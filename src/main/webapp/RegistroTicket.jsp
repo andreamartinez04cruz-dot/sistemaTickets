@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+        <meta charset="utf-8"/>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+        <title>SENA Mesa de Ayuda - Registrar Ticket</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link href="https://fonts.googleapis.com" rel="preconnect"/>
+        <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+        <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        "colors": {
+                            "on-background": "#1a1c1c",
+                            "surface-container": "#eeeeee",
+                            "inverse-surface": "#2f3131",
+                            "surface": "#f9f9f9",
+                            "secondary-container": "#dfe0e0",
+                            "on-surface-variant": "#3f4a38",
+                            "secondary": "#5d5f5f",
+                            "on-tertiary": "#ffffff",
+                            "outline": "#6f7b66",
+                            "tertiary-fixed": "#e2e2e2",
+                            "tertiary-fixed-dim": "#c6c6c6",
+                            "on-error-container": "#93000a",
+                            "surface-container-high": "#e8e8e8",
+                            "tertiary": "#5d5f5e",
+                            "outline-variant": "#becbb3",
+                            "surface-bright": "#f9f9f9",
+                            "surface-dim": "#dadada",
+                            "secondary-fixed": "#e2e2e2",
+                            "on-primary": "#ffffff",
+                            "on-secondary-container": "#616363",
+                            "on-tertiary-container": "#2a2c2c",
+                            "inverse-on-surface": "#f1f1f1",
+                            "surface-tint": "#226d00",
+                            "background": "#f9f9f9",
+                            "on-primary-fixed-variant": "#185200",
+                            "on-primary-fixed": "#052100",
+                            "on-tertiary-fixed-variant": "#454747",
+                            "surface-variant": "#e2e2e2",
+                            "on-tertiary-fixed": "#1a1c1c",
+                            "on-primary-container": "#0c3400",
+                            "on-secondary-fixed-variant": "#454747",
+                            "primary": "#226d00",
+                            "on-secondary": "#ffffff",
+                            "primary-fixed-dim": "#6fdf43",
+                            "surface-container-low": "#f3f3f3",
+                            "on-surface": "#1a1c1c",
+                            "primary-fixed": "#8afd5d",
+                            "surface-container-highest": "#e2e2e2",
+                            "surface-container-lowest": "#ffffff",
+                            "error": "#ba1a1a",
+                            "inverse-primary": "#6fdf43",
+                            "primary-container": "#39a900",
+                            "secondary-fixed-dim": "#c6c6c7",
+                            "on-secondary-fixed": "#1a1c1c",
+                            "on-error": "#ffffff",
+                            "tertiary-container": "#929393",
+                            "error-container": "#ffdad6"
+                        },
+                        "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                        },
+                        "spacing": {
+                            "container-max": "1280px",
+                            "margin-mobile": "16px",
+                            "stack-lg": "32px",
+                            "margin-desktop": "32px",
+                            "gutter": "24px",
+                            "stack-sm": "8px",
+                            "unit": "8px",
+                            "stack-md": "16px"
+                        },
+                        "fontFamily": {
+                            "headline-lg-mobile": ["Work Sans"],
+                            "label-md": ["Work Sans"],
+                            "body-lg": ["Work Sans"],
+                            "headline-md": ["Work Sans"],
+                            "body-md": ["Work Sans"],
+                            "title-lg": ["Work Sans"],
+                            "display-lg": ["Work Sans"],
+                            "headline-lg": ["Work Sans"],
+                            "label-sm": ["Work Sans"]
+                        },
+                        "fontSize": {
+                            "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                            "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                            "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                            "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                            "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                            "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}]
+                        }
+                    }
+                }
+            }
+        </script>
+        <style>
+            body {
+                font-family: 'Work Sans', sans-serif;
+            }
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            }
+            .input-focus-ring:focus-within {
+                box-shadow: 0 0 0 2px rgba(57, 169, 0, 0.2);
+                border-color: #39a900;
+            }
+        </style>
+    </head>
+    <body class="bg-background text-on-background min-h-screen flex flex-col pt-16">
+        <!-- TopAppBar -->
+        <header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface dark:bg-surface-dim shadow-sm">
+            <div class="flex items-center gap-4">
+                <button class="text-primary dark:text-primary-fixed-dim hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 transition-transform">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="flex items-center gap-2">
+                    <img alt="SENA Logo" class="h-8 w-auto hidden md:block" src="https://lh3.googleusercontent.com/aida/AP1WRLsgqsUoGT-2lwimwLtDM221DxP7NWvos4EH-jZO44clebvSs4G9xkk3qy5_sx5r-gM4QaISpEHQdi6MkDmZJjlCouJfjc7cqoB6IKxC6KqhF6otdPBmlirkRXwoftCPtJGBQyj1RHApkoKcCsMv5ZBZUKFMbmvqfkr06yOy5bowvIO_D_snGIHh_9WJluN-wBVSCTX9wmiL-2HUR0a5qth3wQ7dWYpJoACf7PPvRziZydOgCWGfP1eakb0"/>
+                    <h1 class="font-headline-md text-headline-md-mobile md:text-headline-md font-bold text-primary dark:text-primary-fixed-dim">SENA Mesa de Ayuda</h1>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
+                    US
+                </div>
+            </div>
+        </header>
+        <!-- Main Content -->
+        <main class="flex-grow flex flex-col items-center py-stack-lg px-margin-mobile md:px-margin-desktop w-full max-w-container-max mx-auto">
+            <div class="w-full max-w-3xl">
+                <!-- Header Section -->
+                <div class="mb-stack-lg">
+                    <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-stack-sm">Registrar Nuevo Ticket</h2>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Complete los detalles a continuación para reportar una incidencia o solicitar un servicio.</p>
+                </div>
+                <!-- Form Card -->
+                <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container p-stack-lg md:p-stack-lg relative overflow-hidden">
+                    <!-- Decorative Accent Bar -->
+                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+                    <form class="flex flex-col gap-gutter">
+                        <!-- Title -->
+                        <div class="flex flex-col gap-stack-sm">
+                            <label class="font-label-md text-label-md text-on-surface" for="ticket-title">Título del Ticket <span class="text-error">*</span></label>
+                            <input class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface text-on-surface font-body-md text-body-md focus:outline-none input-focus-ring transition-all" id="ticket-title" placeholder="Ej: Problema con acceso a correo institucional" required="" type="text"/>
+                        </div>
+                        <!-- Category -->
+                        <div class="flex flex-col gap-stack-sm">
+                            <label class="font-label-md text-label-md text-on-surface" for="ticket-category">Categoría <span class="text-error">*</span></label>
+                            <div class="relative">
+                                <select class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface text-on-surface font-body-md text-body-md appearance-none focus:outline-none input-focus-ring transition-all" id="ticket-category" required="">
+                                    <option disabled="" selected="" value="">Seleccione una categoría</option>
+                                    <option value="hardware">Soporte Hardware</option>
+                                    <option value="software">Soporte Software</option>
+                                    <option value="network">Redes y Conectividad</option>
+                                    <option value="access">Accesos y Cuentas</option>
+                                    <option value="other">Otro</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+                            </div>
+                        </div>
+                        <!-- Description -->
+                        <div class="flex flex-col gap-stack-sm">
+                            <label class="font-label-md text-label-md text-on-surface" for="ticket-description">Descripción Detallada <span class="text-error">*</span></label>
+                            <textarea class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface text-on-surface font-body-md text-body-md focus:outline-none input-focus-ring transition-all resize-y" id="ticket-description" placeholder="Describa el problema o solicitud con el mayor detalle posible..." required="" rows="5"></textarea>
+                        </div>
+                        <!-- Applicant (Read-only for example) -->
+                        <div class="flex flex-col gap-stack-sm">
+                            <label class="font-label-md text-label-md text-on-surface" for="ticket-applicant">Solicitante</label>
+                            <div class="flex items-center gap-3 px-4 py-3 rounded-lg border border-surface-container-high bg-surface-container-low">
+                                <span class="material-symbols-outlined text-on-surface-variant">person</span>
+                                <input class="w-full bg-transparent text-on-surface-variant font-body-md text-body-md focus:outline-none cursor-not-allowed" id="ticket-applicant" readonly="" type="text" value="Usuario SENA Activo"/>
+                            </div>
+                        </div>
+                        <!-- Attachments Placeholder -->
+                        <div class="flex flex-col gap-stack-sm">
+                            <span class="font-label-md text-label-md text-on-surface">Archivos Adjuntos</span>
+                            <div class="border-2 border-dashed border-outline-variant rounded-lg p-stack-md flex flex-col items-center justify-center gap-2 bg-surface hover:bg-surface-container-low transition-colors cursor-pointer text-center">
+                                <span class="material-symbols-outlined text-on-surface-variant text-3xl">upload_file</span>
+                                <p class="font-body-md text-body-md text-on-surface-variant">Arrastre archivos aquí o haga clic para subir</p>
+                                <span class="font-label-sm text-label-sm text-secondary">Máx 10MB (JPG, PNG, PDF)</span>
+                            </div>
+                        </div>
+                        <!-- Actions -->
+                        <div class="flex justify-end gap-4 mt-stack-md pt-stack-md border-t border-surface-container">
+                            <button class="px-6 py-2.5 rounded-lg border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2" type="button">
+                                Cancelar
+                            </button>
+                            <button class="px-6 py-2.5 rounded-lg bg-primary-container text-white font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-sm focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-2" type="submit">
+                                <span class="material-symbols-outlined text-sm">send</span>
+                                Registrar Ticket
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <!-- Contextual Information Card -->
+                <div class="mt-stack-md bg-secondary-container rounded-lg p-stack-md flex gap-4 items-start shadow-sm">
+                    <span class="material-symbols-outlined text-primary mt-1">info</span>
+                    <div>
+                        <h4 class="font-title-lg text-title-lg text-on-surface mb-1">Tiempos de Respuesta</h4>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant">Los tickets de criticidad alta serán atendidos en un plazo máximo de 4 horas hábiles. Para otras categorías, el tiempo estándar de respuesta es de 24 a 48 horas.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Footer -->
+        <footer class="w-full py-stack-md px-margin-mobile flex flex-col md:flex-row justify-between items-center gap-stack-sm bg-surface-container-lowest dark:bg-inverse-surface border-t border-outline-variant mt-auto">
+            <div class="font-label-md text-label-md font-bold text-secondary flex items-center gap-2">
+                <img alt="SENA Logo" class="h-6 w-auto opacity-70 grayscale" src="https://lh3.googleusercontent.com/aida/AP1WRLsgqsUoGT-2lwimwLtDM221DxP7NWvos4EH-jZO44clebvSs4G9xkk3qy5_sx5r-gM4QaISpEHQdi6MkDmZJjlCouJfjc7cqoB6IKxC6KqhF6otdPBmlirkRXwoftCPtJGBQyj1RHApkoKcCsMv5ZBZUKFMbmvqfkr06yOy5bowvIO_D_snGIHh_9WJluN-wBVSCTX9wmiL-2HUR0a5qth3wQ7dWYpJoACf7PPvRziZydOgCWGfP1eakb0"/>
+            </div>
+            <p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 Servicio Nacional de Aprendizaje SENA. Todos los derechos reservados.</p>
+            <div class="flex gap-4">
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Privacidad</a>
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Términos de Uso</a>
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">Contacto</a>
+            </div>
+        </footer>
+    </body></html>
