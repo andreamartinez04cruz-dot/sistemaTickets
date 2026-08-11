@@ -1,13 +1,14 @@
+package co.edu.sena.mesa.modelo;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package Service;
 
 /**
  *
- * @author andre
+ * @author Doris López
  */
-public class UsuarioService {
+public class Rol {
     
 }
