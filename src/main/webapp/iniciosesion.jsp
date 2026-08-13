@@ -128,7 +128,9 @@
                     </div>
                 </div>
                 <!-- Login Form -->
-                <form class="flex flex-col gap-stack-md w-full">
+                <form action="${pageContext.request.contextPath}/login"
+                      method="POST"
+                      class="flex flex-col gap-stack-md w-full">
                     <!-- Email / Document Input -->
                     <div class="flex flex-col gap-stack-sm">
                         <label class="font-label-md text-label-md text-on-surface font-semibold" for="username">Correo o Documento</label>

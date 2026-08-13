@@ -1,10 +1,14 @@
 package co.edu.sena.mesa.modelo;
 
+import java.util.List;
+
 public class Usuario {
+
     private int id;
     private String nombre;
     private String correo;
     private String contraseña;
+    private List<Rol> roles;
 
     public Usuario(int id, String nombre, String correo, String contraseña) {
         this.id = id;
@@ -52,7 +56,13 @@ public class Usuario {
     public void setId(Long idSolicitante) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
-    
+
+    public List<Rol> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Rol> roles) {
+        this.roles = roles;
+    }
 
 }

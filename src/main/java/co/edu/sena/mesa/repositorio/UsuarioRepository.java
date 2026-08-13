@@ -1,13 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package co.edu.sena.mesa.repositorio;
 
-/**
- *
- * @author andre
- */
-public class UsuarioRepository {
+import co.edu.sena.mesa.modelo.Rol;
+import co.edu.sena.mesa.modelo.Usuario;
+import java.util.List;
+
+public interface UsuarioRepository {
+    
+    //Inicio de sesion 
+    Usuario buscarCorreo (String correo);
+    List<Rol> buscarRolesPorUsuario(int idUsuario);
     
 }
