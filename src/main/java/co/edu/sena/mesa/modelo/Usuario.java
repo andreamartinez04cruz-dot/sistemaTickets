@@ -10,6 +10,11 @@ public class Usuario {
     private String contraseña;
     private List<Rol> roles;
 
+    // 1. Constructor vacío (se removió el throw UnsupportedOperationException)
+    public Usuario() {
+    }
+
+    // 2. Constructor parametrizado
     public Usuario(int id, String nombre, String correo, String contraseña) {
         this.id = id;
         this.nombre = nombre;
@@ -17,16 +22,20 @@ public class Usuario {
         this.contraseña = contraseña;
     }
 
-    public Usuario() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
+    // --- GETTERS Y SETTERS ---
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    // Sobrecarga para aceptar Long si tu JDBC o Mapper le pasa un Long
+    public void setId(Long idSolicitante) {
+        if (idSolicitante != null) {
+            this.id = idSolicitante.intValue();
+        }
     }
 
     public String getNombre() {
@@ -53,10 +62,6 @@ public class Usuario {
         this.contraseña = contraseña;
     }
 
-    public void setId(Long idSolicitante) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
     public List<Rol> getRoles() {
         return roles;
     }
@@ -64,5 +69,4 @@ public class Usuario {
     public void setRoles(List<Rol> roles) {
         this.roles = roles;
     }
-
 }

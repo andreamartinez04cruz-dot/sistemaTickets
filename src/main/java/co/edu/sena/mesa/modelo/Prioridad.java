@@ -2,22 +2,22 @@ package co.edu.sena.mesa.modelo;
 
 public class Prioridad {
 
-    private Long id;
+    private int id;
     private String nombre;
 
     public Prioridad() {
     }
 
-    public Prioridad(Long id, String nombre) {
+    public Prioridad(int id, String nombre) {
         this.id = id;
         this.nombre = nombre;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

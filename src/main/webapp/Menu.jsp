@@ -22,12 +22,33 @@
         <nav class="flex flex-col gap-1">
             <c:choose>
                 <%-- 1. APRENDIZ / FUNCIONARIO --%>
-                <c:when test="${rolActual == 'APRENDIZ' || rolActual == 'FUNCIONARIO'}">
-                    <a href="${pageContext.request.contextPath}/RegistroTicket.jsp" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
+                <c:when test="${rolActual == 'APRENDIZ'}">
+                    <!--  Apunta al Servlet para cargar las categorías antes de mostrar el formulario -->
+                    <a href="${pageContext.request.contextPath}/tickets/registrar" 
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
                         <span class="material-symbols-outlined text-primary">add_circle</span>
                         <span class="font-medium">Crear Solicitud</span>
                     </a>
-                    <a href="${pageContext.request.contextPath}/MisSolicitudes.jsp" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
+
+                    <!-- ✅Apunta al Servlet con la acción historial -->
+                    <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial" 
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
+                        <span class="material-symbols-outlined text-primary">confirmation_number</span>
+                        <span class="font-medium">Mis Solicitudes</span>
+                    </a>
+
+                    <a href="${pageContext.request.contextPath}/Notificaciones.jsp" 
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
+                        <span class="material-symbols-outlined text-primary">notifications</span>
+                        <span class="font-medium">Notificaciones</span>
+                    </a>
+                </c:when>
+                <c:when test="${rolActual == 'FUNCIONARIO'}">
+                    <a href="${pageContext.request.contextPath}/tickets/registrar" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
+                        <span class="material-symbols-outlined text-primary">add_circle</span>
+                        <span class="font-medium">Crear Solicitud</span>
+                    </a>
+                    <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
                         <span class="material-symbols-outlined text-primary">confirmation_number</span>
                         <span class="font-medium">Mis Solicitudes</span>
                     </a>
@@ -43,7 +64,7 @@
                         <span class="material-symbols-outlined text-primary">inbox</span>
                         <span class="font-medium">Tickets Asignados</span>
                     </a>
-                   
+
                     <a href="${pageContext.request.contextPath}/historial-resueltos.jsp" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
                         <span class="material-symbols-outlined text-primary">task_alt</span>
                         <span class="font-medium">Resueltos</span>

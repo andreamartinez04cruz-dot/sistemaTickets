@@ -2,22 +2,22 @@ package co.edu.sena.mesa.modelo;
 
 public class Categoria {
 
-    private Long id;
+    private int id;
     private String nombre;
 
     public Categoria() {
     }
 
-    public Categoria(Long id, String nombre) {
+    public Categoria(int id, String nombre) {
         this.id = id;
         this.nombre = nombre;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

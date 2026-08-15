@@ -1,0 +1,13 @@
+package co.edu.sena.mesaayuda.servicio.sla;
+
+public class SlaCriticaStrategy implements CalcularPrioridad {
+    @Override
+    public String determinarPrioridad() {
+        return "CRITICA";
+    }
+
+    @Override
+    public int calcularHorasMaximas() {
+        return 4; // 4 horas
+    }
+}
