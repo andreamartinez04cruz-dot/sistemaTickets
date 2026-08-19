@@ -2,7 +2,7 @@
 <html lang="es">
     <head>
         <%@ page import="java.util.List" %>
-        <%@ page import="co.edu.sena.mesa.modelo.Categoria" %>
+        <%@ page import="co.edu.sena.mesaayuda.modelo.Categoria" %>
         <meta charset="utf-8">
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <title>SENA Help Desk - Registrar Requerimiento Administrativo</title>
@@ -12,6 +12,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="${pageContext.request.contextPath}/css/styles-global.css" rel="stylesheet"/>
 
         <!-- Tailwind CSS -->
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -60,15 +61,15 @@
         <!-- Layout Principal: Sidebar + Contenido -->
         <div class="flex pt-16 min-h-screen">
 
-            <!-- Contenedor del Menú Lateral -->
+            <!-- Contenedor del Menï¿½ Lateral -->
             <aside class="w-64 fixed left-0 top-16 bottom-0 z-40 bg-surface border-r border-outline-variant overflow-y-auto hidden md:block">
                 <jsp:include page="Menu.jsp"/>
             </aside>
 
-            <!-- Main Content Area (Ajustado con ml-64 para dejar espacio al menú lateral) -->
+            <!-- Main Content Area (Ajustado con ml-64 para dejar espacio al menï¿½ lateral) -->
             <main class="flex-1 md:ml-64 p-6 md:p-10 max-w-4xl mx-auto w-full pb-24 md:pb-12">
 
-                <!-- Header de la Página -->
+                <!-- Header de la Pï¿½gina -->
                 <div class="mb-8">
                     <h2 class="text-2xl md:text-3xl font-bold text-on-surface">Registrar Requerimiento Administrativo</h2>
                     <p class="text-sm md:text-base text-on-surface-variant mt-1">Complete el siguiente formulario para generar un nuevo ticket de soporte o servicio.</p>
@@ -80,21 +81,21 @@
 
                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
 
-                    <!-- Título -->
+                    <!-- Tï¿½tulo -->
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium text-on-surface" for="titulo">Título del Requerimiento</label>
+                        <label class="text-sm font-medium text-on-surface" for="titulo">Tï¿½tulo del Requerimiento</label>
                         <input class="bg-surface border border-outline-variant rounded-md px-4 py-3 text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" 
-                               id="titulo" name="titulo" placeholder="Ej. Solicitud de insumos de papelería" type="text" required>
+                               id="titulo" name="titulo" placeholder="Ej. Solicitud de insumos de papelerï¿½a" type="text" required>
                     </div>
 
-                    <!-- Descripción -->
+                    <!-- Descripciï¿½n -->
                     <div class="flex flex-col gap-2">
-                        <label class="text-sm font-medium text-on-surface" for="descripcion">Descripción Detallada <span class="text-red-600">*</span></label>
+                        <label class="text-sm font-medium text-on-surface" for="descripcion">Descripciï¿½n Detallada <span class="text-red-600">*</span></label>
                         <textarea class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-y" 
                                   id="descripcion" name="descripcion" placeholder="Describa el problema o solicitud con el mayor detalle posible..." required rows="4"></textarea>
                     </div>
 
-                    <!-- Categoría -->
+                    <!-- Categorï¿½a -->
                     <div class="flex flex-col gap-2">
 
                         <label class="text-sm font-medium text-on-surface" for="categoria">
@@ -148,7 +149,7 @@
                         </div>
                     </div>
 
-                    <!-- Solicitante (Dinámico) -->
+                    <!-- Solicitante (Dinï¿½mico) -->
                     <div class="flex flex-col gap-stack-sm">
                         <label class="font-label-md text-label-md text-on-surface" for="ticket-applicant">Solicitante</label>
                         <div class="flex items-center gap-3 px-4 py-3 rounded-lg border border-surface-container-high bg-surface-container-low">
@@ -157,7 +158,7 @@
                         </div>
                     </div>
 
-                    <!-- Botones de Acción -->
+                    <!-- Botones de Acciï¿½n -->
                     <div class="pt-6 border-t border-outline-variant flex flex-col md:flex-row justify-end gap-4 mt-2">
                         <button class="order-2 md:order-1 px-6 py-3 rounded-full border border-primary text-primary font-semibold hover:bg-surface-container-high transition-all text-center" type="button">
                             Cancelar

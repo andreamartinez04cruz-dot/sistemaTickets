@@ -31,6 +31,13 @@
             <groupId>org.glassfish.web</groupId>
             <artifactId>jakarta.servlet.jsp.jstl</artifactId>
             <version>3.0.1</version>
+            <exclusions>
+                <!-- El servlet-api lo provee Tomcat; no debe ir empaquetado en el WAR -->
+                <exclusion>
+                    <groupId>jakarta.servlet</groupId>
+                    <artifactId>jakarta.servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         
         <dependency>

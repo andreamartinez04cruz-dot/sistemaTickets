@@ -3,9 +3,10 @@
 <html class="light" lang="es"><head>
         <meta charset="utf-8"/>
         <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-        <title>SENA Mesa de Ayuda - Iniciar Sesión</title>
+        <title>SENA Mesa de Ayuda - Iniciar SesiÃ³n</title>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+        <link href="${pageContext.request.contextPath}/css/styles-global.css" rel="stylesheet"/>
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
         <script id="tailwind-config">
             tailwind.config = {
@@ -141,7 +142,7 @@
                     </div>
                     <!-- Password Input -->
                     <div class="flex flex-col gap-stack-sm">
-                        <label class="font-label-md text-label-md text-on-surface font-semibold" for="password">Contraseña</label>
+                        <label class="font-label-md text-label-md text-on-surface font-semibold" for="password">Contraseï¿½a</label>
                         <div class="relative group">
                             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors pointer-events-none" data-icon="lock">lock</span>
                             <input class="w-full pl-12 pr-12 py-3.5 bg-surface-container-low border border-outline-variant/60 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-surface transition-all shadow-inner" id="password" name="password" placeholder="????????" required="" type="password"/>
@@ -162,19 +163,19 @@
                             <span class="font-label-md text-label-md text-on-surface-variant group-hover:text-on-surface transition-colors">Recordarme</span>
                         </label>
                         <a class="font-label-md text-label-md text-primary hover:text-primary-container underline transition-colors font-semibold" href="#">
-                            ¿Olvidó su contraseña?
+                            ï¿½Olvidï¿½ su contraseï¿½a?
                         </a>
                     </div>
                     <!-- Primary Action -->
                     <button class="w-full mt-stack-md py-3.5 bg-primary-container text-on-primary rounded-xl font-label-md text-[16px] font-bold shadow-md hover:shadow-lg hover:bg-primary transition-all active:scale-[0.98] flex items-center justify-center gap-2" type="submit">
-                        Iniciar Sesión
+                        Iniciar Sesiï¿½n
                         <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
                     </button>
                 </form>
                 <!-- Secondary Actions -->
                 <div class="pt-stack-md border-t border-outline-variant/50 text-center w-full">
                     <p class="font-body-md text-body-md text-on-surface-variant">
-                        ¿No tiene cuenta? 
+                        ï¿½No tiene cuenta? 
                         <a class="font-label-md text-label-md text-primary font-bold hover:underline transition-all" href="#">Solicitar acceso</a>
                     </p>
                 </div>

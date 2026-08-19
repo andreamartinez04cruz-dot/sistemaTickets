@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -8,6 +9,7 @@
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+        <link href="${pageContext.request.contextPath}/css/styles-global.css" rel="stylesheet"/>
         <script id="tailwind-config">
             tailwind.config = {
                 darkMode: "class",
@@ -58,7 +60,6 @@
 
             <!-- Main Content Area -->
             <main class="flex-1 w-full p-8 md:p-12 pb-20">
-
                 <!-- Header Section -->
                 <div class="mb-6">
                     <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">Notificaciones</h1>
@@ -76,38 +77,40 @@
                 <!-- Notification Grid (2 Columnas) -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-5xl">
 
-                    <!-- Card 1: Ticket Resuelto -->
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200/80 flex gap-4 items-start relative hover:shadow-md transition-all">
-                        <div class="w-10 h-10 rounded-full bg-[#f0fdf4] border border-[#dcfce7] flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-[#16a34a] text-xl">check_circle</span>
-                        </div>
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.notificaciones}">
+                            <c:forEach var="notificacion" items="${sessionScope.notificaciones}">
+                                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200/80 flex gap-4 items-start relative hover:shadow-md transition-all">
+                                    <div class="w-10 h-10 rounded-full bg-[#f0fdf4] border border-[#dcfce7] flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-[#16a34a] text-xl">notifications_active</span>
+                                    </div>
 
-                        <div class="flex-1 pr-4">
-                            <h3 class="text-base font-bold text-gray-900 mb-1">Ticket Resuelto</h3>
-                            <p class="text-xs text-gray-600 leading-relaxed mb-4">
-                                Tu solicitud <span class="font-medium text-gray-800">#TK-1234</span> ha sido marcada como resuelta por el soporte.
-                            </p>
-                            <span class="text-[11px] font-semibold text-gray-400">Hace 10 min</span>
-                        </div>
+                                    <div class="flex-1 pr-4">
+                                        <h3 class="text-base font-bold text-gray-900 mb-1">Cambio de estado</h3>
+                                        <p class="text-xs text-gray-600 leading-relaxed mb-4">
+                                            ${notificacion}
+                                        </p>
+                                        <span class="text-[11px] font-semibold text-gray-400">Ahora</span>
+                                    </div>
 
-                        <!-- Punto Verde de No Leído -->
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#22c55e] absolute top-5 right-5"></span>
-                    </div>
-
-                    <!-- Card 2: Ticket Asignado -->
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200/80 flex gap-4 items-start relative hover:shadow-md transition-all">
-                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-gray-600 text-xl">assignment_ind</span>
-                        </div>
-
-                        <div class="flex-1">
-                            <h3 class="text-base font-bold text-gray-900 mb-1">Ticket Asignado</h3>
-                            <p class="text-xs text-gray-600 leading-relaxed mb-4">
-                                Tu requerimiento <span class="font-medium text-gray-800">#TK-1250</span> ha sido asignado a Soporte Técnico.
-                            </p>
-                            <span class="text-[11px] font-semibold text-gray-400">Ayer</span>
-                        </div>
-                    </div>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-[#22c55e] absolute top-5 right-5"></span>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200/80 flex gap-4 items-start relative hover:shadow-md transition-all lg:col-span-2">
+                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-gray-600 text-xl">notifications</span>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-base font-bold text-gray-900 mb-1">Sin notificaciones</h3>
+                                    <p class="text-xs text-gray-600 leading-relaxed mb-0">
+                                        Cuando el estado de uno de tus tickets cambie, aparecerá aquí.
+                                    </p>
+                                </div>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
 
                 </div>
             </main>

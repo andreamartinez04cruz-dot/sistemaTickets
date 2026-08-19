@@ -1,5 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="c" uri="jakarta.tags.core"%>
 
 <!DOCTYPE html>
 
@@ -18,6 +18,7 @@
 
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
               rel="stylesheet"/>
+        <link href="${pageContext.request.contextPath}/css/styles-global.css" rel="stylesheet"/>
 
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap"
               rel="stylesheet"/>
@@ -126,80 +127,44 @@
     </head>
 
 
-    <body class="bg-background text-on-surface min-h-screen flex flex-col">
+    <body class="bg-background text-on-surface min-h-screen flex">
+        
+        <jsp:include page="Menu.jsp" />
 
-        <main class="flex-grow max-w-7xl mx-auto w-full px-4 md:px-8 py-8">
+        <div class="flex-1 flex flex-col min-w-0">
+            <main class="flex-grow max-w-7xl mx-auto w-full px-4 md:px-8 py-8">
 
 
-            <div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-
+            <div class="mb-8 p-6 bg-gradient-to-r from-emerald-50 to-green-50/20 rounded-2xl border border-emerald-100/70 shadow-sm flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 <div>
-
                     <div class="flex items-center gap-3 mb-2">
-
-                        <h2 class="text-3xl font-bold">
-
+                        <h2 class="text-3xl font-bold text-gray-900">
                             #TK-${ticket.id}
-
                         </h2>
-
-
                         <!-- ESTADO -->
-
-                        <span class="bg-yellow-100 text-yellow-800
-                              font-medium px-3 py-1 rounded-full
-                              border border-yellow-300
-                              flex items-center gap-1">
-
-                            <span class="material-symbols-outlined"
-                                  style="font-size:16px;">
-
+                        <span class="bg-emerald-100/80 text-emerald-800 border border-emerald-200/80 font-semibold px-3 py-1 rounded-full flex items-center gap-1 text-sm shadow-sm">
+                            <span class="material-symbols-outlined text-base">
                                 pending
-
                             </span>
-
                             ${ticket.estado}
-
                         </span>
-
                     </div>
-
-
                     <!-- TITULO -->
-
-                    <h3 class="text-xl font-medium">
-
+                    <h3 class="text-xl font-medium text-emerald-800">
                         ${ticket.titulo}
-
                     </h3>
-
                 </div>
-
 
                 <!-- BOTON VOLVER -->
-
                 <div>
-
-                    <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial"
-                       class="border border-primary text-primary
-                       hover:bg-green-50
-                       font-medium px-4 py-2 rounded-lg
-                       transition-colors
-                       flex items-center gap-2">
-
-                        <span class="material-symbols-outlined"
-                              style="font-size:18px;">
-
+                    <a href="${not empty backUrl ? backUrl : pageContext.request.contextPath + '/tickets/registrar?action=historial'}"
+                       class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-xl shadow-sm transition-colors flex items-center gap-2 text-sm">
+                        <span class="material-symbols-outlined text-base">
                             arrow_back
-
                         </span>
-
-                        Volver
-
+                        Volver al panel
                     </a>
-
                 </div>
-
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -226,7 +191,7 @@
 
                             <div class="grid grid-cols-1
                                  sm:grid-cols-2
-                                 md:grid-cols-4
+                                 md:grid-cols-3
                                  gap-6
                                  mb-6
                                  border-b
@@ -295,23 +260,6 @@
                                         </span>
 
                                         ${ticket.solicitanteNombre}
-
-                                    </p>
-
-                                </div>
-
-                                <div>
-
-                                    <p class="text-xs font-semibold
-                                       text-on-surface-variant mb-1">
-
-                                        Prioridad
-
-                                    </p>
-
-                                    <p class="text-base">
-
-                                        ${ticket.prioridadNombre}
 
                                     </p>
 
@@ -477,100 +425,34 @@
                 </div>
 
                 <div class="md:col-span-4">
-
-                    <div class="bg-white rounded-xl shadow-sm
-                         border border-outline-variant
-                         p-6 sticky top-6">
-
-
-                        <h4 class="text-xl font-medium mb-4">
-
-                            Agregar Comentario
-
-                        </h4>
-
-
-                        <form
-                            action="${pageContext.request.contextPath}/tickets/comentar"
-                            method="POST"
-                            class="flex flex-col gap-4">
-
-
-                            <!-- ID DEL TICKET -->
-
-                            <input
-                                type="hidden"
-                                name="idTicket"
-                                value="${ticket.id}"
-                                />
-
-
-                            <!-- TEXTO -->
-
-                            <div>
-
-                                <label
-                                    class="block text-sm font-medium
-                                    text-on-surface-variant mb-2"
-                                    for="comment-box">
-
-                                    Mensaje
-
-                                </label>
-
-
-                                <textarea
-                                    id="comment-box"
-                                    name="texto"
-                                    required
-                                    rows="5"
-                                    placeholder="Escribe tu comentario o avance aquí..."
-                                    class="w-full rounded-lg
-                                    border border-outline
-                                    bg-white
-                                    p-3
-                                    text-base
-                                    focus:border-primary
-                                    focus:ring-1
-                                    focus:ring-primary
-                                    outline-none
-                                    resize-none"></textarea>
-
+                    <c:choose>
+                        <c:when test="${ticket.estado == 'RESUELTO' || ticket.estado == 'CERRADO' || ticket.estado == 'CANCELADO'}">
+                            <div class="bg-gray-50 rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6 text-center text-slate-500">
+                                <span class="material-symbols-outlined text-4xl text-slate-400 mb-2">lock</span>
+                                <h4 class="text-lg font-bold text-gray-800">Sección Bloqueada</h4>
+                                <p class="text-xs text-gray-500 mt-2 leading-relaxed">Este ticket se encuentra en estado <strong>${ticket.estado}</strong>. No es posible añadir nuevos comentarios.</p>
                             </div>
-
-
-
-                            <!-- BOTON -->
-
-                            <button
-                                type="submit"
-                                class="bg-primary
-                                text-white
-                                hover:bg-primary-container
-                                font-medium
-                                px-6 py-3
-                                rounded-lg
-                                transition-colors
-                                shadow-sm
-                                flex items-center
-                                justify-center
-                                gap-2">
-
-                                Enviar
-
-                                <span class="material-symbols-outlined"
-                                      style="font-size:18px;">
-
-                                    send
-
-                                </span>
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
+                        </c:when>
+                        <c:otherwise>
+                            <div class="bg-white rounded-xl shadow-sm border border-outline-variant p-6 sticky top-6">
+                                <h4 class="text-xl font-medium mb-4">Agregar Comentario</h4>
+                                <form action="${pageContext.request.contextPath}/tickets/comentar" method="POST" class="flex flex-col gap-4">
+                                    <!-- ID DEL TICKET -->
+                                    <input type="hidden" name="idTicket" value="${ticket.id}" />
+                                    <!-- TEXTO -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-on-surface-variant mb-2" for="comment-box">Mensaje</label>
+                                        <textarea id="comment-box" name="texto" required rows="5" placeholder="Escribe tu comentario o avance aquí..." class="w-full rounded-lg border border-outline bg-white p-3 text-base focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"></textarea>
+                                    </div>
+                                    <!-- BOTON -->
+                                    <button type="submit" class="bg-primary text-white hover:bg-primary-container font-medium px-6 py-3 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                                        Enviar
+                                        <span class="material-symbols-outlined" style="font-size:18px;">send</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
 
             </div>
@@ -581,27 +463,48 @@
              w-full bg-white
              border-t border-outline-variant
              p-4 shadow-lg z-40">
-
-            <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial"
-               class="w-full border border-primary
-               text-primary
-               py-3 rounded-lg
-               flex items-center
-               justify-center gap-2">
-
+            <a href="${not empty backUrl ? backUrl : pageContext.request.contextPath + '/tickets/registrar?action=historial'}"
+               class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors">
                 <span class="material-symbols-outlined">
-
                     arrow_back
-
                 </span>
-
-                Volver
-
+                Volver al panel
             </a>
-
         </div>
 
+        </div>
+        
+        <!-- Script para resaltar la opción del menú lateral activa -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const menuVerTickets = document.getElementById('menu-ver-tickets');
+                const menuAtenderTicket = document.getElementById('menu-atender-ticket');
+                const menuVerHistorial = document.getElementById('menu-ver-historial');
+                
+                const estado = "${ticket.estado}".toUpperCase();
+                const isHistorial = estado === "RESUELTO" || estado === "CERRADO" || estado === "CANCELADO";
 
+                // Desactivar todos por defecto
+                [menuVerTickets, menuAtenderTicket, menuVerHistorial].forEach(menu => {
+                    if (menu) {
+                        menu.classList.remove('bg-emerald-100', 'text-emerald-950', 'font-semibold');
+                        menu.classList.add('text-on-surface');
+                    }
+                });
+
+                if (isHistorial) {
+                    if (menuVerHistorial) {
+                        menuVerHistorial.classList.add('bg-emerald-100', 'text-emerald-950', 'font-semibold');
+                        menuVerHistorial.classList.remove('text-on-surface');
+                    }
+                } else {
+                    if (menuAtenderTicket) {
+                        menuAtenderTicket.classList.add('bg-emerald-100', 'text-emerald-950', 'font-semibold');
+                        menuAtenderTicket.classList.remove('text-on-surface');
+                    }
+                }
+            });
+        </script>
     </body>
 
 </html>
