@@ -1,5 +1,17 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ page import="co.edu.sena.mesa.servicio.TicketService" %>
+<%@ page import="co.edu.sena.mesa.modelo.Categoria" %>
+<%@ page import="java.util.List" %>
+<%
+    List<Categoria> categorias = (List<Categoria>) request.getAttribute("categorias");
+    if (categorias == null) {
+        TicketService ticketService = (TicketService) getServletContext().getAttribute("ticketService");
+        if (ticketService != null) {
+            categorias = ticketService.ListarCategorias();
+        }
+    }
+%>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -12,6 +24,7 @@
         <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+        <link href="${pageContext.request.contextPath}/css/styles-global.css" rel="stylesheet"/>
 
         <script id="tailwind-config">
             tailwind.config = {
@@ -147,7 +160,7 @@
                     <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container p-stack-lg relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
 
-                        <form action="${pageContext.request.contextPath}/crearTicket" method="POST" class="flex flex-col gap-gutter">
+                        <form action="${pageContext.request.contextPath}/tickets/registrar" method="POST" class="flex flex-col gap-gutter">
                             <!-- Título -->
                             <div class="flex flex-col gap-stack-sm">
                                 <label class="font-label-md text-label-md text-on-surface" for="ticket-title">Título del Ticket <span class="text-error">*</span></label>
@@ -158,13 +171,17 @@
                             <div class="flex flex-col gap-stack-sm">
                                 <label class="font-label-md text-label-md text-on-surface" for="ticket-category">Categoría <span class="text-error">*</span></label>
                                 <div class="relative">
-                                    <select name="categoria" class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface text-on-surface font-body-md text-body-md appearance-none focus:outline-none input-focus-ring transition-all" id="ticket-category" required>
+                                    <select name="idCategoria" class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface text-on-surface font-body-md text-body-md appearance-none focus:outline-none input-focus-ring transition-all" id="ticket-category" required>
                                         <option disabled selected value="">Seleccione una categoría</option>
-                                        <option value="hardware">Soporte Hardware</option>
-                                        <option value="software">Soporte Software</option>
-                                        <option value="network">Redes y Conectividad</option>
-                                        <option value="access">Accesos y Cuentas</option>
-                                        <option value="other">Otro</option>
+                                        <%
+                                            if (categorias != null) {
+                                                for (Categoria cat : categorias) {
+                                        %>
+                                            <option value="<%= cat.getId() %>"><%= cat.getNombre() %></option>
+                                        <%
+                                                }
+                                            }
+                                        %>
                                     </select>
                                     <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
                                 </div>
@@ -185,13 +202,35 @@
                                 </div>
                             </div>
 
-                            <!-- Adjuntos -->
+                            <!-- Programa -->
                             <div class="flex flex-col gap-stack-sm">
-                                <span class="font-label-md text-label-md text-on-surface">Archivos Adjuntos</span>
-                                <div class="border-2 border-dashed border-outline-variant rounded-lg p-stack-md flex flex-col items-center justify-center gap-2 bg-surface hover:bg-surface-container-low transition-colors cursor-pointer text-center">
-                                    <span class="material-symbols-outlined text-on-surface-variant text-3xl">upload_file</span>
-                                    <p class="font-body-md text-body-md text-on-surface-variant">Arrastre archivos aquí o haga clic para subir</p>
-                                    <span class="font-label-sm text-label-sm text-secondary">Máx 10MB (JPG, PNG, PDF)</span>
+                                <label class="font-label-md text-label-md text-on-surface" for="ticket-programa">Programa <span class="text-error">*</span></label>
+                                <input name="programa" class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface text-on-surface font-body-md text-body-md focus:outline-none input-focus-ring transition-all" id="ticket-programa" placeholder="Ej: Análisis y Desarrollo de Software" required type="text"/>
+                            </div>
+
+                            <!-- Número de programa -->
+                            <div class="flex flex-col gap-stack-sm">
+                                <label class="font-label-md text-label-md text-on-surface" for="ticket-numeroPrograma">Número de Programa (Ficha) <span class="text-error">*</span></label>
+                                <input name="numeroPrograma" class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface text-on-surface font-body-md text-body-md focus:outline-none input-focus-ring transition-all" id="ticket-numeroPrograma" placeholder="Ej: 2712345" required type="text"/>
+                            </div>
+
+                            <!-- Instructor -->
+                            <div class="flex flex-col gap-stack-sm">
+                                <label class="font-label-md text-label-md text-on-surface" for="ticket-instructor">Instructor <span class="text-error">*</span></label>
+                                <input name="instructor" class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface text-on-surface font-body-md text-body-md focus:outline-none input-focus-ring transition-all" id="ticket-instructor" placeholder="Ej: Osman" required type="text"/>
+                            </div>
+
+                            <!-- Jornada -->
+                            <div class="flex flex-col gap-stack-sm">
+                                <label class="font-label-md text-label-md text-on-surface" for="ticket-jornada">Jornada <span class="text-error">*</span></label>
+                                <div class="relative">
+                                    <select name="jornada" class="w-full px-4 py-3 rounded-lg border border-outline-variant bg-surface text-on-surface font-body-md text-body-md appearance-none focus:outline-none input-focus-ring transition-all" id="ticket-jornada" required>
+                                        <option disabled selected value="">Seleccione una jornada</option>
+                                        <option value="Mañana">Mañana</option>
+                                        <option value="Tarde">Tarde</option>
+                                        <option value="Noche">Noche</option>
+                                    </select>
+                                    <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
                                 </div>
                             </div>
 
@@ -222,7 +261,7 @@
             <!-- Footer -->
             <footer class="w-full py-stack-md px-margin-mobile flex flex-col md:flex-row justify-between items-center gap-stack-sm bg-surface-container-lowest dark:bg-inverse-surface border-t border-outline-variant mt-auto">
                 <div class="font-label-md text-label-md font-bold text-secondary flex items-center gap-2">
-                    <img alt="SENA Logo" class="h-6 w-auto opacity-70 grayscale" src="https://lh3.googleusercontent.com/aida/AP1WRLsgqsUoGT-2lwimwLtDM221DxP7NWvos4EH-jZO44clebvSs4G9xkk3qy5_sx5r-gM4QaISpEHQdi6MkDmZJjlCouJfjc7cqoB6IKxC6KqhF6otdPBmlirkRXwoftCPtJGBQyj1RHApkoKcCsMv5ZBZUKFMbmvqfkr06yOy5bowvIO_D_snGIHh_9WJluN-wBVSCTX9wmiL-2HUR0a5qth3wQ7dWYpJoACf7PPvRziZydOgCWGfP1eakb0"/>
+                    <img alt="SENA Logo" class="h-6 w-auto opacity-70 grayscale" src="https://upload.wikimedia.org/wikipedia/commons/8/8c/SENA_Logo.svg"/>
                 </div>
                 <p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 Servicio Nacional de Aprendizaje SENA. Todos los derechos reservados.</p>
                 <div class="flex gap-4">

@@ -39,7 +39,7 @@ public class ComentarioServlet extends HttpServlet {
         Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
 
         if (usuario == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/iniciosesion.jsp");
             return;
         }
 
@@ -49,6 +49,16 @@ public class ComentarioServlet extends HttpServlet {
 
         if (idTicketStr != null && texto != null && !texto.trim().isEmpty()) {
             int idTicket = Integer.parseInt(idTicketStr);
+
+            TicketDTO ticket = ticketService.obtenerPorId(idTicket);
+            String rolUsuario = (String) session.getAttribute("rolUsuario");
+            boolean personalMesaAyuda = "AGENTE".equalsIgnoreCase(rolUsuario)
+                    || "FUNCIONARIO".equalsIgnoreCase(rolUsuario)
+                    || "ADMIN".equalsIgnoreCase(rolUsuario);
+            if (ticket != null && !personalMesaAyuda && ticket.getIdSolicitante() != usuario.getId()) {
+                response.sendRedirect(request.getContextPath() + "/tickets/registrar?action=historial");
+                return;
+            }
 
             // 3. Crear el DTO con la información
             ComentarioDTO dto = new ComentarioDTO();
@@ -75,15 +85,50 @@ public class ComentarioServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int idTicket = Integer.parseInt(request.getParameter("id"));
+        HttpSession session = request.getSession(false);
+        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+
+        if (usuario == null) {
+            response.sendRedirect(request.getContextPath() + "/iniciosesion.jsp");
+            return;
+        }
+
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.isBlank()) {
+            response.sendRedirect(request.getContextPath() + "/tickets/registrar?action=historial");
+            return;
+        }
+
+        int idTicket = Integer.parseInt(idParam);
+
+        TicketDTO ticket = ticketService.obtenerPorId(idTicket);
+        if (ticket == null) {
+            response.sendRedirect(request.getContextPath() + "/tickets/registrar?action=historial");
+            return;
+        }
+
+        String rolUsuario = (String) session.getAttribute("rolUsuario");
+        boolean personalMesaAyuda = "AGENTE".equalsIgnoreCase(rolUsuario)
+            || "FUNCIONARIO".equalsIgnoreCase(rolUsuario)
+            || "ADMIN".equalsIgnoreCase(rolUsuario);
+        if (!personalMesaAyuda && ticket.getIdSolicitante() != usuario.getId()) {
+            response.sendRedirect(request.getContextPath() + "/tickets/registrar?action=historial");
+            return;
+        }
 
         // 1. Obtener ticket y su lista de comentarios DTO
-        TicketDTO ticket = ticketService.obtenerPorId(idTicket);
         List<ComentarioDTO> comentarios = ticketService.listarComentarios(idTicket);
+
+        String backUrl = request.getContextPath() + "/tickets/registrar?action=historial";
+        if (personalMesaAyuda) {
+            backUrl = request.getContextPath() + "/AgenteTickets.jsp";
+        }
 
         // 2. Pasar los atributos al JSP
         request.setAttribute("ticket", ticket);
         request.setAttribute("comentarios", comentarios);
+        request.setAttribute("backUrl", backUrl);
+        request.setAttribute("personalMesaAyuda", personalMesaAyuda);
 
         // 3. Renderizar la vista
         request.getRequestDispatcher("/Comentarios.jsp").forward(request, response);

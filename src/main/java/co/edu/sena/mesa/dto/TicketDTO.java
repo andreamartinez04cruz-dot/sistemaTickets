@@ -29,6 +29,10 @@ public class TicketDTO {
     // COMENTARIOS
     private List<ComentarioDTO> comentarios;
     
+    private String programa;
+    private String numeroPrograma;
+    private String instructor;
+    private String jornada;
 
     public TicketDTO() {
     }
@@ -154,5 +158,37 @@ public class TicketDTO {
 
     public void setComentarios(List<ComentarioDTO> comentarios) {
         this.comentarios = comentarios;
+    }
+
+    public String getPrograma() {
+        return programa;
+    }
+
+    public void setPrograma(String programa) {
+        this.programa = programa;
+    }
+
+    public String getNumeroPrograma() {
+        return numeroPrograma;
+    }
+
+    public void setNumeroPrograma(String numeroPrograma) {
+        this.numeroPrograma = numeroPrograma;
+    }
+
+    public String getInstructor() {
+        return instructor;
+    }
+
+    public void setInstructor(String instructor) {
+        this.instructor = instructor;
+    }
+
+    public String getJornada() {
+        return jornada;
+    }
+
+    public void setJornada(String jornada) {
+        this.jornada = jornada;
     }
 }

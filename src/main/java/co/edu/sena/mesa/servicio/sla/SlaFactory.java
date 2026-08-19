@@ -1,4 +1,4 @@
-package co.edu.sena.mesaayuda.servicio.sla;
+package co.edu.sena.mesa.servicio.sla;
 
 public class SlaFactory {
 

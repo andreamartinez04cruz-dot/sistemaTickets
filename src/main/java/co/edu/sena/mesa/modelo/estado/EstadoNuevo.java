@@ -1,42 +1,42 @@
 package co.edu.sena.mesa.modelo.estado;
 
-public class EstadoNuevo implements EstadoTickets {
+public class EstadoNuevo implements EstadoTicket {
 
     @Override
-    public EstadoTickets asignar() {
+    public EstadoTicket asignar() {
         return new EstadoAsignado();
     }
 
     @Override
-    public EstadoTickets iniciarAtencion() {
+    public EstadoTicket iniciarAtencion() {
         throw new IllegalStateException(
                 "Un ticket NUEVO debe ser asignado antes de iniciar la atención."
         );
     }
 
     @Override
-    public EstadoTickets resolver() {
+    public EstadoTicket resolver() {
         throw new IllegalStateException(
                 "Un ticket NUEVO no puede ser resuelto."
         );
     }
 
     @Override
-    public EstadoTickets confirmar() {
+    public EstadoTicket confirmar() {
         throw new IllegalStateException(
                 "Un ticket NUEVO no puede ser confirmado."
         );
     }
 
     @Override
-    public EstadoTickets reabrir() {
+    public EstadoTicket reabrir() {
         throw new IllegalStateException(
                 "Un ticket NUEVO no puede ser reabierto."
         );
     }
 
     @Override
-    public EstadoTickets cancelar() {
+    public EstadoTicket cancelar() {
         return new EstadoCancelado();
     }
 }

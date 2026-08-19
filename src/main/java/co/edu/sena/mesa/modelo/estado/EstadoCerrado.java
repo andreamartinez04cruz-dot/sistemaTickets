@@ -1,44 +1,44 @@
 package co.edu.sena.mesa.modelo.estado;
 
-public class EstadoCerrado implements EstadoTickets {
+public class EstadoCerrado implements EstadoTicket {
 
     @Override
-    public EstadoTickets asignar() {
+    public EstadoTicket asignar() {
         throw new IllegalStateException(
                 "Un ticket CERRADO no puede ser modificado."
         );
     }
 
     @Override
-    public EstadoTickets iniciarAtencion() {
+    public EstadoTicket iniciarAtencion() {
         throw new IllegalStateException(
                 "Un ticket CERRADO no puede ser modificado."
         );
     }
 
     @Override
-    public EstadoTickets resolver() {
+    public EstadoTicket resolver() {
         throw new IllegalStateException(
                 "Un ticket CERRADO no puede ser modificado."
         );
     }
 
     @Override
-    public EstadoTickets confirmar() {
+    public EstadoTicket confirmar() {
         throw new IllegalStateException(
                 "El ticket ya está cerrado."
         );
     }
 
     @Override
-    public EstadoTickets reabrir() {
+    public EstadoTicket reabrir() {
         throw new IllegalStateException(
                 "Un ticket CERRADO no puede ser reabierto."
         );
     }
 
     @Override
-    public EstadoTickets cancelar() {
+    public EstadoTicket cancelar() {
         throw new IllegalStateException(
                 "Un ticket CERRADO no puede ser cancelado."
         );

@@ -1,85 +1,100 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
 <!-- Carga de Fuentes e Íconos -->
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 
-<aside class="w-64 bg-surface dark:bg-surface-dim border-r border-outline-variant flex flex-col justify-between h-screen sticky top-0 z-40 shrink-0 shadow-sm">
-    <div class="flex flex-col gap-6 p-4">
-        <!-- Logo -->
-        <div class="flex items-center gap-3 px-2 pt-2">
-            <img alt="SENA Logo" class="h-9 w-auto" src="https://lh3.googleusercontent.com/aida/AP1WRLsgqsUoGT-2lwimwLtDM221DxP7NWvos4EH-jZO44clebvSs4G9xkk3qy5_sx5r-gM4QaISpEHQdi6MkDmZJjlCouJfjc7cqoB6IKxC6KqhF6otdPBmlirkRXwoftCPtJGBQyj1RHApkoKcCsMv5ZBZUKFMbmvqfkr06yOy5bowvIO_D_snGIHh_9WJluN-wBVSCTX9wmiL-2HUR0a5qth3wQ7dWYpJoACf7PPvRziZydOgCWGfP1eakb0"/>
-            <span class="font-headline-md text-xl font-bold text-primary dark:text-primary-fixed-dim leading-tight">Mesa de Ayuda</span>
+<aside class="w-72 bg-white border-r border-zinc-200 flex flex-col justify-between h-screen sticky top-0 z-40 shrink-0 shadow-lg transition-all duration-300">
+    <div class="flex flex-col gap-6 p-5">
+
+        <!-- Logo y Header institucional -->
+        <div class="flex items-center gap-3.5 px-3 py-2.5 bg-emerald-50 rounded-2xl border border-emerald-100 shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center p-1.5 shadow-sm shrink-0 border border-emerald-100">
+                <img alt="SENA Logo" class="h-full w-auto object-contain" src="https://commondatastorage.googleapis.com/codesign-sena-bucket/logo-sena-verde.png"/>
+            </div>
+            <div class="flex flex-col min-w-0">
+                <span class="text-xs font-semibold tracking-wider text-emerald-700 uppercase">SENA</span>
+                <span class="text-base font-bold text-zinc-900 leading-tight truncate">Mesa de Ayuda</span>
+            </div>
         </div>
 
         <!-- Obtener el Rol desde la sesión -->
         <c:set var="rolActual" value="${not empty sessionScope.rolUsuario ? sessionScope.rolUsuario : sessionScope.usuario.rol}" />
 
         <!-- Opciones de Navegación según Rol -->
-        <nav class="flex flex-col gap-1">
+        <nav class="flex flex-col gap-1.5">
+            <span class="px-3 text-xs font-semibold tracking-wider text-zinc-400 uppercase mb-1">Menú Principal</span>
+
             <c:choose>
                 <%-- 1. APRENDIZ / FUNCIONARIO --%>
-                <c:when test="${rolActual == 'APRENDIZ'}">
-                    <!--  Apunta al Servlet para cargar las categorías antes de mostrar el formulario -->
+                <c:when test="${rolActual == 'APRENDIZ' || rolActual == 'FUNCIONARIO'}">
                     <a href="${pageContext.request.contextPath}/tickets/registrar" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
-                        <span class="material-symbols-outlined text-primary">add_circle</span>
-                        <span class="font-medium">Crear Solicitud</span>
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">add_circle</span>
+                        <span>Crear Solicitud</span>
                     </a>
 
-                    <!-- ✅Apunta al Servlet con la acción historial -->
                     <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
-                        <span class="material-symbols-outlined text-primary">confirmation_number</span>
-                        <span class="font-medium">Mis Solicitudes</span>
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">confirmation_number</span>
+                        <span>Mis Solicitudes</span>
                     </a>
 
                     <a href="${pageContext.request.contextPath}/Notificaciones.jsp" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
-                        <span class="material-symbols-outlined text-primary">notifications</span>
-                        <span class="font-medium">Notificaciones</span>
-                    </a>
-                </c:when>
-                <c:when test="${rolActual == 'FUNCIONARIO'}">
-                    <a href="${pageContext.request.contextPath}/tickets/registrar" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
-                        <span class="material-symbols-outlined text-primary">add_circle</span>
-                        <span class="font-medium">Crear Solicitud</span>
-                    </a>
-                    <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
-                        <span class="material-symbols-outlined text-primary">confirmation_number</span>
-                        <span class="font-medium">Mis Solicitudes</span>
-                    </a>
-                    <a href="${pageContext.request.contextPath}/Notificaciones.jsp" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
-                        <span class="material-symbols-outlined text-primary">notifications</span>
-                        <span class="font-medium">Notificaciones</span>
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">notifications</span>
+                        <span>Notificaciones</span>
                     </a>
                 </c:when>
 
                 <%-- 2. AGENTE --%>
                 <c:when test="${rolActual == 'AGENTE'}">
-                    <a href="${pageContext.request.contextPath}/AgenteTickets.jsp" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
-                        <span class="material-symbols-outlined text-primary">inbox</span>
-                        <span class="font-medium">Tickets Asignados</span>
+                    <a href="${pageContext.request.contextPath}/AgenteTickets.jsp" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">inbox</span>
+                        <span>Tickets Asignados</span>
                     </a>
 
-                    <a href="${pageContext.request.contextPath}/historial-resueltos.jsp" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
-                        <span class="material-symbols-outlined text-primary">task_alt</span>
-                        <span class="font-medium">Resueltos</span>
+                    <a href="${pageContext.request.contextPath}/AgenteTickets.jsp?filter=atender" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">support_agent</span>
+                        <span>Atender Tickets</span>
+                    </a>
+
+                    <a href="${pageContext.request.contextPath}/AgenteTickets.jsp?filter=historial" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">task_alt</span>
+                        <span>Historial</span>
                     </a>
                 </c:when>
 
-                <%-- 3. ADMIN (Default) --%>
+                <%-- 3. ADMIN --%>
                 <c:when test="${rolActual == 'ADMIN'}">
-                    <a href="${pageContext.request.contextPath}/AdminTickets.jsp" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
-                        <span class="material-symbols-outlined text-primary">confirmation_number</span>
-                        <span class="font-medium">Gestión de Tickets</span>
+                    <a href="${pageContext.request.contextPath}/admin/tickets" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">confirmation_number</span>
+                        <span>Gestión de Tickets</span>
                     </a>
-                    <a href="${pageContext.request.contextPath}/usuarios.jsp" class="flex items-center gap-3 px-4 py-3 rounded-lg text-body-md text-on-surface hover:bg-surface-container-high transition-colors">
-                        <span class="material-symbols-outlined text-primary">group</span>
-                        <span class="font-medium">Gestión Usuarios</span>
+
+                    <a href="${pageContext.request.contextPath}/admin/reasignar-agentes" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">swap_horiz</span>
+                        <span>Reasignar Agentes</span>
+                    </a>
+
+                    <a href="${pageContext.request.contextPath}/admin/reportes" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">query_stats</span>
+                        <span>Reportes</span>
+                    </a>
+
+                    <a href="${pageContext.request.contextPath}/admin/usuarios" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">group</span>
+                        <span>Gestión Usuarios</span>
                     </a>
                 </c:when>
             </c:choose>
@@ -87,24 +102,24 @@
     </div>
 
     <!-- Usuario Activo y Logout -->
-    <div class="p-4 border-t border-outline-variant flex flex-col gap-2 bg-surface-container-lowest">
+    <div class="p-4 border-t border-zinc-200 flex flex-col gap-3 bg-zinc-50">
         <div class="flex items-center gap-3 px-2 py-1">
-            <div class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-emerald-600/20 shrink-0">
                 ${not empty sessionScope.usuario.nombre ? sessionScope.usuario.nombre.substring(0,2).toUpperCase() : 'US'}
             </div>
             <div class="flex flex-col min-w-0">
-                <span class="font-label-md font-bold text-on-surface truncate">
+                <span class="text-sm font-semibold text-zinc-900 truncate">
                     ${not empty sessionScope.usuario.nombre ? sessionScope.usuario.nombre : 'Usuario SENA'}
                 </span>
-                <span class="font-label-sm text-secondary truncate">
+                <span class="text-xs font-medium text-emerald-600 uppercase tracking-wide">
                     ${not empty rolActual ? rolActual : 'INVITADO'}
                 </span>
             </div>
         </div>
 
-        <a href="${pageContext.request.contextPath}/logout" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-body-md text-error hover:bg-error-container/20 transition-colors mt-1">
-            <span class="material-symbols-outlined text-error">logout</span>
-            <span class="font-medium">Cerrar sesión</span>
+        <a href="${pageContext.request.contextPath}/logout" class="flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors shadow-sm">
+            <span class="material-symbols-outlined text-rose-500 text-lg">logout</span>
+            <span>Cerrar sesión</span>
         </a>
     </div>
 </aside>

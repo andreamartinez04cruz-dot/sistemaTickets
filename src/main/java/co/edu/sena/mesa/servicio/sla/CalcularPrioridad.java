@@ -1,5 +1,5 @@
 
-package co.edu.sena.mesaayuda.servicio.sla;
+package co.edu.sena.mesa.servicio.sla;
 
 public interface CalcularPrioridad {
     // Retorna la prioridad calculada (ej. "BAJA", "MEDIA", "ALTA", "CRITICA")

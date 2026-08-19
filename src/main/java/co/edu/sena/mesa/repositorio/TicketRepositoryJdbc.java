@@ -28,7 +28,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
 
         String sql = "INSERT INTO ticket "
                 + "(titulo, descripcion, idCategoria, idPrioridad, "
-                + "idSolicitante, estado, fechaCreacion) "
+                + "idUsuario, estado, fechaCreacion) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conexion = ConexionBD.obtenerConexion(); PreparedStatement statement = conexion.prepareStatement(
@@ -69,86 +69,44 @@ public class TicketRepositoryJdbc implements TicketRepository {
 
         System.out.println("ENTRO A TicketFuncionario");
 
-        // 1. Añadimos el campo de prioridad en el INSERT (Asumiendo que tu columna se llama idPrioridad)
         String sqlTicket = "INSERT INTO ticket "
-                + "(titulo, descripcion, idCategoria, idPrioridad, estado, fechaCreacion) "
-                + "VALUES (?, ?, ?, ?, ?, ?)";
+                + "(titulo, descripcion, idCategoria, idPrioridad, idUsuario, estado, fechaCreacion, programa, numeroPrograma, instructor, jornada) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        String sqlRelacion = "INSERT INTO ticketusuario "
-                + "(idTicket, idUsuario) "
-                + "VALUES (?, ?)";
+        try (Connection conexion = ConexionBD.obtenerConexion();
+             PreparedStatement ps = conexion.prepareStatement(
+                     sqlTicket,
+                     Statement.RETURN_GENERATED_KEYS)) {
 
-        try (Connection conexion = ConexionBD.obtenerConexion()) {
+            ps.setString(1, ticket.getTitulo());
+            ps.setString(2, ticket.getDescripcion());
+            ps.setLong(3, ticket.getCategoria().getId());
+            ps.setLong(4, ticket.getPrioridad().getId());
+            ps.setLong(5, idSolicitante);
+            ps.setString(6, ticket.getEstadoNombre());
+            ps.setTimestamp(7, java.sql.Timestamp.valueOf(ticket.getFechaCreacion()));
+            ps.setString(8, ticket.getPrograma());
+            ps.setString(9, ticket.getNumeroPrograma());
+            ps.setString(10, ticket.getInstructor());
+            ps.setString(11, ticket.getJornada());
 
-            conexion.setAutoCommit(false);
+            ps.executeUpdate();
 
-            try (PreparedStatement ps = conexion.prepareStatement(
-                    sqlTicket,
-                    Statement.RETURN_GENERATED_KEYS)) {
+            System.out.println("TICKET INSERTADO");
 
-                ps.setString(1, ticket.getTitulo());
-                ps.setString(2, ticket.getDescripcion());
-                ps.setLong(3, ticket.getCategoria().getId());
-
-                // 2. Insertamos la prioridad del ticket (Asegúrate de que tu objeto Ticket tenga un método para obtener el ID de la prioridad)
-                ps.setLong(4, ticket.getPrioridad().getId());
-
-                ps.setString(5, ticket.getEstadoNombre());
-                ps.setTimestamp(6,
-                        java.sql.Timestamp.valueOf(ticket.getFechaCreacion()));
-
-                ps.executeUpdate();
-
-                System.out.println("TICKET INSERTADO");
-
-                try (ResultSet rs = ps.getGeneratedKeys()) {
-
-                    if (rs.next()) {
-
-                        long idTicket = rs.getLong(1);
-
-                        System.out.println("ID TICKET: " + idTicket);
-                        System.out.println("ID USUARIO: " + idSolicitante);
-
-                        try (PreparedStatement psRelacion
-                                = conexion.prepareStatement(sqlRelacion)) {
-
-                            psRelacion.setLong(1, idTicket);
-                            psRelacion.setLong(2, idSolicitante);
-
-                            psRelacion.executeUpdate();
-
-                            System.out.println(
-                                    "RELACION TICKET-USUARIO INSERTADA"
-                            );
-                        }
-
-                        conexion.commit();
-
-                        System.out.println("COMMIT REALIZADO");
-
-                        // CORRECCIÓN: Asignamos el ID real del ticket, no el del usuario
-                        ticket.setId((int) idTicket);
-
-                    } else {
-                        conexion.rollback();
-                        throw new SQLException(
-                                "No se pudo obtener el ID del ticket"
-                        );
-                    }
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    long idTicket = rs.getLong(1);
+                    System.out.println("ID TICKET GENERADO: " + idTicket);
+                    ticket.setId((int) idTicket);
+                } else {
+                    throw new SQLException("No se pudo obtener el ID del ticket");
                 }
-
-            } catch (Exception e) {
-                conexion.rollback();
-                throw e;
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException(
-                    "Error al registrar ticket",
-                    e
-            );
+            throw new RuntimeException("Error al registrar ticket", e);
         }
     }
 
@@ -185,9 +143,8 @@ public class TicketRepositoryJdbc implements TicketRepository {
         String sql = "SELECT t.id, t.titulo, t.descripcion, t.estado, t.fechaCreacion, "
                 + "c.nombre AS categoria "
                 + "FROM ticket t "
-                + "INNER JOIN ticketusuario tu ON t.id = tu.idTicket "
                 + "INNER JOIN categoria c ON t.idCategoria = c.id "
-                + "WHERE tu.idUsuario = ?";
+                + "WHERE t.idUsuario = ?";
 
         try (Connection conn = ConexionBD.obtenerConexion(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -362,8 +319,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
                 + "u.nombre AS nombre_usuario, "
                 + "u.correo AS correo_usuario "
                 + "FROM ticket t "
-                + "LEFT JOIN ticketusuario tu ON t.id = tu.idTicket "
-                + "LEFT JOIN usuario u ON tu.idUsuario = u.id "
+                + "LEFT JOIN usuario u ON t.idUsuario = u.id "
                 + "LEFT JOIN categoria c ON t.idCategoria = c.id "
                 + "LEFT JOIN prioridad p ON t.idPrioridad = p.id "
                 + "WHERE t.id = ?";

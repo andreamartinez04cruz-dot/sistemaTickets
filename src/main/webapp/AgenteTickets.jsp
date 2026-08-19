@@ -1,3 +1,4 @@
+<%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -7,6 +8,7 @@
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+        <link href="${pageContext.request.contextPath}/css/styles-global.css" rel="stylesheet"/>
         <script id="tailwind-config">
             tailwind.config = {
                 darkMode: "class",
@@ -116,16 +118,188 @@
             }
         </style>
     </head>
-    <body class="bg-background text-on-background min-h-screen flex flex-col">
-        <!-- TopAppBar -->
-        <header class="bg-surface dark:bg-surface-dim shadow-sm fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16">
+    <%@ page import="java.sql.*, java.util.*" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ page import="co.edu.sena.mesa.servicio.notificacion.Notificador, co.edu.sena.mesa.servicio.notificacion.NotificadorEnAplicacion, co.edu.sena.mesa.servicio.notificacion.NotificacionService, co.edu.sena.mesa.servicio.notificacion.NotificacionServiceImpl" %>
+<%
+    List<Map<String, Object>> ticketsAsignados = new ArrayList<>();
+    int totalAsignados = 0;
+    int urgentes = 0;
+    int pendientes = 0;
+    String mensajeEstado = "";
+
+    Notificador notificadorEnAplicacion = new NotificadorEnAplicacion();
+    NotificacionService notificacionService = new NotificacionServiceImpl(notificadorEnAplicacion);
+    HttpSession sesion = request.getSession(false);
+
+    java.util.function.Function<String, String> normalizarEstadoTicket = (estado) -> {
+        if (estado == null) {
+            return null;
+        }
+        String valor = estado.trim();
+        if (valor.isEmpty()) {
+            return null;
+        }
+        String mayus = valor.toUpperCase(Locale.ROOT);
+        if ("EN_PROCESO".equals(mayus) || "EN PROCESO".equalsIgnoreCase(valor)) {
+            return "EN PROCESO";
+        }
+        return mayus;
+    };
+
+    if ("POST".equalsIgnoreCase(request.getMethod()) && sesion != null && sesion.getAttribute("usuario") != null) {
+        co.edu.sena.mesa.modelo.Usuario usuarioActual = (co.edu.sena.mesa.modelo.Usuario) sesion.getAttribute("usuario");
+        int idUsuarioActual = usuarioActual.getId();
+        String idTicketParam = request.getParameter("idTicket");
+        String accion = request.getParameter("accion");
+        String nuevoEstado = request.getParameter("nuevoEstado");
+
+        if (idTicketParam != null) {
+            try {
+                int idTicket = Integer.parseInt(idTicketParam);
+                String validarSql = "SELECT 1 FROM ticketagente WHERE idTicket = ? AND idUsuario = ?";
+                String updateSql = "UPDATE ticket SET estado = ? WHERE id = ? AND id IN (SELECT idTicket FROM ticketagente WHERE idUsuario = ?)";
+
+                try (Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mesaayuda", "root", "Sena2026*")) {
+                    try (PreparedStatement validarPs = cn.prepareStatement(validarSql)) {
+                        validarPs.setInt(1, idTicket);
+                        validarPs.setInt(2, idUsuarioActual);
+                        try (ResultSet rs = validarPs.executeQuery()) {
+                            if (!rs.next()) {
+                                mensajeEstado = "Este ticket no estÃ¡ asignado a tu usuario.";
+                            } else if ("resolverTicket".equals(accion)) {
+                                try (PreparedStatement updatePs = cn.prepareStatement(updateSql)) {
+                                    updatePs.setString(1, "RESUELTO");
+                                    updatePs.setInt(2, idTicket);
+                                    updatePs.setInt(3, idUsuarioActual);
+                                    int filas = updatePs.executeUpdate();
+                                    if (filas > 0) {
+                                        mensajeEstado = "Ticket resuelto correctamente y guardado en la base de datos.";
+                                        String correoSolicitante = null;
+                                        try (PreparedStatement correoPs = cn.prepareStatement(
+                                                "SELECT u.correo FROM ticket t JOIN usuario u ON u.id = t.idUsuario WHERE t.id = ?")) {
+                                            correoPs.setInt(1, idTicket);
+                                            try (ResultSet correoRs = correoPs.executeQuery()) {
+                                                if (correoRs.next()) {
+                                                    correoSolicitante = correoRs.getString("correo");
+                                                }
+                                            }
+                                        }
+                                        if (correoSolicitante != null && !correoSolicitante.trim().isEmpty()) {
+                                            notificacionService.notificarTicketResuelto(correoSolicitante, idTicket);
+                                        }
+                                    } else {
+                                        mensajeEstado = "No se pudo resolver el ticket.";
+                                    }
+                                }
+                            } else {
+                                String estado = normalizarEstadoTicket.apply(nuevoEstado);
+                                if (estado != null && !estado.trim().isEmpty()) {
+                                    try (PreparedStatement updatePs = cn.prepareStatement(updateSql)) {
+                                        updatePs.setString(1, estado);
+                                        updatePs.setInt(2, idTicket);
+                                        updatePs.setInt(3, idUsuarioActual);
+                                        int filas = updatePs.executeUpdate();
+                                        if (filas > 0) {
+                                            mensajeEstado = "Estado actualizado correctamente y guardado en la base de datos.";
+                                            String correoSolicitante = null;
+                                            try (PreparedStatement correoPs = cn.prepareStatement(
+                                                    "SELECT u.correo FROM ticket t JOIN usuario u ON u.id = t.idUsuario WHERE t.id = ?")) {
+                                                correoPs.setInt(1, idTicket);
+                                                try (ResultSet correoRs = correoPs.executeQuery()) {
+                                                    if (correoRs.next()) {
+                                                        correoSolicitante = correoRs.getString("correo");
+                                                    }
+                                                }
+                                            }
+                                            if (correoSolicitante != null && !correoSolicitante.trim().isEmpty()) {
+                                                notificacionService.notificarCambioEstado(correoSolicitante, idTicket, estado);
+                                            }
+                                        } else {
+                                            mensajeEstado = "No se pudo actualizar el estado.";
+                                        }
+                                    }
+                                } else {
+                                    mensajeEstado = "Debe elegir un estado vÃ¡lido.";
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                mensajeEstado = "Error al guardar el cambio del ticket.";
+                e.printStackTrace();
+            }
+        }
+    }
+    if (mensajeEstado != null && !mensajeEstado.isEmpty()) {
+        request.setAttribute("mensajeEstado", mensajeEstado);
+    }
+
+    if (sesion != null && sesion.getAttribute("usuario") != null) {
+        co.edu.sena.mesa.modelo.Usuario usuarioActual = (co.edu.sena.mesa.modelo.Usuario) sesion.getAttribute("usuario");
+        int idUsuarioActual = usuarioActual.getId();
+
+        String sql = "SELECT t.id, t.titulo, t.estado, c.nombre AS categoria, pr.tipoPrioridad AS prioridad, "
+                + "u.nombre AS solicitante, u.apellido AS apellido_solicitante "
+                + "FROM ticketagente ta "
+                + "JOIN ticket t ON t.id = ta.idTicket "
+                + "JOIN usuario u ON u.id = t.idUsuario "
+                + "LEFT JOIN categoria c ON c.id = t.idCategoria "
+                + "LEFT JOIN prioridad pr ON pr.id = t.idPrioridad "
+                + "WHERE ta.idUsuario = ? "
+                + "ORDER BY t.id DESC";
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            try (Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mesaayuda", "root", "Sena2026*");
+                 PreparedStatement ps = cn.prepareStatement(sql)) {
+                ps.setInt(1, idUsuarioActual);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, Object> ticket = new HashMap<>();
+                        ticket.put("id", rs.getInt("id"));
+                        ticket.put("titulo", rs.getString("titulo"));
+                        ticket.put("estado", rs.getString("estado"));
+                        ticket.put("categoria", rs.getString("categoria"));
+                        ticket.put("prioridad", rs.getString("prioridad"));
+                        ticket.put("solicitante", rs.getString("solicitante") + (rs.getString("apellido_solicitante") != null ? " " + rs.getString("apellido_solicitante") : ""));
+                        ticketsAsignados.add(ticket);
+                        totalAsignados++;
+
+                        String prioridad = rs.getString("prioridad");
+                        if (prioridad != null && (prioridad.equalsIgnoreCase("Alta") || prioridad.equalsIgnoreCase("Urgente") || prioridad.equalsIgnoreCase("CrÃ­tica") || prioridad.equalsIgnoreCase("Inmediata"))) {
+                            urgentes++;
+                        }
+
+                        String estado = rs.getString("estado");
+                        if (estado != null && !"CERRADO".equalsIgnoreCase(estado) && !"CANCELADO".equalsIgnoreCase(estado)) {
+                            pendientes++;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    request.setAttribute("ticketsAsignados", ticketsAsignados);
+    request.setAttribute("totalAsignados", totalAsignados);
+    request.setAttribute("urgentes", urgentes);
+    request.setAttribute("pendientes", pendientes);
+    request.setAttribute("mensajeEstado", mensajeEstado);
+%>
+
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+        <header class="bg-gradient-to-r from-emerald-50 to-green-50/20 border-b border-emerald-100 shadow-sm fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16">
             <div class="flex items-center gap-4">
                 <button class="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant dark:text-on-surface-variant active:scale-95 transition-transform">
                     <span class="material-symbols-outlined" data-icon="menu">menu</span>
                 </button>
                 <div class="flex items-center gap-3">
-                    <img alt="SENA Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLsgqsUoGT-2lwimwLtDM221DxP7NWvos4EH-jZO44clebvSs4G9xkk3qy5_sx5r-gM4QaISpEHQdi6MkDmZJjlCouJfjc7cqoB6IKxC6KqhF6otdPBmlirkRXwoftCPtJGBQyj1RHApkoKcCsMv5ZBZUKFMbmvqfkr06yOy5bowvIO_D_snGIHh_9WJluN-wBVSCTX9wmiL-2HUR0a5qth3wQ7dWYpJoACf7PPvRziZydOgCWGfP1eakb0"/>
-                    <h1 class="font-headline-md text-headline-md-mobile md:text-headline-md font-bold text-primary dark:text-primary-fixed-dim">
+                    <img alt="SENA Logo" class="h-8 w-8 object-contain" src="https://upload.wikimedia.org/wikipedia/commons/8/8c/SENA_Logo.svg"/>
+                    <h1 class="font-headline-md text-headline-md-mobile md:text-headline-md font-bold text-emerald-600 dark:text-emerald-500">
                         SENA Mesa de Ayuda
                     </h1>
                 </div>
@@ -141,208 +315,281 @@
             </div>
         </header>
 
-        <!-- Layout contenedor (Menú + Contenido) -->
         <div class="flex flex-1 pt-16">
-            <!-- Sidebar Menu -->
             <aside class="shrink-0">
                 <jsp:include page="Menu.jsp"/>
             </aside>
 
-            <!-- Main Content -->
             <main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg flex flex-col gap-stack-lg min-w-0">
-                <!-- Page Title & Actions -->
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-stack-md">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-stack-md p-6 bg-gradient-to-r from-emerald-50 to-green-50/20 rounded-2xl border border-emerald-100/70 shadow-sm">
                     <div>
-                        <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Tickets Asignados</h2>
-                        <p class="font-body-md text-body-md text-on-surface-variant mt-1">Gestiona los requerimientos asignados a tu perfil.</p>
+                        <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-gray-900">Tickets Asignados</h2>
+                        <p class="font-body-md text-emerald-800 font-medium mt-1">Gestiona los requerimientos asignados a tu perfil en tiempo real.</p>
                     </div>
                 </div>
 
-                <!-- Summary Cards (Bento style) -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-                    <!-- Total -->
-                    <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
-                            <span class="material-symbols-outlined icon-fill text-3xl">confirmation_number</span>
-                        </div>
+
+
+                <c:if test="${not empty mensajeEstado}">
+                    <div class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 shadow-sm flex items-start gap-3">
+                        <span class="material-symbols-outlined text-lg">notifications_active</span>
                         <div>
-                            <p class="font-label-md text-label-md text-on-surface-variant">Mis Asignados</p>
-                            <p class="font-display-lg text-display-lg text-on-surface">24</p>
+                            <p class="font-semibold">NotificaciÃ³n</p>
+                            <p>${mensajeEstado}</p>
                         </div>
                     </div>
-                    <!-- Alta Prioridad -->
-                    <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex items-center gap-4 relative overflow-hidden">
-                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
-                        <div class="w-12 h-12 rounded-lg bg-error-container flex items-center justify-center text-error">
-                            <span class="material-symbols-outlined icon-fill text-3xl">priority_high</span>
-                        </div>
-                        <div>
-                            <p class="font-label-md text-label-md text-on-surface-variant">Alta Prioridad</p>
-                            <p class="font-display-lg text-display-lg text-on-surface">5</p>
-                        </div>
-                    </div>
-                    <!-- Vencen Hoy -->
-                    <div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex items-center gap-4 relative overflow-hidden">
-                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#f59e0b]"></div>
-                        <div class="w-12 h-12 rounded-lg bg-[#fef3c7] flex items-center justify-center text-[#d97706]">
-                            <span class="material-symbols-outlined icon-fill text-3xl">timer</span>
-                        </div>
-                        <div>
-                            <p class="font-label-md text-label-md text-on-surface-variant">Vencen Hoy</p>
-                            <p class="font-display-lg text-display-lg text-on-surface">3</p>
-                        </div>
-                    </div>
-                </div>
+                </c:if>
 
-                <!-- Filter/Search Bar -->
-                <div class="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant flex flex-col md:flex-row gap-4 items-center">
-                    <div class="relative w-full md:w-96">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-                        <input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-body-md text-body-md text-on-surface transition-colors" placeholder="Buscar por ID, asunto o solicitante..." type="text"/>
-                    </div>
-                    <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-                        <button class="px-4 py-2 rounded-lg bg-surface-container-high text-on-surface font-label-md text-label-md whitespace-nowrap hover:bg-surface-variant transition-colors border border-outline-variant">
-                            Todos
-                        </button>
-                        <button class="px-4 py-2 rounded-lg bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md whitespace-nowrap hover:bg-surface-container-high transition-colors border border-outline-variant">
-                            Abiertos
-                        </button>
-                        <button class="px-4 py-2 rounded-lg bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md whitespace-nowrap hover:bg-surface-container-high transition-colors border border-outline-variant flex items-center gap-2">
-                            <span class="material-symbols-outlined text-sm">filter_list</span>
-                            Más filtros
-                        </button>
-                    </div>
-                </div>
+                <c:choose>
+                    <c:when test="${not empty ticketsAsignados}">
+                        <div class="bg-white rounded-2xl shadow-sm border border-outline-variant overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full border-collapse text-left">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b border-outline-variant text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                            <th class="py-4 px-6">ID / Asunto</th>
+                                            <th class="py-4 px-6">Solicitante</th>
+                                            <th class="py-4 px-6">CategorÃ­a</th>
+                                            <th class="py-4 px-6">Prioridad</th>
+                                            <th class="py-4 px-6">Estado</th>
+                                            <th class="py-4 px-6 text-right">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-outline-variant">
+                                        <c:forEach var="ticket" items="${ticketsAsignados}">
+                                            <c:set var="priorityColor" value="#3b82f6" />
+                                            <c:set var="priorityBg" value="bg-blue-50 text-blue-700 border-blue-200" />
+                                            <c:if test="${ticket.prioridad == 'Alta' || ticket.prioridad == 'URGENTE' || ticket.prioridad == 'Urgente' || ticket.prioridad == 'CrÃ­tica' || ticket.prioridad == 'Critica'}">
+                                                <c:set var="priorityColor" value="#ef4444" />
+                                                <c:set var="priorityBg" value="bg-red-50 text-red-700 border-red-200" />
+                                            </c:if>
+                                            <c:if test="${ticket.prioridad == 'Media' || ticket.prioridad == 'MEDIA'}">
+                                                <c:set var="priorityColor" value="#f59e0b" />
+                                                <c:set var="priorityBg" value="bg-amber-50 text-amber-700 border-amber-200" />
+                                            </c:if>
+                                            <c:if test="${ticket.prioridad == 'Baja' || ticket.prioridad == 'BAJA'}">
+                                                <c:set var="priorityColor" value="#10b981" />
+                                                <c:set var="priorityBg" value="bg-emerald-50 text-emerald-700 border-emerald-200" />
+                                            </c:if>
 
-                <!-- Ticket List -->
-                <div class="flex flex-col gap-4">
-                    <!-- Ticket Card 1 (Alta) -->
-                    <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant p-5 hover:shadow-md transition-shadow relative overflow-hidden group cursor-pointer">
-                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-error group-hover:w-2 transition-all"></div>
-                        <div class="flex flex-col md:flex-row justify-between gap-4">
-                            <div class="flex flex-col gap-2 pl-2">
-                                <div class="flex items-center gap-3 flex-wrap">
-                                    <span class="font-label-md text-label-md text-on-surface-variant">#TK-9876</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-error"></span> Alta
-                                    </span>
-                                    <span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm border border-outline-variant">
-                                        Abierto
-                                    </span>
-                                </div>
-                                <h3 class="font-title-lg text-title-lg text-on-surface">Falla masiva en servidor Sofía Plus</h3>
-                                <div class="flex items-center gap-4 text-on-surface-variant font-body-md text-body-md mt-1">
-                                    <div class="flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[18px]">person</span>
-                                        Carlos Mendoza
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[18px]">apartment</span>
-                                        Centro de Industria
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex flex-row md:flex-col items-center md:items-end justify-between pl-2 md:pl-0 border-t md:border-t-0 md:border-l border-outline-variant pt-3 md:pt-0 md:pl-4">
-                                <div class="flex items-center gap-1 text-error font-label-md text-label-md bg-error-container/30 px-3 py-1 rounded-lg">
-                                    <span class="material-symbols-outlined text-[18px]">timer</span>
-                                    2h restantes
-                                </div>
-                                <button class="text-primary font-label-md text-label-md hover:underline mt-0 md:mt-auto flex items-center gap-1">
-                                    Ver detalles <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                                </button>
+                                            <c:set var="stateBg" value="bg-gray-100 text-gray-700 border-gray-200" />
+                                            <c:if test="${ticket.estado == 'ASIGNADO'}">
+                                                <c:set var="stateBg" value="bg-indigo-50 text-indigo-700 border border-indigo-200" />
+                                            </c:if>
+                                            <c:if test="${ticket.estado == 'EN PROCESO'}">
+                                                <c:set var="stateBg" value="bg-amber-50 text-amber-700 border border-amber-200" />
+                                            </c:if>
+                                            <c:if test="${ticket.estado == 'RESUELTO'}">
+                                                <c:set var="stateBg" value="bg-emerald-50 text-emerald-700 border border-emerald-200" />
+                                            </c:if>
+                                            <c:if test="${ticket.estado == 'CANCELADO'}">
+                                                <c:set var="stateBg" value="bg-rose-50 text-rose-700 border border-rose-200" />
+                                            </c:if>
+
+                                            <tr class="ticket-card hover:bg-gray-50/40 transition-colors group"
+                                                data-id="${ticket.id}" data-titulo="${ticket.titulo}" data-solicitante="${ticket.solicitante}" data-estado="${ticket.estado}" data-prioridad="${ticket.prioridad}">
+                                                <!-- ID / Asunto -->
+                                                <td class="py-4 px-6">
+                                                    <div class="flex items-center gap-3">
+                                                        <span class="font-mono text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">#${ticket.id}</span>
+                                                        <a href="${pageContext.request.contextPath}/tickets/comentar?id=${ticket.id}" class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors hover:underline">
+                                                            ${ticket.titulo}
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <!-- Solicitante -->
+                                                <td class="py-4 px-6">
+                                                    <div class="flex items-center gap-2 text-gray-700 font-medium">
+                                                        <span class="material-symbols-outlined text-[18px] text-gray-400">person</span>
+                                                        ${ticket.solicitante}
+                                                    </div>
+                                                </td>
+                                                <!-- CategorÃ­a -->
+                                                <td class="py-4 px-6">
+                                                    <div class="flex items-center gap-2 text-gray-600 font-medium">
+                                                        <span class="material-symbols-outlined text-[18px] text-gray-400">apartment</span>
+                                                        ${ticket.categoria != null ? ticket.categoria : 'Sin categorÃ­a'}
+                                                    </div>
+                                                </td>
+                                                <!-- Prioridad -->
+                                                <td class="py-4 px-6">
+                                                    <span class="px-2.5 py-1 rounded-full font-semibold text-xs border ${priorityBg} inline-flex items-center gap-1.5 shadow-sm">
+                                                        <span class="w-1.5 h-1.5 rounded-full" style="background-color: ${priorityColor};"></span>
+                                                        ${ticket.prioridad != null ? ticket.prioridad : 'Sin prioridad'}
+                                                    </span>
+                                                </td>
+                                                <!-- Estado -->
+                                                <td class="py-4 px-6">
+                                                    <span class="px-2.5 py-1 rounded-full font-semibold text-xs border ${stateBg} shadow-sm">
+                                                        ${ticket.estado != null ? ticket.estado : 'ABIERTO'}
+                                                    </span>
+                                                </td>
+                                                <!-- Acciones -->
+                                                <td class="py-4 px-6 text-right">
+                                                    <div class="flex items-center justify-end gap-3 flex-wrap">
+                                                        <c:choose>
+                                                            <c:when test="${ticket.estado == 'CERRADO' || ticket.estado == 'CANCELADO'}">
+                                                                <span class="text-xs font-bold text-gray-400 flex items-center gap-1">
+                                                                    <span class="material-symbols-outlined text-sm">lock</span> Finalizado
+                                                                </span>
+                                                            </c:when>
+                                                            <c:when test="${ticket.estado == 'RESUELTO'}">
+                                                                <span class="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                                                                    <span class="material-symbols-outlined text-sm">check_circle</span> Resuelto
+                                                                </span>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <form method="post" action="${pageContext.request.contextPath}/AgenteTickets.jsp" class="flex items-center gap-2">
+                                                                    <input type="hidden" name="idTicket" value="${ticket.id}"/>
+                                                                    <select name="nuevoEstado" class="rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1 text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-emerald-500 font-semibold shadow-sm">
+                                                                        <c:choose>
+                                                                            <c:when test="${ticket.estado == 'ASIGNADO'}">
+                                                                                <option value="ASIGNADO" selected>ASIGNADO</option>
+                                                                                <option value="EN PROCESO">EN PROCESO</option>
+                                                                                <option value="RESUELTO">RESUELTO</option>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <option value="EN PROCESO" selected>EN PROCESO</option>
+                                                                                <option value="RESUELTO">RESUELTO</option>
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </select>
+                                                                    <button type="submit" name="accion" value="cambiarEstado" class="bg-emerald-600 hover:bg-emerald-700 text-white p-1 rounded-lg text-xs font-bold shadow-sm hover:shadow transition-all flex items-center justify-center" title="Guardar estado">
+                                                                        <span class="material-symbols-outlined text-sm">save</span>
+                                                                    </button>
+                                                                </form>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                        
+                                                        <a href="${pageContext.request.contextPath}/tickets/comentar?id=${ticket.id}" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 transition-all">
+                                                            <c:choose>
+                                                                <c:when test="${ticket.estado == 'CERRADO' || ticket.estado == 'CANCELADO' || ticket.estado == 'RESUELTO'}">
+                                                                    Historial <span class="material-symbols-outlined text-sm">visibility</span>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    Atender <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Ticket Card 2 (Media) -->
-                    <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant p-5 hover:shadow-md transition-shadow relative overflow-hidden group cursor-pointer">
-                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#f59e0b] group-hover:w-2 transition-all"></div>
-                        <div class="flex flex-col md:flex-row justify-between gap-4">
-                            <div class="flex flex-col gap-2 pl-2">
-                                <div class="flex items-center gap-3 flex-wrap">
-                                    <span class="font-label-md text-label-md text-on-surface-variant">#TK-9842</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-[#fef3c7] text-[#92400e] font-label-sm text-label-sm flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span> Media
-                                    </span>
-                                    <span class="px-2 py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm border border-primary/20">
-                                        En Proceso
-                                    </span>
-                                </div>
-                                <h3 class="font-title-lg text-title-lg text-on-surface">Actualización de software laboratorio D-4</h3>
-                                <div class="flex items-center gap-4 text-on-surface-variant font-body-md text-body-md mt-1">
-                                    <div class="flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[18px]">person</span>
-                                        Instructora Ana Ríos
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[18px]">apartment</span>
-                                        Diseño y Multimedia
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex flex-row md:flex-col items-center md:items-end justify-between pl-2 md:pl-0 border-t md:border-t-0 md:border-l border-outline-variant pt-3 md:pt-0 md:pl-4">
-                                <div class="flex items-center gap-1 text-[#b45309] font-label-md text-label-md bg-[#fef3c7]/50 px-3 py-1 rounded-lg">
-                                    <span class="material-symbols-outlined text-[18px]">schedule</span>
-                                    Mañana
-                                </div>
-                                <button class="text-primary font-label-md text-label-md hover:underline mt-0 md:mt-auto flex items-center gap-1">
-                                    Ver detalles <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                                </button>
-                            </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="bg-white rounded-2xl border border-dashed border-gray-300 p-8 text-center text-gray-500">
+                            No tienes tickets asignados en este momento.
                         </div>
-                    </div>
-
-                    <!-- Ticket Card 3 (Baja) -->
-                    <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant p-5 hover:shadow-md transition-shadow relative overflow-hidden group cursor-pointer">
-                        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#3b82f6] group-hover:w-2 transition-all"></div>
-                        <div class="flex flex-col md:flex-row justify-between gap-4">
-                            <div class="flex flex-col gap-2 pl-2">
-                                <div class="flex items-center gap-3 flex-wrap">
-                                    <span class="font-label-md text-label-md text-on-surface-variant">#TK-9810</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-[#dbeafe] text-[#1e40af] font-label-sm text-label-sm flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></span> Baja
-                                    </span>
-                                    <span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm border border-outline-variant">
-                                        Abierto
-                                    </span>
-                                </div>
-                                <h3 class="font-title-lg text-title-lg text-on-surface">Solicitud de creación de cuenta correo SENA</h3>
-                                <div class="flex items-center gap-4 text-on-surface-variant font-body-md text-body-md mt-1">
-                                    <div class="flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[18px]">person</span>
-                                        Luis Pérez (Aprendiz)
-                                    </div>
-                                    <div class="flex items-center gap-1">
-                                        <span class="material-symbols-outlined text-[18px]">apartment</span>
-                                        Administrativa
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex flex-row md:flex-col items-center md:items-end justify-between pl-2 md:pl-0 border-t md:border-t-0 md:border-l border-outline-variant pt-3 md:pt-0 md:pl-4">
-                                <div class="flex items-center gap-1 text-on-surface-variant font-label-md text-label-md bg-surface-container-high px-3 py-1 rounded-lg">
-                                    <span class="material-symbols-outlined text-[18px]">calendar_today</span>
-                                    3 días
-                                </div>
-                                <button class="text-primary font-label-md text-label-md hover:underline mt-0 md:mt-auto flex items-center gap-1">
-                                    Ver detalles <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    </c:otherwise>
+                </c:choose>
             </main>
         </div>
 
-        <!-- Footer -->
         <footer class="bg-surface-container-lowest dark:bg-inverse-surface border-t border-outline-variant w-full py-stack-md px-margin-mobile flex flex-col md:flex-row justify-between items-center gap-stack-sm mt-auto z-10">
             <p class="font-label-sm text-label-sm text-primary dark:text-primary-fixed-dim">
-                © 2024 Servicio Nacional de Aprendizaje SENA. Todos los derechos reservados.
+                Â© 2024 Servicio Nacional de Aprendizaje SENA. Todos los derechos reservados.
             </p>
             <div class="flex gap-4">
                 <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim opacity-80 hover:opacity-100 transition-opacity" href="#">Privacidad</a>
-                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim opacity-80 hover:opacity-100 transition-opacity" href="#">Términos de Uso</a>
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim opacity-80 hover:opacity-100 transition-opacity" href="#">TÃ©rminos de Uso</a>
                 <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim opacity-80 hover:opacity-100 transition-opacity" href="#">Contacto</a>
             </div>
         </footer>
+        <!-- Script de Filtrado por MenÃº Lateral -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const menuVerTickets = document.getElementById('menu-ver-tickets');
+                const menuAtenderTicket = document.getElementById('menu-atender-ticket');
+                const menuVerHistorial = document.getElementById('menu-ver-historial');
+                const ticketCards = document.querySelectorAll('.ticket-card');
+
+                // Leer parÃ¡metro de la URL
+                const urlParams = new URLSearchParams(window.location.search);
+                let currentView = urlParams.get('filter') || 'todos'; // 'todos', 'atender', 'historial'
+
+                function applyFilters() {
+                    // 1. Actualizar estilos del menÃº lateral
+                    [menuVerTickets, menuAtenderTicket, menuVerHistorial].forEach(menu => {
+                        if (menu) {
+                            menu.classList.remove('bg-emerald-100', 'text-emerald-950', 'font-semibold');
+                            menu.classList.add('text-on-surface');
+                        }
+                    });
+
+                    if (currentView === 'todos') {
+                        if (menuVerTickets) {
+                            menuVerTickets.classList.add('bg-emerald-100', 'text-emerald-950', 'font-semibold');
+                            menuVerTickets.classList.remove('text-on-surface');
+                        }
+                    } else if (currentView === 'atender') {
+                        if (menuAtenderTicket) {
+                            menuAtenderTicket.classList.add('bg-emerald-100', 'text-emerald-950', 'font-semibold');
+                            menuAtenderTicket.classList.remove('text-on-surface');
+                        }
+                    } else if (currentView === 'historial') {
+                        if (menuVerHistorial) {
+                            menuVerHistorial.classList.add('bg-emerald-100', 'text-emerald-950', 'font-semibold');
+                            menuVerHistorial.classList.remove('text-on-surface');
+                        }
+                    }
+
+                    // 2. Filtrar tarjetas
+                    ticketCards.forEach(card => {
+                        const estado = card.getAttribute('data-estado').toUpperCase();
+
+                        // Filtro de vista principal (lateral)
+                        const isHistorial = estado === "RESUELTO" || estado === "CERRADO" || estado === "CANCELADO";
+                        
+                        let matchesView = true;
+                        if (currentView === 'atender') {
+                            matchesView = !isHistorial;
+                        } else if (currentView === 'historial') {
+                            matchesView = isHistorial;
+                        }
+
+                        if (matchesView) {
+                            card.style.display = "";
+                        } else {
+                            card.style.display = "none";
+                        }
+                    });
+                }
+
+                // Eventos del menÃº lateral
+                if (menuVerTickets) {
+                    menuVerTickets.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        currentView = 'todos';
+                        window.history.pushState({}, '', window.location.pathname);
+                        applyFilters();
+                    });
+                }
+
+                if (menuAtenderTicket) {
+                    menuAtenderTicket.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        currentView = 'atender';
+                        window.history.pushState({}, '', `${window.location.pathname}?filter=atender`);
+                        applyFilters();
+                    });
+                }
+
+                if (menuVerHistorial) {
+                    menuVerHistorial.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        currentView = 'historial';
+                        window.history.pushState({}, '', `${window.location.pathname}?filter=historial`);
+                        applyFilters();
+                    });
+                }
+
+                // Inicializar
+                applyFilters();
+            });
+        </script>
     </body>
 </html>

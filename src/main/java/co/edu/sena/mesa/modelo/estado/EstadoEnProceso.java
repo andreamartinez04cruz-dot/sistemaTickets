@@ -1,42 +1,42 @@
 package co.edu.sena.mesa.modelo.estado;
 
-public class EstadoEnProceso implements EstadoTickets {
+public class EstadoEnProceso implements EstadoTicket {
 
     @Override
-    public EstadoTickets asignar() {
+    public EstadoTicket asignar() {
         throw new IllegalStateException(
                 "El ticket ya está en proceso."
         );
     }
 
     @Override
-    public EstadoTickets iniciarAtencion() {
+    public EstadoTicket iniciarAtencion() {
         throw new IllegalStateException(
                 "El ticket ya está en proceso."
         );
     }
 
     @Override
-    public EstadoTickets resolver() {
+    public EstadoTicket resolver() {
         return new EstadoResuelto();
     }
 
     @Override
-    public EstadoTickets confirmar() {
+    public EstadoTicket confirmar() {
         throw new IllegalStateException(
                 "El ticket debe estar resuelto antes de ser confirmado."
         );
     }
 
     @Override
-    public EstadoTickets reabrir() {
+    public EstadoTicket reabrir() {
         throw new IllegalStateException(
                 "El ticket todavía no está resuelto."
         );
     }
 
     @Override
-    public EstadoTickets cancelar() {
+    public EstadoTicket cancelar() {
         return new EstadoCancelado();
     }
 }

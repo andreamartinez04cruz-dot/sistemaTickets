@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Locale;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
@@ -73,18 +74,55 @@ public class LoginServlet extends HttpServlet {
         String redirectUrl = request.getContextPath() + "/sin-acceso.jsp";
         String rolUsuario = "SIN_ROL";
 
-        if (roles.stream().anyMatch(rol -> rol.getTiporol().equalsIgnoreCase("ADMIN"))) {
-            rolUsuario = "ADMIN";
-            redirectUrl = request.getContextPath() + "/AdminTickets.jsp";
-        } else if (roles.stream().anyMatch(rol -> rol.getTiporol().equalsIgnoreCase("AGENTE"))) {
-            rolUsuario = "AGENTE";
-            redirectUrl = request.getContextPath() + "/AgenteTickets.jsp";
-        } else if (roles.stream().anyMatch(rol -> rol.getTiporol().equalsIgnoreCase("APRENDIZ"))) {
-            rolUsuario = "APRENDIZ";
-            redirectUrl = request.getContextPath() + "/RegistroTicket.jsp";
-        } else if (roles.stream().anyMatch(rol -> rol.getTiporol().equalsIgnoreCase("FUNCIONARIO"))) {
-            rolUsuario = "FUNCIONARIO";
-            redirectUrl = request.getContextPath() + "/tickets/registrar";
+        if (roles != null) {
+            boolean esAgente = false;
+            boolean esAprendiz = false;
+            boolean esFuncionario = false;
+
+            for (Rol rol : roles) {
+                String nombreRol = (rol != null && rol.getTiporol() != null)
+                        ? rol.getTiporol().trim()
+                        : "";
+
+                String rolNormalizado = nombreRol.toUpperCase(Locale.ROOT)
+                        .replace(" ", "")
+                        .replace("_", "")
+                        .replace("-", "");
+
+                if (rolNormalizado.contains("ADMIN") || "ADMINISTRADOR".equals(rolNormalizado)) {
+                    rolUsuario = "ADMIN";
+                    redirectUrl = request.getContextPath() + "/admin/tickets";
+                    break;
+                } else if (rolNormalizado.contains("AGENTE")) {
+                    esAgente = true;
+                } else if (rolNormalizado.contains("APRENDIZ")) {
+                    esAprendiz = true;
+                } else {
+                    esFuncionario = true;
+                }
+            }
+
+            // Se resuelve por prioridad solo si no se encontró ya un ADMIN
+            if (!"ADMIN".equals(rolUsuario)) {
+                if (esAgente) {
+                    rolUsuario = "AGENTE";
+                    redirectUrl = request.getContextPath() + "/AgenteTickets.jsp";
+                } else if (esAprendiz) {
+                    rolUsuario = "APRENDIZ";
+                    redirectUrl = request.getContextPath() + "/RegistroTicket.jsp";
+                } else if (esFuncionario) {
+                    rolUsuario = "FUNCIONARIO";
+                    redirectUrl = request.getContextPath() + "/SolicitudFuncionario.jsp";
+                }
+            }
+        }
+
+        if ("SIN_ROL".equals(rolUsuario) && roles != null && !roles.isEmpty()) {
+            String nombreUltimoRol = roles.get(0).getTiporol();
+            if (nombreUltimoRol != null && nombreUltimoRol.toUpperCase(Locale.ROOT).contains("AGENTE")) {
+                rolUsuario = "AGENTE";
+                redirectUrl = request.getContextPath() + "/AgenteTickets.jsp";
+            }
         }
 
         session.setAttribute("rolUsuario", rolUsuario);

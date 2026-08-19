@@ -1,7 +1,7 @@
 package co.edu.sena.mesa.modelo;
 
 import java.time.LocalDateTime;
-import co.edu.sena.mesa.modelo.estado.EstadoTickets;
+import co.edu.sena.mesa.modelo.estado.EstadoTicket;
 import co.edu.sena.mesa.modelo.estado.EstadoNuevo;
 import co.edu.sena.mesa.modelo.estado.EstadoAsignado;
 import co.edu.sena.mesa.modelo.estado.EstadoEnProceso;
@@ -18,12 +18,16 @@ public class Ticket {
     private Prioridad prioridad;
     private Usuario solicitante;
     private LocalDateTime fechaCreacion;
-    private EstadoTickets estado;
+    private EstadoTicket estado;
+    private String programa;
+    private String numeroPrograma;
+    private String instructor;
+    private String jornada;
 
     public Ticket() {
     }
 
-    public Ticket(int id, String titulo, String descripcion, Categoria categoria, Prioridad prioridad, Usuario solicitante, LocalDateTime fechaCreacion, EstadoTickets esatdo) {
+    public Ticket(int id, String titulo, String descripcion, Categoria categoria, Prioridad prioridad, Usuario solicitante, LocalDateTime fechaCreacion, EstadoTicket esatdo) {
         this.id = id;
         this.titulo = titulo;
         this.descripcion = descripcion;
@@ -90,11 +94,11 @@ public class Ticket {
         this.fechaCreacion = fechaCreacion;
     }
 
-    public EstadoTickets getEsatdo() {
+    public EstadoTicket getEsatdo() {
         return estado;
     }
 
-    public void setEsatdo(EstadoTickets esatdo) {
+    public void setEsatdo(EstadoTicket esatdo) {
         this.estado = esatdo;
     }
 
@@ -122,4 +126,35 @@ public class Ticket {
         return null;
     }
 
+    public String getPrograma() {
+        return programa;
+    }
+
+    public void setPrograma(String programa) {
+        this.programa = programa;
+    }
+
+    public String getNumeroPrograma() {
+        return numeroPrograma;
+    }
+
+    public void setNumeroPrograma(String numeroPrograma) {
+        this.numeroPrograma = numeroPrograma;
+    }
+
+    public String getInstructor() {
+        return instructor;
+    }
+
+    public void setInstructor(String instructor) {
+        this.instructor = instructor;
+    }
+
+    public String getJornada() {
+        return jornada;
+    }
+
+    public void setJornada(String jornada) {
+        this.jornada = jornada;
+    }
 }

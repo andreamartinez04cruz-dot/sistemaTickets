@@ -40,6 +40,11 @@ public class TicketMapper {
         // Fecha de creación
         ticket.setFechaCreacion(LocalDateTime.now());
 
+        ticket.setPrograma(dto.getPrograma());
+        ticket.setNumeroPrograma(dto.getNumeroPrograma());
+        ticket.setInstructor(dto.getInstructor());
+        ticket.setJornada(dto.getJornada());
+
         return ticket;
     }
 
@@ -148,6 +153,11 @@ public class TicketMapper {
         dto.setDescripcion(
                 ticket.getDescripcion()
         );
+
+        dto.setPrograma(ticket.getPrograma());
+        dto.setNumeroPrograma(ticket.getNumeroPrograma());
+        dto.setInstructor(ticket.getInstructor());
+        dto.setJornada(ticket.getJornada());
 
         // =====================================================
         // SOLICITANTE
