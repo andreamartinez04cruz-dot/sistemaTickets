@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 
 <html class="light" lang="es"><head>
@@ -108,6 +109,20 @@
             .material-symbols-outlined {
                 font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             }
+            input[type="text"],
+            input[type="password"],
+            input::placeholder {
+                font-family: 'Work Sans', sans-serif !important;
+            }
+            input[type="text"],
+            input[type="password"] {
+                font-size: 1rem;
+                letter-spacing: 0.01em;
+            }
+            input::placeholder {
+                color: #6f7b66;
+                opacity: 1;
+            }
         </style>
     </head>
     <body class="bg-gradient-to-br from-surface to-primary-container/20 font-body-md text-on-surface antialiased min-h-screen flex flex-col pt-[64px]">
@@ -137,15 +152,15 @@
                         <label class="font-label-md text-label-md text-on-surface font-semibold" for="username">Correo o Documento</label>
                         <div class="relative group">
                             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors pointer-events-none" data-icon="person">person</span>
-                            <input class="w-full pl-12 pr-4 py-3.5 bg-surface-container-low border border-outline-variant/60 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-surface transition-all shadow-inner" id="username" name="username" placeholder="Ej. jperez@sena.edu.co" required="" type="text"/>
+                            <input class="w-full pl-14 pr-4 py-3.5 bg-surface-container-low border border-outline-variant/60 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-surface transition-all shadow-inner" id="username" name="username" placeholder="Ej. diana.op@sena.edu.co" required="" type="text"/>
                         </div>
                     </div>
                     <!-- Password Input -->
                     <div class="flex flex-col gap-stack-sm">
-                        <label class="font-label-md text-label-md text-on-surface font-semibold" for="password">Contrase�a</label>
+                        <label class="font-label-md text-label-md text-on-surface font-semibold" for="password">Contraseña</label>
                         <div class="relative group">
                             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors pointer-events-none" data-icon="lock">lock</span>
-                            <input class="w-full pl-12 pr-12 py-3.5 bg-surface-container-low border border-outline-variant/60 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-surface transition-all shadow-inner" id="password" name="password" placeholder="????????" required="" type="password"/>
+                            <input class="w-full pl-14 pr-12 py-3.5 bg-surface-container-low border border-outline-variant/60 rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary focus:bg-surface transition-all shadow-inner" id="password" name="password" placeholder="••••••••" required="" type="password"/>
                             <button aria-label="Toggle password visibility" class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors focus:outline-none" type="button">
                                 <span class="material-symbols-outlined" data-icon="visibility">visibility</span>
                             </button>
@@ -163,19 +178,19 @@
                             <span class="font-label-md text-label-md text-on-surface-variant group-hover:text-on-surface transition-colors">Recordarme</span>
                         </label>
                         <a class="font-label-md text-label-md text-primary hover:text-primary-container underline transition-colors font-semibold" href="#">
-                            �Olvid� su contrase�a?
+                            ¿Olvidó su contraseña?
                         </a>
                     </div>
                     <!-- Primary Action -->
                     <button class="w-full mt-stack-md py-3.5 bg-primary-container text-on-primary rounded-xl font-label-md text-[16px] font-bold shadow-md hover:shadow-lg hover:bg-primary transition-all active:scale-[0.98] flex items-center justify-center gap-2" type="submit">
-                        Iniciar Sesi�n
+                        Iniciar Sesión
                         <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
                     </button>
                 </form>
                 <!-- Secondary Actions -->
                 <div class="pt-stack-md border-t border-outline-variant/50 text-center w-full">
                     <p class="font-body-md text-body-md text-on-surface-variant">
-                        �No tiene cuenta? 
+                        ¿No tiene cuenta? 
                         <a class="font-label-md text-label-md text-primary font-bold hover:underline transition-all" href="#">Solicitar acceso</a>
                     </p>
                 </div>

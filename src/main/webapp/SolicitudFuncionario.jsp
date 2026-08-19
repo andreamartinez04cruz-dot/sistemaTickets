@@ -2,7 +2,7 @@
 <html lang="es">
     <head>
         <%@ page import="java.util.List" %>
-        <%@ page import="co.edu.sena.mesaayuda.modelo.Categoria" %>
+        <%@ page import="co.edu.sena.mesa.modelo.Categoria" %>
         <meta charset="utf-8">
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <title>SENA Help Desk - Registrar Requerimiento Administrativo</title>

@@ -120,7 +120,7 @@
     </head>
     <%@ page import="java.sql.*, java.util.*" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ page import="co.edu.sena.mesaayuda.servicio.notificacion.Notificador, co.edu.sena.mesaayuda.servicio.notificacion.NotificadorEnAplicacion, co.edu.sena.mesaayuda.servicio.notificacion.NotificacionService, co.edu.sena.mesaayuda.servicio.notificacion.NotificacionServiceImpl" %>
+<%@ page import="co.edu.sena.mesa.servicio.notificacion.Notificador, co.edu.sena.mesa.servicio.notificacion.NotificadorEnAplicacion, co.edu.sena.mesa.servicio.notificacion.NotificacionService, co.edu.sena.mesa.servicio.notificacion.NotificacionServiceImpl" %>
 <%
     List<Map<String, Object>> ticketsAsignados = new ArrayList<>();
     int totalAsignados = 0;
@@ -148,7 +148,7 @@
     };
 
     if ("POST".equalsIgnoreCase(request.getMethod()) && sesion != null && sesion.getAttribute("usuario") != null) {
-        co.edu.sena.mesaayuda.modelo.Usuario usuarioActual = (co.edu.sena.mesaayuda.modelo.Usuario) sesion.getAttribute("usuario");
+        co.edu.sena.mesa.modelo.Usuario usuarioActual = (co.edu.sena.mesa.modelo.Usuario) sesion.getAttribute("usuario");
         int idUsuarioActual = usuarioActual.getId();
         String idTicketParam = request.getParameter("idTicket");
         String accion = request.getParameter("accion");
@@ -175,10 +175,19 @@
                                     int filas = updatePs.executeUpdate();
                                     if (filas > 0) {
                                         mensajeEstado = "Ticket resuelto correctamente y guardado en la base de datos.";
-                                        notificacionService.notificarTicketResuelto(
-                                            usuarioActual.getCorreo() != null ? usuarioActual.getCorreo() : "agente@local",
-                                            idTicket
-                                        );
+                                        String correoSolicitante = null;
+                                        try (PreparedStatement correoPs = cn.prepareStatement(
+                                                "SELECT u.correo FROM ticket t JOIN usuario u ON u.id = t.idUsuario WHERE t.id = ?")) {
+                                            correoPs.setInt(1, idTicket);
+                                            try (ResultSet correoRs = correoPs.executeQuery()) {
+                                                if (correoRs.next()) {
+                                                    correoSolicitante = correoRs.getString("correo");
+                                                }
+                                            }
+                                        }
+                                        if (correoSolicitante != null && !correoSolicitante.trim().isEmpty()) {
+                                            notificacionService.notificarTicketResuelto(correoSolicitante, idTicket);
+                                        }
                                     } else {
                                         mensajeEstado = "No se pudo resolver el ticket.";
                                     }
@@ -193,11 +202,19 @@
                                         int filas = updatePs.executeUpdate();
                                         if (filas > 0) {
                                             mensajeEstado = "Estado actualizado correctamente y guardado en la base de datos.";
-                                            notificacionService.notificarCambioEstado(
-                                                usuarioActual.getCorreo() != null ? usuarioActual.getCorreo() : "agente@local",
-                                                idTicket,
-                                                estado
-                                            );
+                                            String correoSolicitante = null;
+                                            try (PreparedStatement correoPs = cn.prepareStatement(
+                                                    "SELECT u.correo FROM ticket t JOIN usuario u ON u.id = t.idUsuario WHERE t.id = ?")) {
+                                                correoPs.setInt(1, idTicket);
+                                                try (ResultSet correoRs = correoPs.executeQuery()) {
+                                                    if (correoRs.next()) {
+                                                        correoSolicitante = correoRs.getString("correo");
+                                                    }
+                                                }
+                                            }
+                                            if (correoSolicitante != null && !correoSolicitante.trim().isEmpty()) {
+                                                notificacionService.notificarCambioEstado(correoSolicitante, idTicket, estado);
+                                            }
                                         } else {
                                             mensajeEstado = "No se pudo actualizar el estado.";
                                         }
@@ -220,7 +237,7 @@
     }
 
     if (sesion != null && sesion.getAttribute("usuario") != null) {
-        co.edu.sena.mesaayuda.modelo.Usuario usuarioActual = (co.edu.sena.mesaayuda.modelo.Usuario) sesion.getAttribute("usuario");
+        co.edu.sena.mesa.modelo.Usuario usuarioActual = (co.edu.sena.mesa.modelo.Usuario) sesion.getAttribute("usuario");
         int idUsuarioActual = usuarioActual.getId();
 
         String sql = "SELECT t.id, t.titulo, t.estado, c.nombre AS categoria, pr.tipoPrioridad AS prioridad, "

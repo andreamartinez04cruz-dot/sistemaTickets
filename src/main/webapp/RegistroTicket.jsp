@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ page import="co.edu.sena.mesaayuda.servicio.TicketService" %>
-<%@ page import="co.edu.sena.mesaayuda.modelo.Categoria" %>
+<%@ page import="co.edu.sena.mesa.servicio.TicketService" %>
+<%@ page import="co.edu.sena.mesa.modelo.Categoria" %>
 <%@ page import="java.util.List" %>
 <%
     List<Categoria> categorias = (List<Categoria>) request.getAttribute("categorias");

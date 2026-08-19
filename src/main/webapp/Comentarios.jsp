@@ -426,7 +426,7 @@
 
                 <div class="md:col-span-4">
                     <c:choose>
-                        <c:when test="${ticket.estado == 'RESUELTO' || ticket.estado == 'CERRADO' || ticket.estado == 'CANCELADO'}">
+                        <c:when test="${(ticket.estado == 'RESUELTO' || ticket.estado == 'CERRADO' || ticket.estado == 'CANCELADO') && !personalMesaAyuda}">
                             <div class="bg-gray-50 rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6 text-center text-slate-500">
                                 <span class="material-symbols-outlined text-4xl text-slate-400 mb-2">lock</span>
                                 <h4 class="text-lg font-bold text-gray-800">Sección Bloqueada</h4>
