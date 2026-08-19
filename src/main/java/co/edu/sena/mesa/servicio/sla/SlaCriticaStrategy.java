@@ -10,4 +10,7 @@ public class SlaCriticaStrategy implements CalcularPrioridad {
     public int calcularHorasMaximas() {
         return 4; // 4 horas
     }
+    public int obtenerIdPrioridad () {
+        return 4;
+    }
 }

@@ -13,8 +13,7 @@
                 int idTicket = Integer.parseInt(idTicketStr);
                 Usuario usuarioActual = (sesionActual != null) ? (Usuario) sesionActual.getAttribute("usuario") : null;
                 if (usuarioActual != null) {
-                    try (Connection cn = ConexionBD.obtenerConexion();
-                         PreparedStatement ps = cn.prepareStatement("UPDATE ticket SET estado = 'CERRADO' WHERE id = ? AND idUsuario = ? AND estado = 'RESUELTO'")) {
+                    try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement("UPDATE ticket SET estado = 'CERRADO' WHERE id = ? AND idUsuario = ? AND estado = 'RESUELTO'")) {
                         ps.setInt(1, idTicket);
                         ps.setInt(2, usuarioActual.getId());
                         ps.executeUpdate();
@@ -29,8 +28,7 @@
     if (sesionActual != null && sesionActual.getAttribute("usuario") != null) {
         Usuario usuarioActual = (Usuario) sesionActual.getAttribute("usuario");
         String sql = "SELECT id, titulo, estado FROM ticket WHERE idUsuario = ? ORDER BY id DESC";
-        try (Connection cn = ConexionBD.obtenerConexion();
-             PreparedStatement ps = cn.prepareStatement(sql)) {
+        try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement(sql)) {
             ps.setInt(1, usuarioActual.getId());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -106,7 +104,7 @@
             </aside>
 
             <!-- Main Content Area -->
-            <main class="flex-1 w-full p-8 md:p-12 pb-20">
+            <main class="flex-1 w-full p-8 md:p-12 pb-12">
                 <!-- Header Section -->
                 <div class="mb-6">
                     <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">Notificaciones</h1>
@@ -191,26 +189,6 @@
                 </div>
             </main>
         </div>
-
-        <!-- BottomNavBar (Mobile) -->
-        <nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 bg-white border-t border-gray-200 z-50">
-            <a class="flex flex-col items-center justify-center text-gray-600 py-1 hover:text-green-700 w-16" href="#">
-                <span class="material-symbols-outlined">home</span>
-                <span class="text-[10px] mt-0.5">Inicio</span>
-            </a>
-            <a class="flex flex-col items-center justify-center text-gray-600 py-1 hover:text-green-700 w-16" href="#">
-                <span class="material-symbols-outlined">add_circle</span>
-                <span class="text-[10px] mt-0.5">Nuevo</span>
-            </a>
-            <a class="flex flex-col items-center justify-center text-green-700 font-semibold py-1 w-16" href="#">
-                <span class="material-symbols-outlined">notifications</span>
-                <span class="text-[10px] mt-0.5">Notificaciones</span>
-            </a>
-            <a class="flex flex-col items-center justify-center text-gray-600 py-1 hover:text-green-700 w-16" href="#">
-                <span class="material-symbols-outlined">settings</span>
-                <span class="text-[10px] mt-0.5">Ajustes</span>
-            </a>
-        </nav>
 
     </body>
 </html>

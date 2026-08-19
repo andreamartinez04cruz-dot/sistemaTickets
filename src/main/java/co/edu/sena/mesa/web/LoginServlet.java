@@ -5,6 +5,7 @@ import co.edu.sena.mesa.modelo.Usuario;
 import co.edu.sena.mesa.repositorio.UsuarioRepository;
 import co.edu.sena.mesa.repositorio.UsuarioRepositoryJdbc;
 import co.edu.sena.mesa.servicio.UsuarioService;
+import co.edu.sena.mesa.servicio.UsuarioServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,7 +27,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     public void init() {
         UsuarioRepository usuarioRepository = new UsuarioRepositoryJdbc();
-        usuarioService = new UsuarioService(usuarioRepository);
+        usuarioService = new UsuarioServiceImpl(usuarioRepository);
     }
 
     @Override
@@ -109,10 +110,10 @@ public class LoginServlet extends HttpServlet {
                     redirectUrl = request.getContextPath() + "/AgenteTickets.jsp";
                 } else if (esAprendiz) {
                     rolUsuario = "APRENDIZ";
-                    redirectUrl = request.getContextPath() + "/RegistroTicket.jsp";
+                    redirectUrl = request.getContextPath() + "/tickets/registrar";
                 } else if (esFuncionario) {
                     rolUsuario = "FUNCIONARIO";
-                    redirectUrl = request.getContextPath() + "/SolicitudFuncionario.jsp";
+                    redirectUrl = request.getContextPath() + "/tickets/registrar/Funcionario";
                 }
             }
         }

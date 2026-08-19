@@ -12,16 +12,12 @@ public class DashboardRepositoryJdbc implements DashboardRepository {
     @Override
     public DashboardEstadisticasDTO obtenerEstadisticasAdministrador() {
         DashboardEstadisticasDTO dto = new DashboardEstadisticasDTO();
-
         String sql = "SELECT "
                 + "(SELECT COUNT(*) FROM ticket WHERE MONTH(fechaCreacion) = MONTH(CURRENT_DATE()) AND YEAR(fechaCreacion) = YEAR(CURRENT_DATE())) AS total_tickets_mes, "
-                + "(SELECT COUNT(*) FROM ticket t LEFT JOIN ticketagente ta ON ta.idTicket = t.id WHERE ta.idTicket IS NULL AND UPPER(COALESCE(t.estado, '')) NOT IN ('CERRADO', 'CANCELADO')) AS sin_asignar, "
+                + "(SELECT COUNT(*) FROM ticket t LEFT JOIN ticketusuario tu ON tu.idTicket = t.id WHERE tu.idTicket IS NULL AND UPPER(COALESCE(t.estado, '')) NOT IN ('CERRADO', 'CANCELADO')) AS sin_asignar, "
                 + "(SELECT COUNT(*) FROM ticket t INNER JOIN prioridad p ON p.id = t.idPrioridad WHERE (UPPER(COALESCE(p.tipoPrioridad, '')) LIKE '%ALTA%' OR UPPER(COALESCE(p.tipoPrioridad, '')) LIKE '%CRITICA%' OR UPPER(COALESCE(p.tipoPrioridad, '')) LIKE '%CRÍTICA%' OR UPPER(COALESCE(p.tipoPrioridad, '')) LIKE '%URGENTE%') AND UPPER(COALESCE(t.estado, '')) NOT IN ('CERRADO', 'CANCELADO')) AS criticos, "
                 + "(SELECT COUNT(*) FROM ticket WHERE UPPER(COALESCE(estado, '')) = 'CERRADO' AND DATE(fechaCreacion) = CURDATE()) AS cerrados_hoy";
-
-        try (Connection cn = ConexionBD.obtenerConexion();
-             PreparedStatement ps = cn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
                 dto.setTotalTicketsMes(rs.getInt("total_tickets_mes"));

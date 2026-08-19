@@ -29,9 +29,29 @@
             <span class="px-3 text-xs font-semibold tracking-wider text-zinc-400 uppercase mb-1">Menú Principal</span>
 
             <c:choose>
-                <%-- 1. APRENDIZ / FUNCIONARIO --%>
-                <c:when test="${rolActual == 'APRENDIZ' || rolActual == 'FUNCIONARIO'}">
+                <%-- 1. APRENDIZ  --%>
+                <c:when test="${rolActual == 'APRENDIZ'}">
                     <a href="${pageContext.request.contextPath}/tickets/registrar" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">add_circle</span>
+                        <span>Crear Solicitud</span>
+                    </a>
+
+                    <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">confirmation_number</span>
+                        <span>Mis Solicitudes</span>
+                    </a>
+
+                    <a href="${pageContext.request.contextPath}/Notificaciones.jsp" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">notifications</span>
+                        <span>Notificaciones</span>
+                    </a>
+                </c:when>
+                <%-- FUNCIONARIO --%>
+               <c:when test="${rolActual == 'FUNCIONARIO'}">
+                    <a href="${pageContext.request.contextPath}/tickets/registrar/Funcionarior" 
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">add_circle</span>
                         <span>Crear Solicitud</span>
@@ -68,16 +88,24 @@
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">task_alt</span>
                         <span>Historial</span>
+
+                    <a href="${pageContext.request.contextPath}/historial-resueltos.jsp" 
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">task_alt</span>
+                        <span>Resueltos</span>
                     </a>
                 </c:when>
 
                 <%-- 3. ADMIN --%>
                 <c:when test="${rolActual == 'ADMIN'}">
                     <a href="${pageContext.request.contextPath}/admin/tickets" 
+
+                    <a href="${pageContext.request.contextPath}/AdminTickets.jsp" 
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">confirmation_number</span>
                         <span>Gestión de Tickets</span>
                     </a>
+
 
                     <a href="${pageContext.request.contextPath}/admin/reasignar-agentes" 
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
@@ -92,6 +120,8 @@
                     </a>
 
                     <a href="${pageContext.request.contextPath}/admin/usuarios" 
+
+                    <a href="${pageContext.request.contextPath}/usuarios.jsp" 
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">group</span>
                         <span>Gestión Usuarios</span>

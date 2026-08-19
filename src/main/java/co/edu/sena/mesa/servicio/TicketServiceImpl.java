@@ -11,6 +11,8 @@ import co.edu.sena.mesa.modelo.Prioridad;
 import co.edu.sena.mesa.modelo.Ticket;
 import co.edu.sena.mesa.modelo.Usuario;
 import co.edu.sena.mesa.repositorio.TicketRepository;
+import co.edu.sena.mesa.servicio.sla.CalcularPrioridad;
+import co.edu.sena.mesa.servicio.sla.SlaService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,20 +39,28 @@ public class TicketServiceImpl implements TicketService {
     public void RegistrarTicket(
             TicketDTO dto,
             Categoria categoria,
-            Prioridad prioridad,
-            Usuario solicitante) {
+            Usuario solicitante,
+            SlaService slaService){
 
-        Ticket ticket = ticketMapper.toEntity(
-                dto,
-                categoria,
-                prioridad,
-                solicitante
-        );
+        // 1. Aplicar el Patrón Strategy usando el SlaService (Cero if/else)
+        CalcularPrioridad estrategiaSla = slaService.obtenerEstrategia(String.valueOf(categoria.getId()));
+        String prioridadCalculada = estrategiaSla.determinarPrioridad();
+        int idPrioridad = estrategiaSla.obtenerIdPrioridad();
 
-        ticketRepository.TicketFuncionario(
-                ticket,
-                solicitante.getId()
-        );
+        // 2. Completar los datos faltantes en el DTO
+        dto.setIdPrioridad(idPrioridad);
+        dto.setPrioridadNombre(prioridadCalculada);
+
+        // 3. Crear la entidad Prioridad con los datos calculados por la estrategia
+        Prioridad prioridad = new Prioridad();
+        prioridad.setId(idPrioridad);
+        prioridad.setNombre(prioridadCalculada);
+
+        // 4. Mapear a la entidad de base de datos
+        Ticket ticket = ticketMapper.toEntity(dto, categoria, prioridad, solicitante);
+
+        // 5. Guardar mediante el repositorio
+        ticketRepository.TicketFuncionario(ticket, solicitante.getId());
     }
 
     //Lista de categorias
@@ -106,5 +116,8 @@ public class TicketServiceImpl implements TicketService {
 
         // 2. Mapeas el objeto Ticket a TicketDTO para enviar a la vista
         return TicketMapper.ToDTO(ticket);
+
     }
+
+    //Mostrar la prioridad del ticket
 }

@@ -15,24 +15,34 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
     public List<AdminTicketDTO> listarTicketsAprendiz() {
         List<AdminTicketDTO> lista = new ArrayList<>();
 
-        String sql = "SELECT t.id, t.titulo, t.descripcion, CONCAT(u.nombre, ' ', u.apellido) AS nombre_aprendiz, "
-            + "t.programa AS programa, t.numeroPrograma AS numero_programa, "
-            + "t.instructor AS nombre_instructor, '' AS apellido_instructor, "
-            + "c.nombre AS categoria, pr.tipoPrioridad AS prioridad, t.estado, "
-            + "'APRENDIZ' AS tipo_persona, 'No definida' AS jornada "
-            + "FROM ticket t "
-            + "JOIN usuario u ON u.id = t.idUsuario "
-            + "LEFT JOIN categoria c ON c.id = t.idCategoria "
-            + "LEFT JOIN prioridad pr ON pr.id = t.idPrioridad "
-            + "WHERE EXISTS (SELECT 1 FROM rolusuario ru "
-            + "INNER JOIN rol r ON r.id = ru.idRol "
-            + "WHERE ru.idUsuario = u.id "
-            + "AND LOWER(TRIM(r.tipoRol)) LIKE '%aprendiz%') "
+        String sql = "SELECT t.id, t.titulo, t.descripcion, "
+                + "u.nombre AS nombre_aprendiz, "
+                + "p.nombrePrograma AS programa, "
+                + "p.numeroFicha AS numero_programa, "
+                + "i.nombre AS nombre_instructor, "
+                + "i.apellido AS apellido_instructor, "
+                + "c.nombre AS categoria, "
+                + "pr.tipoPrioridad AS prioridad, "
+                + "t.estado, "
+                + "'APRENDIZ' AS tipo_persona, "
+                + "COALESCE(t.jornada, 'No definida') AS jornada "
+                + "FROM ticket t "
+                + "JOIN ticketusuario tu ON tu.idTicket = t.id "
+                + "JOIN usuario u ON u.id = tu.idUsuario "
+                + "LEFT JOIN categoria c ON c.id = t.idCategoria "
+                + "LEFT JOIN prioridad pr ON pr.id = t.idPrioridad "
+                + "LEFT JOIN usuarioprograma up ON up.idUsuario = u.id "
+                + "LEFT JOIN programa p ON p.id = up.idPrograma "
+                + "LEFT JOIN instructor i ON i.id = p.idInstructor "
+                + "WHERE EXISTS ("
+                + "    SELECT 1 FROM rolusuario ru "
+                + "    INNER JOIN rol r ON r.id = ru.idRol "
+                + "    WHERE ru.idUsuario = u.id "
+                + "    AND LOWER(TRIM(r.tipoRol)) LIKE '%aprendiz%'"
+                + ") "
                 + "ORDER BY t.id DESC";
 
-        try (Connection cn = ConexionBD.obtenerConexion();
-             PreparedStatement ps = cn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 AdminTicketDTO dto = new AdminTicketDTO();
@@ -66,24 +76,27 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
     public List<AdminTicketDTO> listarTicketsFuncionario() {
         List<AdminTicketDTO> lista = new ArrayList<>();
 
-        String sql = "SELECT DISTINCT t.id, t.titulo, t.descripcion, CONCAT(u.nombre, ' ', u.apellido) AS nombre_funcionario, COALESCE(r.tipoRol, 'SIN ROL') AS rol, "
+        String sql = "SELECT DISTINCT t.id, t.titulo, t.descripcion, "
+                + "u.nombre AS nombre_funcionario, "
+                + "COALESCE(r.tipoRol, 'SIN ROL') AS rol, "
                 + "c.nombre AS categoria, pr.tipoPrioridad AS prioridad, t.estado, "
                 + "'FUNCIONARIO' AS tipo_persona, 'No definida' AS jornada "
                 + "FROM ticket t "
-                + "JOIN usuario u ON u.id = t.idUsuario "
+                + "JOIN ticketusuario tu ON tu.idTicket = t.id "
+                + "JOIN usuario u ON u.id = tu.idUsuario "
                 + "LEFT JOIN rolusuario ru ON ru.idUsuario = u.id "
                 + "LEFT JOIN rol r ON r.id = ru.idRol "
                 + "LEFT JOIN categoria c ON c.id = t.idCategoria "
                 + "LEFT JOIN prioridad pr ON pr.id = t.idPrioridad "
-                + "WHERE NOT EXISTS (SELECT 1 FROM rolusuario ruAprendiz "
-                + "INNER JOIN rol rAprendiz ON rAprendiz.id = ruAprendiz.idRol "
-                + "WHERE ruAprendiz.idUsuario = u.id "
-                + "AND LOWER(TRIM(rAprendiz.tipoRol)) LIKE '%aprendiz%') "
+                + "WHERE NOT EXISTS ("
+                + "    SELECT 1 FROM rolusuario ruAprendiz "
+                + "    INNER JOIN rol rAprendiz ON rAprendiz.id = ruAprendiz.idRol "
+                + "    WHERE ruAprendiz.idUsuario = u.id "
+                + "    AND LOWER(TRIM(rAprendiz.tipoRol)) LIKE '%aprendiz%'"
+                + ") "
                 + "ORDER BY t.id DESC";
 
-        try (Connection cn = ConexionBD.obtenerConexion();
-             PreparedStatement ps = cn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 AdminTicketDTO dto = new AdminTicketDTO();

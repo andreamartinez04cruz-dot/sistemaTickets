@@ -10,4 +10,7 @@ public class SlaMediaStrategy implements CalcularPrioridad {
     public int calcularHorasMaximas() {
         return 24; // 1 día
     }
+    public int obtenerIdPrioridad () {
+        return 2;
+    }
 }

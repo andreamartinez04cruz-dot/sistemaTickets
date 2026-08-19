@@ -7,6 +7,7 @@ import co.edu.sena.mesa.modelo.Categoria;
 import co.edu.sena.mesa.modelo.Prioridad;
 import co.edu.sena.mesa.modelo.Ticket;
 import co.edu.sena.mesa.modelo.Usuario;
+import co.edu.sena.mesa.servicio.sla.SlaService;
 import java.util.List;
 
 public interface TicketService {
@@ -18,8 +19,8 @@ public interface TicketService {
     void RegistrarTicket(
             TicketDTO dto,
             Categoria categoria,
-            Prioridad prioridad,
-            Usuario solicitante
+            Usuario solicitante,
+            SlaService slaService
     );
     
     //lISTA DE CATEGORIAS

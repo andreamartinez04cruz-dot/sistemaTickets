@@ -19,7 +19,7 @@ public interface TicketRepository {
     //COMKENTARIO
     void guardar(Comentario comentario, int idTicket);
     List<Comentario> obtenerComentariosPorTicket(int idTicket);
-    
+   
     //obtener id
     Ticket obtenerPorId(int idTicket);
 

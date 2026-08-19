@@ -11,5 +11,8 @@ public class SlaBajaStrategy implements CalcularPrioridad{
     public int calcularHorasMaximas() {
         return 72; // 3 días de SLA
     }
+    public int obtenerIdPrioridad () {
+        return 1;
+    }
     
 }

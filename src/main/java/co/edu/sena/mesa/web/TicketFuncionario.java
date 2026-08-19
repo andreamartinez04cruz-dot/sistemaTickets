@@ -8,8 +8,6 @@ import co.edu.sena.mesa.modelo.Usuario;
 import co.edu.sena.mesa.servicio.TicketService;
 import co.edu.sena.mesa.servicio.sla.CalcularPrioridad;
 import co.edu.sena.mesa.servicio.sla.SlaService;
-
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -21,8 +19,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-@WebServlet("/tickets/registrar")
-public class TicketServlet extends HttpServlet {
+@WebServlet("/tickets/registrar/Funcionario")
+public class TicketFuncionario extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
@@ -39,32 +37,6 @@ public class TicketServlet extends HttpServlet {
     private TicketService ticketService;
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        HttpSession session = request.getSession(false);
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
-
-        if (usuario == null) {
-            response.sendRedirect(request.getContextPath() + "/iniciosesion.jsp");
-            return;
-        }
-
-        String action = request.getParameter("action");
-        if ("historial".equalsIgnoreCase(action)) {
-            List<HistorialFuncionarioDTO> tickets = ticketService.listarTicketsPorSolicitante(usuario.getId());
-            request.setAttribute("tickets", tickets);
-            request.getRequestDispatcher("/MisSolicitudes.jsp").forward(request, response);
-            return;
-        }
-
-        List<Categoria> categorias = ticketService.ListarCategorias();
-        request.setAttribute("categorias", categorias);
-        request.getRequestDispatcher("/RegistroTicket.jsp").forward(request, response);
-    }
-
-    @Override
-        // 1. Captura de datos del formulario
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // 1. Obtener los parámetros del formulario
         String titulo = request.getParameter("titulo");
@@ -72,28 +44,10 @@ public class TicketServlet extends HttpServlet {
         String categoriaNombre = request.getParameter("categoria");
         int idCategoria = Integer.parseInt(request.getParameter("idCategoria"));
 
-        String programa = request.getParameter("programa");
-        String numeroPrograma = request.getParameter("numeroPrograma");
-        String instructor = request.getParameter("instructor");
-        String jornada = request.getParameter("jornada");
-
-        // Si categoriaNombre no viene, lo buscamos usando idCategoria
-        if (categoriaNombre == null || categoriaNombre.trim().isEmpty()) {
-            List<Categoria> categorias = ticketService.ListarCategorias();
-            if (categorias != null) {
-                for (Categoria cat : categorias) {
-                    if (cat.getId() == idCategoria) {
-                        categoriaNombre = cat.getNombre();
-                        break;
-                    }
-                }
-            }
-        }
-       
         // 2. Obtener el SlaService del contexto de la aplicación (configurado en el AppContextListener)
         SlaService slaService = (SlaService) getServletContext().getAttribute("slaService");
 
-   
+        // 3. Aplicar el Patrón Strategy sin condicionales usando el SlaService
         CalcularPrioridad estrategiaSla = slaService.obtenerEstrategia(String.valueOf(idCategoria));
         String prioridadCalculada = estrategiaSla.determinarPrioridad();
         int idPrioridad = estrategiaSla.obtenerIdPrioridad(); // ID directo de la BD
@@ -115,10 +69,6 @@ public class TicketServlet extends HttpServlet {
         dto.setIdSolicitante(solicitante.getId());
         dto.setIdPrioridad(idPrioridad);
         dto.setPrioridadNombre(prioridadCalculada);
-        dto.setPrograma(programa);
-        dto.setNumeroPrograma(numeroPrograma);
-        dto.setInstructor(instructor);
-        dto.setJornada(jornada);
 
         // 6. Preparar las entidades requeridas por el servicio
         Categoria categoria = new Categoria();
@@ -132,28 +82,6 @@ public class TicketServlet extends HttpServlet {
         // 7. Llamar al servicio con los 4 parámetros clásicos
         ticketService.RegistrarTicket(dto, categoria, solicitante, slaService);
 
-        // 8. Respuesta al usuario (SweetAlert)
-        String redirectUrl = request.getContextPath() + "/SolicitudFuncionario.jsp";
-        
-        // Comprobar rol de aprendiz usando rolUsuario en sesión o los roles de solicitante
-        String rolUsuarioPost = (session != null) ? (String) session.getAttribute("rolUsuario") : "";
-        if ((rolUsuarioPost == null || rolUsuarioPost.isEmpty()) && solicitante != null) {
-            List<co.edu.sena.mesa.modelo.Rol> roles = solicitante.getRoles();
-            if (roles != null) {
-                for (co.edu.sena.mesa.modelo.Rol rol : roles) {
-                    String nombreRol = (rol != null && rol.getTiporol() != null) ? rol.getTiporol().toUpperCase() : "";
-                    if (nombreRol.contains("APRENDIZ")) {
-                        rolUsuarioPost = "APRENDIZ";
-                        break;
-                    }
-                }
-            }
-        }
-        
-        if ("APRENDIZ".equals(rolUsuarioPost)) {
-            redirectUrl = request.getContextPath() + "/RegistroTicket.jsp";
-        }
-
         // 8. Respuesta de éxito con SweetAlert
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
@@ -163,7 +91,41 @@ public class TicketServlet extends HttpServlet {
         out.println("Swal.fire({ icon: 'success', title: '¡Ticket registrado!', "
                 + "text: 'Se ha asignado prioridad: " + dto.getPrioridadNombre() + "', "
                 + "confirmButtonText: 'Aceptar' }).then(() => { "
-                + "window.location.href = '" + redirectUrl + "'; });");
+                + "window.location.href = '" + request.getContextPath() + "/tickets/registrar'; });");
         out.println("</script></body></html>");
+    }
+
+    @Override
+    protected void doGet(
+            HttpServletRequest request,
+            HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String action = request.getParameter("action");
+
+        // HISTORIAL DE SOLICITUDES
+        if ("historial".equals(action)) {
+
+            HttpSession session = request.getSession(false);
+            Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuario") : null;
+
+            if (usuario == null) {
+                response.sendRedirect(request.getContextPath() + "/iniciosesion.jsp");
+                return;
+            }
+
+            List<HistorialFuncionarioDTO> tickets = ticketService.listarTicketsPorSolicitante((int) usuario.getId());
+            request.setAttribute("tickets", tickets);
+
+            // REDIRIGE AL JSP CORRESPONDIENTE
+            request.getRequestDispatcher("/MisSolicitudes.jsp").forward(request, response);
+
+        } else {
+            // FORMULARIO DE NUEVA SOLICITUD
+            List<Categoria> categorias = ticketService.ListarCategorias();
+            request.setAttribute("categorias", categorias);
+
+            request.getRequestDispatcher("/SolicitudFuncionario.jsp").forward(request, response);
+        }
     }
 }

@@ -1,5 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="jakarta.tags.core" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!DOCTYPE html>
 <html class="light" lang="es">
@@ -13,7 +13,6 @@
         <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-        <link href="${pageContext.request.contextPath}/css/styles-global.css" rel="stylesheet"/>
 
         <!-- Tailwind CSS -->
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>

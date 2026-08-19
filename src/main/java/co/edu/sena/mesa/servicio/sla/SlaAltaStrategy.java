@@ -1,6 +1,7 @@
 package co.edu.sena.mesa.servicio.sla;
 
 public class SlaAltaStrategy implements CalcularPrioridad {
+
     @Override
     public String determinarPrioridad() {
         return "ALTA";
@@ -9,5 +10,9 @@ public class SlaAltaStrategy implements CalcularPrioridad {
     @Override
     public int calcularHorasMaximas() {
         return 8; // 8 horas
+    }
+
+    public int obtenerIdPrioridad() {
+        return 3;
     }
 }
