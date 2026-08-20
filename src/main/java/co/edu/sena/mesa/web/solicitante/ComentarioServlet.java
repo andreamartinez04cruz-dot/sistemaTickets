@@ -1,9 +1,9 @@
-package co.edu.sena.mesa.web;
+package co.edu.sena.mesa.web.solicitante;
 
 import co.edu.sena.mesa.dto.ComentarioDTO;
 import co.edu.sena.mesa.dto.TicketDTO;
 import co.edu.sena.mesa.modelo.Usuario;
-import co.edu.sena.mesa.servicio.TicketService;
+import co.edu.sena.mesa.servicio.solicitante.SolicitanteTicketService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,12 +16,12 @@ import java.util.List;
 @WebServlet("/tickets/comentar")
 public class ComentarioServlet extends HttpServlet {
 
-    private TicketService ticketService;
+    private SolicitanteTicketService ticketService;
 
     public void init() throws ServletException {
 
-        ticketService = (TicketService) getServletContext()
-                .getAttribute("ticketService");
+        ticketService = (SolicitanteTicketService) getServletContext()
+            .getAttribute("solicitanteTicketService");
 
         if (ticketService == null) {
             throw new ServletException(
@@ -49,6 +49,14 @@ public class ComentarioServlet extends HttpServlet {
 
         if (idTicketStr != null && texto != null && !texto.trim().isEmpty()) {
             int idTicket = Integer.parseInt(idTicketStr);
+            TicketDTO ticket = ticketService.obtenerPorId(idTicket);
+            String estadoTicket = ticket != null && ticket.getEstado() != null ? ticket.getEstado().trim().toUpperCase() : "";
+
+            if ("CERRADO".equals(estadoTicket) || "CANCELADO".equals(estadoTicket) || "RESUELTO".equals(estadoTicket)) {
+                request.getSession().setAttribute("mensajeExito", "No se pueden agregar comentarios porque este ticket ya está " + estadoTicket + ".");
+                response.sendRedirect(request.getContextPath() + "/tickets/comentar?id=" + idTicket);
+                return;
+            }
 
             // 3. Crear el DTO con la información
             ComentarioDTO dto = new ComentarioDTO();

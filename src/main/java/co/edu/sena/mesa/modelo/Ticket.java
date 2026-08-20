@@ -103,27 +103,7 @@ public class Ticket {
     }
 
     public String getEstadoNombre() {
-
-        if (estado instanceof EstadoNuevo) {
-            return "NUEVO";
-
-        } else if (estado instanceof EstadoAsignado) {
-            return "ASIGNADO";
-
-        } else if (estado instanceof EstadoEnProceso) {
-            return "EN_PROCESO";
-
-        } else if (estado instanceof EstadoResuelto) {
-            return "RESUELTO";
-
-        } else if (estado instanceof EstadoCerrado) {
-            return "CERRADO";
-
-        } else if (estado instanceof EstadoCancelado) {
-            return "CANCELADO";
-        }
-
-        return null;
+        return estado != null ? estado.getNombreEstado() : null;
     }
 
     public String getPrograma() {

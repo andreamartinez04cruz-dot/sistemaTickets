@@ -97,6 +97,22 @@
                         <tbody class="divide-y divide-gray-100">
                             <tr class="hover:bg-emerald-50/30 transition-colors">
                                 <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-cyan-500"></span> Agentes con tickets activos
+                                </td>
+                                <td class="px-6 py-4 text-center font-bold text-cyan-600">${estadisticasAdmin.agentesConTickets}</td>
+                                <td class="px-6 py-4 text-center">-</td>
+                                <td class="px-6 py-4 text-gray-500">Agentes con al menos un ticket activo asignado.</td>
+                            </tr>
+                            <tr class="hover:bg-emerald-50/30 transition-colors">
+                                <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-red-600"></span> SLA vencidos
+                                </td>
+                                <td class="px-6 py-4 text-center font-bold text-red-600">${estadisticasAdmin.slaVencidos}</td>
+                                <td class="px-6 py-4 text-center">-</td>
+                                <td class="px-6 py-4 text-gray-500">Tickets activos que superaron el tiempo máximo de su prioridad.</td>
+                            </tr>
+                            <tr class="hover:bg-emerald-50/30 transition-colors">
+                                <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
                                     <span class="w-3 h-3 rounded-full bg-blue-500"></span> Total de Casos (Mes)
                                 </td>
                                 <td class="px-6 py-4 text-center font-bold text-gray-900">${estadisticasAdmin.totalTicketsMes}</td>

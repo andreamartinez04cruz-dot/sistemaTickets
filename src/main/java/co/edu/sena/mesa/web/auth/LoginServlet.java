@@ -1,4 +1,4 @@
-package co.edu.sena.mesa.web;
+package co.edu.sena.mesa.web.auth;
 
 import co.edu.sena.mesa.modelo.Rol;
 import co.edu.sena.mesa.modelo.Usuario;
@@ -116,6 +116,11 @@ public class LoginServlet extends HttpServlet {
                     redirectUrl = request.getContextPath() + "/tickets/registrar/Funcionario";
                 }
             }
+        }
+
+        if (roles != null && roles.stream().anyMatch(r -> r != null && r.getTiporol() != null && r.getTiporol().toUpperCase(Locale.ROOT).contains("AGENTE"))) {
+            rolUsuario = "AGENTE";
+            redirectUrl = request.getContextPath() + "/AgenteTickets.jsp";
         }
 
         if ("SIN_ROL".equals(rolUsuario) && roles != null && !roles.isEmpty()) {

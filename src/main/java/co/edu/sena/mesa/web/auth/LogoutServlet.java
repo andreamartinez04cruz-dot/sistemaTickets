@@ -1,4 +1,4 @@
-package co.edu.sena.mesa.web;
+package co.edu.sena.mesa.web.auth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

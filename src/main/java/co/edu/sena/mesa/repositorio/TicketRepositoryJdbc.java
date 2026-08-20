@@ -71,12 +71,8 @@ public class TicketRepositoryJdbc implements TicketRepository {
 
         // 1. Añadimos el campo de prioridad en el INSERT (Asumiendo que tu columna se llama idPrioridad)
         String sqlTicket = "INSERT INTO ticket "
-                + "(titulo, descripcion, idCategoria, idPrioridad, estado, fechaCreacion) "
-                + "VALUES (?, ?, ?, ?, ?, ?)";
-
-        String sqlRelacion = "INSERT INTO ticketusuario "
-                + "(idTicket, idUsuario) "
-                + "VALUES (?, ?)";
+            + "(titulo, descripcion, idCategoria, idPrioridad, idUsuario, estado, fechaCreacion, jornada) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conexion = ConexionBD.obtenerConexion()) {
 
@@ -93,9 +89,11 @@ public class TicketRepositoryJdbc implements TicketRepository {
                 // 2. Insertamos la prioridad del ticket (Asegúrate de que tu objeto Ticket tenga un método para obtener el ID de la prioridad)
                 ps.setLong(4, ticket.getPrioridad().getId());
 
-                ps.setString(5, ticket.getEstadoNombre());
-                ps.setTimestamp(6,
+                ps.setLong(5, idSolicitante);
+                ps.setString(6, ticket.getEstadoNombre());
+                ps.setTimestamp(7,
                         java.sql.Timestamp.valueOf(ticket.getFechaCreacion()));
+                ps.setString(8, ticket.getJornada());
 
                 ps.executeUpdate();
 
@@ -109,19 +107,6 @@ public class TicketRepositoryJdbc implements TicketRepository {
 
                         System.out.println("ID TICKET: " + idTicket);
                         System.out.println("ID USUARIO: " + idSolicitante);
-
-                        try (PreparedStatement psRelacion
-                                = conexion.prepareStatement(sqlRelacion)) {
-
-                            psRelacion.setLong(1, idTicket);
-                            psRelacion.setLong(2, idSolicitante);
-
-                            psRelacion.executeUpdate();
-
-                            System.out.println(
-                                    "RELACION TICKET-USUARIO INSERTADA"
-                            );
-                        }
 
                         conexion.commit();
 
@@ -186,9 +171,8 @@ public class TicketRepositoryJdbc implements TicketRepository {
         String sql = "SELECT t.id, t.titulo, t.descripcion, t.estado, t.fechaCreacion, "
                 + "c.nombre AS categoria "
                 + "FROM ticket t "
-                + "INNER JOIN ticketusuario tu ON t.id = tu.idTicket "
                 + "INNER JOIN categoria c ON t.idCategoria = c.id "
-                + "WHERE tu.idUsuario = ?";
+                + "WHERE t.idUsuario = ?";
 
         try (Connection conn = ConexionBD.obtenerConexion(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -250,58 +234,19 @@ public class TicketRepositoryJdbc implements TicketRepository {
     //GUARDAR Y MOSTRAR COMENTARIOS
     @Override
     public void guardar(Comentario comentario, int idTicket) {
-        String sqlComentario = "INSERT INTO comentario (idUsuario, texto, fecha) VALUES (?, ?, ?)";
-        String sqlUpdateTicket = "UPDATE ticket SET idComentario = ? WHERE id = ?";
+        String sqlComentario = "INSERT INTO comentario (idUsuario, texto, fecha, idTicket) VALUES (?, ?, ?, ?)";
 
-        Connection conn = null;
-        try {
-            conn = ConexionBD.obtenerConexion();
-            // Desactivar autocommit para manejar una transacción segura
-            conn.setAutoCommit(false);
+        try (Connection conn = ConexionBD.obtenerConexion();
+             PreparedStatement psComentario = conn.prepareStatement(sqlComentario)) {
 
-            // 1. Insertar el comentario y obtener el ID generado
-            try (PreparedStatement psComentario = conn.prepareStatement(sqlComentario, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                psComentario.setInt(1, comentario.getUsuario().getId());
-                psComentario.setString(2, comentario.getTexto());
-                psComentario.setTimestamp(3, Timestamp.valueOf(comentario.getFecha()));
-                psComentario.executeUpdate();
-
-                // Recuperar el ID autogenerado del comentario
-                try (ResultSet rsKeys = psComentario.getGeneratedKeys()) {
-                    if (rsKeys.next()) {
-                        int idComentarioGenerado = rsKeys.getInt(1);
-
-                        // 2. Actualizar la tabla ticket con el idComentario
-                        try (PreparedStatement psUpdate = conn.prepareStatement(sqlUpdateTicket)) {
-                            psUpdate.setInt(1, idComentarioGenerado);
-                            psUpdate.setInt(2, idTicket);
-                            psUpdate.executeUpdate();
-                        }
-                    }
-                }
-            }
-
-            // Confirmar transacción
-            conn.commit();
+            psComentario.setInt(1, comentario.getUsuario().getId());
+            psComentario.setString(2, comentario.getTexto());
+            psComentario.setTimestamp(3, Timestamp.valueOf(comentario.getFecha()));
+            psComentario.setInt(4, idTicket);
+            psComentario.executeUpdate();
 
         } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback(); // Si algo falla, deshacemos los cambios
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
             e.printStackTrace();
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -309,12 +254,10 @@ public class TicketRepositoryJdbc implements TicketRepository {
     public List<Comentario> obtenerComentariosPorTicket(int idTicket) {
         List<Comentario> comentarios = new ArrayList<>();
 
-        // Si la relación ticket-comentario es por idComentario o idTicket:
         String sql = "SELECT c.id, c.texto, c.fecha, u.id AS id_usuario, u.nombre AS nombre_usuario "
-                + "FROM ticket t "
-                + "INNER JOIN comentario c ON t.idComentario = c.id "
+                + "FROM comentario c "
                 + "INNER JOIN usuario u ON c.idUsuario = u.id "
-                + "WHERE t.id = ? "
+                + "WHERE c.idTicket = ? "
                 + "ORDER BY c.fecha ASC";
         try (Connection conn = ConexionBD.obtenerConexion(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -329,8 +272,8 @@ public class TicketRepositoryJdbc implements TicketRepository {
                     comentario.setId(rs.getInt("id"));
                     comentario.setTexto(rs.getString("texto"));
 
-                    if (rs.getDate("fecha") != null) {
-                        comentario.setFecha(rs.getDate("fecha").toLocalDate().atStartOfDay());
+                    if (rs.getTimestamp("fecha") != null) {
+                        comentario.setFecha(rs.getTimestamp("fecha").toLocalDateTime());
                     }
                     comentario.setUsuario(usuario);
 
@@ -363,8 +306,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
                 + "u.nombre AS nombre_usuario, "
                 + "u.correo AS correo_usuario "
                 + "FROM ticket t "
-                + "LEFT JOIN ticketusuario tu ON t.id = tu.idTicket "
-                + "LEFT JOIN usuario u ON tu.idUsuario = u.id "
+                + "LEFT JOIN usuario u ON u.id = t.idUsuario "
                 + "LEFT JOIN categoria c ON t.idCategoria = c.id "
                 + "LEFT JOIN prioridad p ON t.idPrioridad = p.id "
                 + "WHERE t.id = ?";
@@ -487,5 +429,25 @@ public class TicketRepositoryJdbc implements TicketRepository {
         }
 
         return ticket;
+    }
+
+    @Override
+    public boolean cancelarTicketSolicitante(int idTicket, int idSolicitante) {
+        String sql = "UPDATE ticket "
+                + "SET estado = 'CANCELADO' "
+                + "WHERE id = ? "
+                + "AND idUsuario = ? "
+                + "AND REPLACE(UPPER(COALESCE(estado, '')), ' ', '_') "
+                + "NOT IN ('EN_PROCESO', 'CERRADO', 'RESUELTO', 'CANCELADO')";
+
+        try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, idTicket);
+            ps.setInt(2, idSolicitante);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

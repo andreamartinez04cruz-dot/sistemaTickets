@@ -3,6 +3,11 @@ package co.edu.sena.mesa.modelo.estado;
 public class EstadoNuevo implements EstadoTicket {
 
     @Override
+    public String getNombreEstado() {
+        return "NUEVO";
+    }
+
+    @Override
     public EstadoTicket asignar() {
         return new EstadoAsignado();
     }

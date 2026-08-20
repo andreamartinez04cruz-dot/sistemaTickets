@@ -57,7 +57,7 @@ CREATE TABLE `categoriausuario` (
   KEY `idCategoria` (`idCategoria`),
   CONSTRAINT `categoriausuario_ibfk_1` FOREIGN KEY (`idUsuario`) REFERENCES `usuario` (`id`),
   CONSTRAINT `categoriausuario_ibfk_2` FOREIGN KEY (`idCategoria`) REFERENCES `categoria` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -66,7 +66,7 @@ CREATE TABLE `categoriausuario` (
 
 LOCK TABLES `categoriausuario` WRITE;
 /*!40000 ALTER TABLE `categoriausuario` DISABLE KEYS */;
-INSERT INTO `categoriausuario` VALUES (1,3,1),(2,5,2),(3,6,3),(4,7,4),(5,8,5),(6,9,6),(7,10,7),(8,11,8),(9,12,9);
+INSERT INTO `categoriausuario` VALUES (1,3,1),(2,5,2),(3,6,3),(4,7,4),(5,8,5),(6,9,6),(7,10,7),(8,11,8),(9,12,9),(10,3,1),(11,3,2),(12,3,3),(13,3,4),(14,3,5);
 /*!40000 ALTER TABLE `categoriausuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -82,8 +82,9 @@ CREATE TABLE `comentario` (
   `idUsuario` int NOT NULL,
   `texto` varchar(500) NOT NULL,
   `fecha` date NOT NULL,
+  `idTicket` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -92,7 +93,7 @@ CREATE TABLE `comentario` (
 
 LOCK TABLES `comentario` WRITE;
 /*!40000 ALTER TABLE `comentario` DISABLE KEYS */;
-INSERT INTO `comentario` VALUES (1,4,'hjbhbhhu','2026-08-14'),(2,4,'hhyhh','2026-08-14'),(3,4,'holaaaa','2026-08-14'),(4,4,'vgggg','2026-08-14'),(5,4,'bbbb','2026-08-14'),(6,4,'es muy bueno','2026-08-14'),(7,4,'ghgh','2026-08-14'),(8,4,'okmml','2026-08-18'),(9,4,'hbjnkml','2026-08-18'),(10,4,'tfgtlk','2026-08-19'),(11,4,'jktlgmyñ','2026-08-19'),(12,1,'ghbjnk','2026-08-19');
+INSERT INTO `comentario` VALUES (1,4,'hjbhbhhu','2026-08-14',0),(2,4,'hhyhh','2026-08-14',0),(3,4,'holaaaa','2026-08-14',0),(4,4,'vgggg','2026-08-14',0),(5,4,'bbbb','2026-08-14',0),(6,4,'es muy bueno','2026-08-14',0),(7,4,'ghgh','2026-08-14',0),(8,4,'okmml','2026-08-18',0),(9,4,'hbjnkml','2026-08-18',0),(10,4,'tfgtlk','2026-08-19',0),(11,4,'jktlgmyñ','2026-08-19',0),(12,1,'ghbjnk','2026-08-19',0),(13,4,'vghbjnkml','2026-08-19',0),(14,1,'b nmk,','2026-08-19',0);
 /*!40000 ALTER TABLE `comentario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -237,21 +238,18 @@ CREATE TABLE `ticket` (
   `descripcion` text,
   `idCategoria` int NOT NULL,
   `idPrioridad` int DEFAULT NULL,
-  `idComentario` int DEFAULT NULL,
   `estado` varchar(20) NOT NULL,
   `fechaCreacion` datetime NOT NULL,
-  `programa` varchar(255) DEFAULT NULL,
-  `numeroPrograma` varchar(100) DEFAULT NULL,
-  `instructor` varchar(255) DEFAULT NULL,
   `jornada` varchar(50) DEFAULT NULL,
+  `idUsuario` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idCategoria` (`idCategoria`),
   KEY `idPrioridad` (`idPrioridad`),
-  KEY `idComentario` (`idComentario`),
+  KEY `fk_ticket_usuario` (`idUsuario`),
+  CONSTRAINT `fk_ticket_usuario` FOREIGN KEY (`idUsuario`) REFERENCES `usuario` (`id`),
   CONSTRAINT `ticket_ibfk_1` FOREIGN KEY (`idCategoria`) REFERENCES `categoria` (`id`),
-  CONSTRAINT `ticket_ibfk_2` FOREIGN KEY (`idPrioridad`) REFERENCES `prioridad` (`id`),
-  CONSTRAINT `ticket_ibfk_3` FOREIGN KEY (`idComentario`) REFERENCES `comentario` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `ticket_ibfk_2` FOREIGN KEY (`idPrioridad`) REFERENCES `prioridad` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -260,7 +258,7 @@ CREATE TABLE `ticket` (
 
 LOCK TABLES `ticket` WRITE;
 /*!40000 ALTER TABLE `ticket` DISABLE KEYS */;
-INSERT INTO `ticket` VALUES (2,'jkn','bhjhbbh',7,NULL,10,'NUEVO','2026-08-13 20:52:38',NULL,NULL,NULL,NULL),(3,'bhhhb','jrfhjefer',8,NULL,NULL,'NUEVO','2026-08-13 20:55:49',NULL,NULL,NULL,NULL),(4,'hgvhgtvh','n frcvhrfv',5,NULL,NULL,'NUEVO','2026-08-13 20:57:34',NULL,NULL,NULL,NULL),(5,'jhhbhb','uhhhb',8,NULL,NULL,'NUEVO','2026-08-13 21:01:36',NULL,NULL,NULL,NULL),(6,'bhjhb','grfrbrf',6,NULL,NULL,'NUEVO','2026-08-14 20:47:47',NULL,NULL,NULL,NULL),(7,'gvtgykuhhul','gbvuihuyftrdefgyhjkiuhyugtrfghbj',5,NULL,11,'NUEVO','2026-08-14 20:48:50',NULL,NULL,NULL,NULL),(8,'yugg','bhhygh',5,NULL,NULL,'NUEVO','2026-08-14 20:53:01',NULL,NULL,NULL,NULL),(9,'jnewdfjefjejrfn','jnefjnrfnearjk',6,NULL,NULL,'NUEVO','2026-08-14 20:53:53',NULL,NULL,NULL,NULL),(10,'hjuygctfyvhbujighj','tfyghujikl',4,NULL,NULL,'NUEVO','2026-08-14 20:54:06',NULL,NULL,NULL,NULL),(11,'yughjiokñ{','xdfcgjkml',9,NULL,NULL,'NUEVO','2026-08-14 20:54:17',NULL,NULL,NULL,NULL),(12,'cfdvcgyuuyh','fcfghyhujju',3,NULL,7,'NUEVO','2026-08-14 20:54:29',NULL,NULL,NULL,NULL),(15,'tfyyuyggh','vcvfghjkm',2,4,NULL,'NUEVO','2026-08-14 21:36:38',NULL,NULL,NULL,NULL),(16,'knj njmn','kjjknkj',4,1,8,'NUEVO','2026-08-18 17:12:37',NULL,NULL,NULL,NULL),(18,'ghgjblñ,kjn','fgvhbjl,',1,1,NULL,'NUEVO','2026-08-18 21:47:59',NULL,NULL,NULL,NULL),(19,'hgjkml','tfgyhujik',3,3,NULL,'NUEVO','2026-08-18 21:48:12',NULL,NULL,NULL,NULL),(20,'hjrefd','bnjmkdswaz',7,4,NULL,'NUEVO','2026-08-18 21:57:51',NULL,NULL,NULL,NULL),(21,'hjnkml,ñ',' vbnm,',3,2,NULL,'NUEVO','2026-08-18 21:58:11',NULL,NULL,NULL,NULL),(22,'gvhbjmn,','nm,.',5,3,NULL,'NUEVO','2026-08-19 10:14:50',NULL,NULL,NULL,NULL),(23,'ghbjl','glgfcvhjk',1,1,12,'NUEVO','2026-08-19 10:39:36',NULL,NULL,NULL,NULL);
+INSERT INTO `ticket` VALUES (2,'jkn','bhjhbbh',7,NULL,'NUEVO','2026-08-13 20:52:38',NULL,NULL),(3,'bhhhb','jrfhjefer',8,NULL,'NUEVO','2026-08-13 20:55:49',NULL,NULL),(4,'hgvhgtvh','n frcvhrfv',5,NULL,'NUEVO','2026-08-13 20:57:34',NULL,NULL),(5,'jhhbhb','uhhhb',8,NULL,'NUEVO','2026-08-13 21:01:36',NULL,NULL),(6,'bhjhb','grfrbrf',6,NULL,'NUEVO','2026-08-14 20:47:47',NULL,NULL),(7,'gvtgykuhhul','gbvuihuyftrdefgyhjkiuhyugtrfghbj',5,NULL,'NUEVO','2026-08-14 20:48:50',NULL,NULL),(8,'yugg','bhhygh',5,NULL,'NUEVO','2026-08-14 20:53:01',NULL,NULL),(9,'jnewdfjefjejrfn','jnefjnrfnearjk',6,NULL,'NUEVO','2026-08-14 20:53:53',NULL,NULL),(10,'hjuygctfyvhbujighj','tfyghujikl',4,NULL,'NUEVO','2026-08-14 20:54:06',NULL,NULL),(11,'yughjiokñ{','xdfcgjkml',9,NULL,'NUEVO','2026-08-14 20:54:17',NULL,NULL),(12,'cfdvcgyuuyh','fcfghyhujju',3,NULL,'NUEVO','2026-08-14 20:54:29',NULL,NULL),(15,'tfyyuyggh','vcvfghjkm',2,4,'NUEVO','2026-08-14 21:36:38',NULL,NULL),(16,'knj njmn','kjjknkj',4,1,'NUEVO','2026-08-18 17:12:37',NULL,NULL),(18,'ghgjblñ,kjn','fgvhbjl,',1,1,'NUEVO','2026-08-18 21:47:59',NULL,NULL),(19,'hgjkml','tfgyhujik',3,3,'NUEVO','2026-08-18 21:48:12',NULL,NULL),(20,'hjrefd','bnjmkdswaz',7,4,'NUEVO','2026-08-18 21:57:51',NULL,NULL),(21,'hjnkml,ñ',' vbnm,',3,2,'NUEVO','2026-08-18 21:58:11',NULL,NULL),(22,'gvhbjmn,','nm,.',5,3,'NUEVO','2026-08-19 10:14:50',NULL,NULL),(23,'ghbjl','glgfcvhjk',1,1,'NUEVO','2026-08-19 10:39:36',NULL,NULL),(24,'fgvhbjnk','ghbjnlñ',5,3,'NUEVO','2026-08-19 12:21:30',NULL,4),(25,'bhhjnkml','gbhulñ',2,1,'NUEVO','2026-08-19 12:24:48',NULL,4),(26,'jkml,ñ','vghjkl',7,4,'NUEVO','2026-08-19 12:27:28',NULL,4),(27,'njklñ','nmk,lñ.',2,1,'NUEVO','2026-08-19 12:28:07',NULL,1),(28,'gyhujok','hgbjnk',8,1,'NUEVO','2026-08-19 13:05:49',NULL,1),(29,'67h5gtrefwd','w3456tr',1,1,'NUEVO','2026-08-19 14:32:08',NULL,4),(30,'gvbhjn','fgvhbjnk',1,1,'NUEVO','2026-08-19 14:33:57',NULL,4),(31,'gdbvfhdvf','heffcnj',8,1,'NUEVO','2026-08-19 14:35:22',NULL,4);
 /*!40000 ALTER TABLE `ticket` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -289,35 +287,6 @@ CREATE TABLE `ticketagente` (
 LOCK TABLES `ticketagente` WRITE;
 /*!40000 ALTER TABLE `ticketagente` DISABLE KEYS */;
 /*!40000 ALTER TABLE `ticketagente` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `ticketusuario`
---
-
-DROP TABLE IF EXISTS `ticketusuario`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `ticketusuario` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `idTicket` int NOT NULL,
-  `idUsuario` int NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idTicket` (`idTicket`),
-  KEY `idUsuario` (`idUsuario`),
-  CONSTRAINT `ticketusuario_ibfk_1` FOREIGN KEY (`idTicket`) REFERENCES `ticket` (`id`),
-  CONSTRAINT `ticketusuario_ibfk_2` FOREIGN KEY (`idUsuario`) REFERENCES `usuario` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `ticketusuario`
---
-
-LOCK TABLES `ticketusuario` WRITE;
-/*!40000 ALTER TABLE `ticketusuario` DISABLE KEYS */;
-INSERT INTO `ticketusuario` VALUES (1,2,4),(2,3,4),(3,4,4),(4,5,4),(5,6,4),(6,7,4),(7,8,4),(8,9,4),(9,10,4),(10,11,4),(11,12,4),(12,15,4),(13,16,4),(14,18,4),(15,19,4),(16,20,4),(17,21,4),(18,22,4),(19,23,1);
-/*!40000 ALTER TABLE `ticketusuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -381,4 +350,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-08-19 11:04:16
+-- Dump completed on 2026-08-19 18:48:18

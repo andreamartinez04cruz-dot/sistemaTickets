@@ -62,7 +62,7 @@
                 </div>
 
                 <!-- Formulario -->
-                <form action="${pageContext.request.contextPath}/tickets/registrar" method="POST"
+                <form action="${pageContext.request.contextPath}/tickets/registrar/Funcionario" method="POST"
                       class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant p-6 md:p-8 flex flex-col gap-6 relative overflow-hidden">
 
                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
@@ -123,6 +123,23 @@
                         </div>
                     </div>
 
+                    <!-- Jornada -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-on-surface" for="jornada">Jornada</label>
+                        <div class="relative">
+                            <select class="w-full bg-surface border border-outline-variant rounded-md px-4 py-3 text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all appearance-none pr-10 cursor-pointer"
+                                    id="jornada" name="jornada" required>
+                                <option disabled selected value="">Seleccione la jornada...</option>
+                                <option value="MAÑANA">Mañana</option>
+                                <option value="TARDE">Tarde</option>
+                                <option value="NOCHE">Noche</option>
+                            </select>
+                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">
+                                expand_more
+                            </span>
+                        </div>
+                    </div>
+
                     <!-- Solicitante (Dinámico) -->
                     <div class="flex flex-col gap-2">
                         <label class="text-sm font-medium text-on-surface" for="ticket-applicant">Solicitante</label>
@@ -134,7 +151,7 @@
 
                     <!-- Botones de Acción -->
                     <div class="pt-6 border-t border-outline-variant flex flex-col md:flex-row justify-end gap-4 mt-2">
-                        <button class="order-2 md:order-1 px-6 py-3 rounded-full border border-primary text-primary font-semibold hover:bg-surface-container-high transition-all text-center" type="button">
+                        <button class="order-2 md:order-1 px-6 py-3 rounded-full border border-primary text-primary font-semibold hover:bg-surface-container-high transition-all text-center" type="button" onclick="window.location.href='${pageContext.request.contextPath}/tickets/registrar/Funcionario?action=historial'">
                             Cancelar
                         </button>
                         <button class="order-1 md:order-2 px-8 py-3 rounded-full bg-primary-container text-on-primary-container font-bold hover:brightness-95 transition-all text-center flex items-center justify-center gap-2 shadow-sm" type="submit">

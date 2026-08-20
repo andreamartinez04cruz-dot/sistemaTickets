@@ -3,6 +3,11 @@ package co.edu.sena.mesa.modelo.estado;
 public class EstadoResuelto implements EstadoTicket {
 
     @Override
+    public String getNombreEstado() {
+        return "RESUELTO";
+    }
+
+    @Override
     public EstadoTicket asignar() {
         throw new IllegalStateException(
                 "El ticket ya fue resuelto."

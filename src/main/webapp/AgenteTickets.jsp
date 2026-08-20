@@ -118,177 +118,12 @@
             }
         </style>
     </head>
-    <%@ page import="java.sql.*, java.util.*" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ page import="co.edu.sena.mesa.servicio.notificacion.Notificador, co.edu.sena.mesa.servicio.notificacion.NotificadorEnAplicacion, co.edu.sena.mesa.servicio.notificacion.NotificacionService, co.edu.sena.mesa.servicio.notificacion.NotificacionServiceImpl" %>
+    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%
-    List<Map<String, Object>> ticketsAsignados = new ArrayList<>();
-    int totalAsignados = 0;
-    int urgentes = 0;
-    int pendientes = 0;
-    String mensajeEstado = "";
-
-    Notificador notificadorEnAplicacion = new NotificadorEnAplicacion();
-    NotificacionService notificacionService = new NotificacionServiceImpl(notificadorEnAplicacion);
-    HttpSession sesion = request.getSession(false);
-
-    java.util.function.Function<String, String> normalizarEstadoTicket = (estado) -> {
-        if (estado == null) {
-            return null;
-        }
-        String valor = estado.trim();
-        if (valor.isEmpty()) {
-            return null;
-        }
-        String mayus = valor.toUpperCase(Locale.ROOT);
-        if ("EN_PROCESO".equals(mayus) || "EN PROCESO".equalsIgnoreCase(valor)) {
-            return "EN PROCESO";
-        }
-        return mayus;
-    };
-
-    if ("POST".equalsIgnoreCase(request.getMethod()) && sesion != null && sesion.getAttribute("usuario") != null) {
-        co.edu.sena.mesa.modelo.Usuario usuarioActual = (co.edu.sena.mesa.modelo.Usuario) sesion.getAttribute("usuario");
-        int idUsuarioActual = usuarioActual.getId();
-        String idTicketParam = request.getParameter("idTicket");
-        String accion = request.getParameter("accion");
-        String nuevoEstado = request.getParameter("nuevoEstado");
-
-        if (idTicketParam != null) {
-            try {
-                int idTicket = Integer.parseInt(idTicketParam);
-                String validarSql = "SELECT 1 FROM ticketagente WHERE idTicket = ? AND idUsuario = ?";
-                String updateSql = "UPDATE ticket SET estado = ? WHERE id = ? AND id IN (SELECT idTicket FROM ticketagente WHERE idUsuario = ?)";
-
-                try (Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mesaayuda", "root", "Sena2026*")) {
-                    try (PreparedStatement validarPs = cn.prepareStatement(validarSql)) {
-                        validarPs.setInt(1, idTicket);
-                        validarPs.setInt(2, idUsuarioActual);
-                        try (ResultSet rs = validarPs.executeQuery()) {
-                            if (!rs.next()) {
-                                mensajeEstado = "Este ticket no está asignado a tu usuario.";
-                            } else if ("resolverTicket".equals(accion)) {
-                                try (PreparedStatement updatePs = cn.prepareStatement(updateSql)) {
-                                    updatePs.setString(1, "RESUELTO");
-                                    updatePs.setInt(2, idTicket);
-                                    updatePs.setInt(3, idUsuarioActual);
-                                    int filas = updatePs.executeUpdate();
-                                    if (filas > 0) {
-                                        mensajeEstado = "Ticket resuelto correctamente y guardado en la base de datos.";
-                                        String correoSolicitante = null;
-                                        try (PreparedStatement correoPs = cn.prepareStatement(
-                                                "SELECT u.correo FROM ticket t JOIN usuario u ON u.id = t.idUsuario WHERE t.id = ?")) {
-                                            correoPs.setInt(1, idTicket);
-                                            try (ResultSet correoRs = correoPs.executeQuery()) {
-                                                if (correoRs.next()) {
-                                                    correoSolicitante = correoRs.getString("correo");
-                                                }
-                                            }
-                                        }
-                                        if (correoSolicitante != null && !correoSolicitante.trim().isEmpty()) {
-                                            notificacionService.notificarTicketResuelto(correoSolicitante, idTicket);
-                                        }
-                                    } else {
-                                        mensajeEstado = "No se pudo resolver el ticket.";
-                                    }
-                                }
-                            } else {
-                                String estado = normalizarEstadoTicket.apply(nuevoEstado);
-                                if (estado != null && !estado.trim().isEmpty()) {
-                                    try (PreparedStatement updatePs = cn.prepareStatement(updateSql)) {
-                                        updatePs.setString(1, estado);
-                                        updatePs.setInt(2, idTicket);
-                                        updatePs.setInt(3, idUsuarioActual);
-                                        int filas = updatePs.executeUpdate();
-                                        if (filas > 0) {
-                                            mensajeEstado = "Estado actualizado correctamente y guardado en la base de datos.";
-                                            String correoSolicitante = null;
-                                            try (PreparedStatement correoPs = cn.prepareStatement(
-                                                    "SELECT u.correo FROM ticket t JOIN usuario u ON u.id = t.idUsuario WHERE t.id = ?")) {
-                                                correoPs.setInt(1, idTicket);
-                                                try (ResultSet correoRs = correoPs.executeQuery()) {
-                                                    if (correoRs.next()) {
-                                                        correoSolicitante = correoRs.getString("correo");
-                                                    }
-                                                }
-                                            }
-                                            if (correoSolicitante != null && !correoSolicitante.trim().isEmpty()) {
-                                                notificacionService.notificarCambioEstado(correoSolicitante, idTicket, estado);
-                                            }
-                                        } else {
-                                            mensajeEstado = "No se pudo actualizar el estado.";
-                                        }
-                                    }
-                                } else {
-                                    mensajeEstado = "Debe elegir un estado válido.";
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                mensajeEstado = "Error al guardar el cambio del ticket.";
-                e.printStackTrace();
-            }
-        }
+    if (request.getAttribute("agenteTicketsPreparados") == null) {
+        response.sendRedirect(request.getContextPath() + "/agente/tickets");
+        return;
     }
-    if (mensajeEstado != null && !mensajeEstado.isEmpty()) {
-        request.setAttribute("mensajeEstado", mensajeEstado);
-    }
-
-    if (sesion != null && sesion.getAttribute("usuario") != null) {
-        co.edu.sena.mesa.modelo.Usuario usuarioActual = (co.edu.sena.mesa.modelo.Usuario) sesion.getAttribute("usuario");
-        int idUsuarioActual = usuarioActual.getId();
-
-        String sql = "SELECT t.id, t.titulo, t.estado, c.nombre AS categoria, pr.tipoPrioridad AS prioridad, "
-                + "u.nombre AS solicitante, u.apellido AS apellido_solicitante "
-                + "FROM ticketagente ta "
-                + "JOIN ticket t ON t.id = ta.idTicket "
-                + "JOIN usuario u ON u.id = t.idUsuario "
-                + "LEFT JOIN categoria c ON c.id = t.idCategoria "
-                + "LEFT JOIN prioridad pr ON pr.id = t.idPrioridad "
-                + "WHERE ta.idUsuario = ? "
-                + "ORDER BY t.id DESC";
-
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            try (Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mesaayuda", "root", "Sena2026*");
-                 PreparedStatement ps = cn.prepareStatement(sql)) {
-                ps.setInt(1, idUsuarioActual);
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        Map<String, Object> ticket = new HashMap<>();
-                        ticket.put("id", rs.getInt("id"));
-                        ticket.put("titulo", rs.getString("titulo"));
-                        ticket.put("estado", rs.getString("estado"));
-                        ticket.put("categoria", rs.getString("categoria"));
-                        ticket.put("prioridad", rs.getString("prioridad"));
-                        ticket.put("solicitante", rs.getString("solicitante") + (rs.getString("apellido_solicitante") != null ? " " + rs.getString("apellido_solicitante") : ""));
-                        ticketsAsignados.add(ticket);
-                        totalAsignados++;
-
-                        String prioridad = rs.getString("prioridad");
-                        if (prioridad != null && (prioridad.equalsIgnoreCase("Alta") || prioridad.equalsIgnoreCase("Urgente") || prioridad.equalsIgnoreCase("Crítica") || prioridad.equalsIgnoreCase("Inmediata"))) {
-                            urgentes++;
-                        }
-
-                        String estado = rs.getString("estado");
-                        if (estado != null && !"CERRADO".equalsIgnoreCase(estado) && !"CANCELADO".equalsIgnoreCase(estado)) {
-                            pendientes++;
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    request.setAttribute("ticketsAsignados", ticketsAsignados);
-    request.setAttribute("totalAsignados", totalAsignados);
-    request.setAttribute("urgentes", urgentes);
-    request.setAttribute("pendientes", pendientes);
-    request.setAttribute("mensajeEstado", mensajeEstado);
 %>
 
 <body class="bg-background text-on-background min-h-screen flex flex-col">
@@ -439,7 +274,7 @@
                                                                 </span>
                                                             </c:when>
                                                             <c:otherwise>
-                                                                <form method="post" action="${pageContext.request.contextPath}/AgenteTickets.jsp" class="flex items-center gap-2">
+                                                                <form method="post" action="${pageContext.request.contextPath}/agente/tickets" class="flex items-center gap-2">
                                                                     <input type="hidden" name="idTicket" value="${ticket.id}"/>
                                                                     <select name="nuevoEstado" class="rounded-lg border border-outline-variant bg-surface-container-low px-2 py-1 text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-emerald-500 font-semibold shadow-sm">
                                                                         <c:choose>
@@ -539,16 +374,15 @@
 
                     // 2. Filtrar tarjetas
                     ticketCards.forEach(card => {
-                        const estado = card.getAttribute('data-estado').toUpperCase();
+                        const estado = (card.getAttribute('data-estado') || '').toUpperCase().replace(/_/g, ' ').trim();
+                        const esActivo = ["NUEVO", "ASIGNADO", "EN PROCESO"].includes(estado);
+                        const esHistorial = ["RESUELTO", "CERRADO", "CANCELADO"].includes(estado);
 
-                        // Filtro de vista principal (lateral)
-                        const isHistorial = estado === "RESUELTO" || estado === "CERRADO" || estado === "CANCELADO";
-                        
                         let matchesView = true;
                         if (currentView === 'atender') {
-                            matchesView = !isHistorial;
+                            matchesView = esActivo;
                         } else if (currentView === 'historial') {
-                            matchesView = isHistorial;
+                            matchesView = esHistorial;
                         }
 
                         if (matchesView) {

@@ -3,6 +3,11 @@ package co.edu.sena.mesa.modelo.estado;
 public class EstadoEnProceso implements EstadoTicket {
 
     @Override
+    public String getNombreEstado() {
+        return "EN_PROCESO";
+    }
+
+    @Override
     public EstadoTicket asignar() {
         throw new IllegalStateException(
                 "El ticket ya está en proceso."

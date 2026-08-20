@@ -3,6 +3,11 @@ package co.edu.sena.mesa.modelo.estado;
 public class EstadoCancelado implements EstadoTicket {
 
     @Override
+    public String getNombreEstado() {
+        return "CANCELADO";
+    }
+
+    @Override
     public EstadoTicket asignar() {
         throw new IllegalStateException(
                 "Un ticket CANCELADO no puede ser asignado."

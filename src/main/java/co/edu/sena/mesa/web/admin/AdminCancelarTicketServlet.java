@@ -1,13 +1,11 @@
-package co.edu.sena.mesa.web;
+package co.edu.sena.mesa.web.admin;
 
-import co.edu.sena.mesa.config.ConexionBD;
+import co.edu.sena.mesa.servicio.AdminTicketService;
+import co.edu.sena.mesa.servicio.AdminTicketServiceImpl;
+import co.edu.sena.mesa.repositorio.AdminTicketRepositoryJdbc;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.servlet.ServletException;
@@ -21,10 +19,16 @@ import jakarta.servlet.http.HttpSession;
 public class AdminCancelarTicketServlet extends HttpServlet {
 
     private NotificacionService notificacionService;
+    private final AdminTicketService adminTicketService = new AdminTicketServiceImpl(new AdminTicketRepositoryJdbc());
 
     @Override
     public void init() throws ServletException {
         notificacionService = (NotificacionService) getServletContext().getAttribute("notificacionService");
+        if (notificacionService == null) {
+            notificacionService = new co.edu.sena.mesa.servicio.notificacion.NotificacionServiceImpl(
+                    new co.edu.sena.mesa.servicio.notificacion.NotificadorEnAplicacion()
+            );
+        }
     }
 
     @Override
@@ -41,10 +45,10 @@ public class AdminCancelarTicketServlet extends HttpServlet {
         if (idTicketStr != null && !idTicketStr.isBlank()) {
             try {
                 int idTicket = Integer.parseInt(idTicketStr);
-                cancelarTicket(idTicket);
+                adminTicketService.cancelarTicket(idTicket);
 
-                String destinatario = obtenerCorreoSolicitante(idTicket);
-                if (destinatario != null && !destinatario.isBlank()) {
+                String destinatario = adminTicketService.obtenerCorreoSolicitante(idTicket);
+                if (notificacionService != null && destinatario != null && !destinatario.isBlank()) {
                     notificacionService.notificarCambioEstado(destinatario, idTicket, "CANCELADO");
 
                     List<String> notificaciones = (List<String>) session.getAttribute("notificaciones");
@@ -83,30 +87,4 @@ public class AdminCancelarTicketServlet extends HttpServlet {
         out.println("</html>");
     }
 
-    private void cancelarTicket(int idTicket) {
-        String sql = "UPDATE ticket SET estado = 'CANCELADO' WHERE id = ?";
-        try (Connection cn = ConexionBD.obtenerConexion();
-             PreparedStatement ps = cn.prepareStatement(sql)) {
-            ps.setInt(1, idTicket);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String obtenerCorreoSolicitante(int idTicket) {
-        String sql = "SELECT u.correo FROM ticket t INNER JOIN usuario u ON u.id = t.idUsuario WHERE t.id = ?";
-        try (Connection cn = ConexionBD.obtenerConexion();
-             PreparedStatement ps = cn.prepareStatement(sql)) {
-            ps.setInt(1, idTicket);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getString("correo");
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 }

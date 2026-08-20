@@ -1,4 +1,4 @@
-package co.edu.sena.mesa.web;
+package co.edu.sena.mesa.web.admin;
 
 import co.edu.sena.mesa.dto.DashboardEstadisticasDTO;
 import co.edu.sena.mesa.repositorio.DashboardRepository;

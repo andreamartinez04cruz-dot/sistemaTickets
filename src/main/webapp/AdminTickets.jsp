@@ -116,7 +116,7 @@
                                             </div>
 
                                             <div class="space-y-3 text-sm">
-                                                <c:if test="${ticket.estado != null && !fn:containsIgnoreCase(ticket.estado, 'CERRADO') && !fn:containsIgnoreCase(ticket.estado, 'CANCELADO')}">
+                                                <c:if test="${ticket.estado != null && (fn:containsIgnoreCase(ticket.estado, 'NUEVO') || fn:containsIgnoreCase(ticket.estado, 'ASIGNADO') || fn:containsIgnoreCase(ticket.estado, 'EN_PROCESO') || fn:containsIgnoreCase(ticket.estado, 'EN PROCESO'))}">
                                                     <div class="mt-4 flex justify-end gap-2">
                                                         <a href="${pageContext.request.contextPath}/admin/reasignar-agentes?idTicket=${ticket.id}" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-100 text-amber-800 text-xs font-semibold hover:bg-amber-200">
                                                             <span class="material-symbols-outlined text-sm">swap_horiz</span>
@@ -196,7 +196,7 @@
                                             </div>
 
                                             <div class="space-y-3 text-sm">
-                                                <c:if test="${ticket.estado != null && !fn:containsIgnoreCase(ticket.estado, 'CERRADO') && !fn:containsIgnoreCase(ticket.estado, 'CANCELADO')}">
+                                                <c:if test="${ticket.estado != null && (fn:containsIgnoreCase(ticket.estado, 'NUEVO') || fn:containsIgnoreCase(ticket.estado, 'ASIGNADO') || fn:containsIgnoreCase(ticket.estado, 'EN_PROCESO') || fn:containsIgnoreCase(ticket.estado, 'EN PROCESO'))}">
                                                     <div class="mt-4 flex justify-end gap-2">
                                                         <a href="${pageContext.request.contextPath}/admin/reasignar-agentes?idTicket=${ticket.id}" class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-100 text-amber-800 text-xs font-semibold hover:bg-amber-200">
                                                             <span class="material-symbols-outlined text-sm">swap_horiz</span>

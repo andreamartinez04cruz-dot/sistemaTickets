@@ -10,7 +10,7 @@
         </h1>
     </div>
     <div class="flex items-center gap-4">
-        <a href="${pageContext.request.contextPath}/Notificaciones.jsp" class="p-2.5 text-[#073a1e] hover:bg-emerald-100 rounded-full transition-all duration-300 relative hover:scale-110" title="Notificaciones">
+        <a href="${pageContext.request.contextPath}/notificaciones" class="p-2.5 text-[#073a1e] hover:bg-emerald-100 rounded-full transition-all duration-300 relative hover:scale-110" title="Notificaciones">
             <span class="material-symbols-outlined text-2xl">notifications</span>
             <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse"></span>
         </a>

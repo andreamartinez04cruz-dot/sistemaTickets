@@ -11,24 +11,32 @@ import co.edu.sena.mesa.modelo.Prioridad;
 import co.edu.sena.mesa.modelo.Ticket;
 import co.edu.sena.mesa.modelo.Usuario;
 import co.edu.sena.mesa.repositorio.TicketRepository;
+import co.edu.sena.mesa.servicio.asignacion.AsignacionService;
 import co.edu.sena.mesa.servicio.sla.CalcularPrioridad;
 import co.edu.sena.mesa.servicio.sla.SlaService;
+import co.edu.sena.mesa.servicio.solicitante.SolicitanteTicketService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TicketServiceImpl implements TicketService {
+public class TicketServiceImpl implements TicketService, SolicitanteTicketService {
 
     // Servicio de Doris
     private final TicketRepository ticketRepository;
+    private final AsignacionService asignacionService;
 
-    public TicketServiceImpl(TicketRepository ticketRepository) {
+    public TicketServiceImpl(
+            TicketRepository ticketRepository,
+            AsignacionService asignacionService) {
         this.ticketRepository = ticketRepository;
+        this.asignacionService = asignacionService;
     }
 
     @Override
     public Ticket registrarTicket(Ticket ticket) {
-        return ticketRepository.guardar(ticket);
+        Ticket ticketGuardado = ticketRepository.guardar(ticket);
+        asignacionService.asignarTicket(ticketGuardado);
+        return ticketGuardado;
     }
 
     // ------------------------------------------------
@@ -61,6 +69,7 @@ public class TicketServiceImpl implements TicketService {
 
         // 5. Guardar mediante el repositorio
         ticketRepository.TicketFuncionario(ticket, solicitante.getId());
+        asignacionService.asignarTicket(ticket);
     }
 
     //Lista de categorias
@@ -120,4 +129,9 @@ public class TicketServiceImpl implements TicketService {
     }
 
     //Mostrar la prioridad del ticket
+
+    @Override
+    public boolean cancelarTicketSolicitante(int idTicket, int idSolicitante) {
+        return ticketRepository.cancelarTicketSolicitante(idTicket, idSolicitante);
+    }
 }

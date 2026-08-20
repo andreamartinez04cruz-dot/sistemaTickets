@@ -3,6 +3,11 @@ package co.edu.sena.mesa.modelo.estado;
 public class EstadoCerrado implements EstadoTicket {
 
     @Override
+    public String getNombreEstado() {
+        return "CERRADO";
+    }
+
+    @Override
     public EstadoTicket asignar() {
         throw new IllegalStateException(
                 "Un ticket CERRADO no puede ser modificado."

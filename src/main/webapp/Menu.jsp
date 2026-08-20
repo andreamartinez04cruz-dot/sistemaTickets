@@ -37,21 +37,21 @@
                         <span>Crear Solicitud</span>
                     </a>
 
-                    <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial" 
+                    <a href="${pageContext.request.contextPath}/tickets/registrar/Funcionario?action=historial" 
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">confirmation_number</span>
                         <span>Mis Solicitudes</span>
                     </a>
 
-                    <a href="${pageContext.request.contextPath}/Notificaciones.jsp" 
+                    <a href="${pageContext.request.contextPath}/notificaciones"
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">notifications</span>
                         <span>Notificaciones</span>
                     </a>
                 </c:when>
                 <%-- FUNCIONARIO --%>
-               <c:when test="${rolActual == 'FUNCIONARIO'}">
-                    <a href="${pageContext.request.contextPath}/tickets/registrar/Funcionarior" 
+               <c:when test="${rolActual == 'FUNCIONARIO'}"> 
+                    <a href="${pageContext.request.contextPath}/tickets/registrar/Funcionario" 
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">add_circle</span>
                         <span>Crear Solicitud</span>
@@ -63,7 +63,7 @@
                         <span>Mis Solicitudes</span>
                     </a>
 
-                    <a href="${pageContext.request.contextPath}/Notificaciones.jsp" 
+                    <a href="${pageContext.request.contextPath}/notificaciones"
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">notifications</span>
                         <span>Notificaciones</span>
@@ -72,27 +72,27 @@
 
                 <%-- 2. AGENTE --%>
                 <c:when test="${rolActual == 'AGENTE'}">
-                    <a href="${pageContext.request.contextPath}/AgenteTickets.jsp" 
+                    <a href="${pageContext.request.contextPath}/agente/tickets"
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">inbox</span>
                         <span>Tickets Asignados</span>
                     </a>
 
-                    <a href="${pageContext.request.contextPath}/AgenteTickets.jsp?filter=atender" 
+                    <a href="${pageContext.request.contextPath}/agente/tickets?filter=atender"
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">support_agent</span>
                         <span>Atender Tickets</span>
                     </a>
 
-                    <a href="${pageContext.request.contextPath}/AgenteTickets.jsp?filter=historial" 
+                    <a href="${pageContext.request.contextPath}/agente/tickets?filter=historial"
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">task_alt</span>
                         <span>Historial</span>
 
-                    <a href="${pageContext.request.contextPath}/historial-resueltos.jsp" 
+                    <a href="${pageContext.request.contextPath}/notificaciones"
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">task_alt</span>
-                        <span>Resueltos</span>
+                        <span>Notificaciones</span>
                     </a>
                 </c:when>
 
@@ -125,6 +125,12 @@
                        class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
                         <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">group</span>
                         <span>Gestión Usuarios</span>
+                    </a>
+                       
+                       <a href="${pageContext.request.contextPath}/notificaciones"
+                       class="flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-zinc-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all group">
+                        <span class="material-symbols-outlined text-emerald-600 group-hover:scale-110 transition-transform">group</span>
+                        <span>Notificaciones</span>
                     </a>
                 </c:when>
             </c:choose>

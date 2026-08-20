@@ -1,11 +1,11 @@
-package co.edu.sena.mesa.web;
+package co.edu.sena.mesa.web.solicitante;
 
 import co.edu.sena.mesa.dto.HistorialFuncionarioDTO;
 import co.edu.sena.mesa.dto.TicketDTO;
 import co.edu.sena.mesa.modelo.Categoria;
 import co.edu.sena.mesa.modelo.Prioridad;
 import co.edu.sena.mesa.modelo.Usuario;
-import co.edu.sena.mesa.servicio.TicketService;
+import co.edu.sena.mesa.servicio.solicitante.SolicitanteTicketService;
 import co.edu.sena.mesa.servicio.sla.CalcularPrioridad;
 import co.edu.sena.mesa.servicio.sla.SlaService;
 
@@ -26,17 +26,14 @@ public class TicketServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        // Intentamos recuperar el servicio del contexto de la aplicación
-        ticketService = (TicketService) getServletContext().getAttribute("ticketService");
-
-        // Si es null, aquí es donde salta la alerta o se valida
-        if (ticketService == null) {
-            // Ocurre si el Listener no corrió o guardó el nombre con otra clave
+        solicitanteTicketService = (SolicitanteTicketService) getServletContext()
+                .getAttribute("solicitanteTicketService");
+        if (solicitanteTicketService == null) {
             throw new ServletException("TicketService no fue inicializado en el AppContextListener");
         }
     }
 
-    private TicketService ticketService;
+    private SolicitanteTicketService solicitanteTicketService;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -51,22 +48,35 @@ public class TicketServlet extends HttpServlet {
         }
 
         String action = request.getParameter("action");
+        if ("cancelar".equalsIgnoreCase(action)) {
+            String idTicketParam = request.getParameter("idTicket");
+            if (idTicketParam != null && !idTicketParam.isBlank()) {
+                try {
+                    int idTicket = Integer.parseInt(idTicketParam);
+                    solicitanteTicketService.cancelarTicketSolicitante(idTicket, usuario.getId());
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            response.sendRedirect(request.getContextPath() + "/tickets/registrar?action=historial");
+            return;
+        }
+
         if ("historial".equalsIgnoreCase(action)) {
-            List<HistorialFuncionarioDTO> tickets = ticketService.listarTicketsPorSolicitante(usuario.getId());
+            List<HistorialFuncionarioDTO> tickets = solicitanteTicketService.listarTicketsPorSolicitante(usuario.getId());
             request.setAttribute("tickets", tickets);
             request.getRequestDispatcher("/MisSolicitudes.jsp").forward(request, response);
             return;
         }
 
-        List<Categoria> categorias = ticketService.ListarCategorias();
+        List<Categoria> categorias = solicitanteTicketService.ListarCategorias();
         request.setAttribute("categorias", categorias);
         request.getRequestDispatcher("/RegistroTicket.jsp").forward(request, response);
     }
 
     @Override
-        // 1. Captura de datos del formulario
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // 1. Obtener los parámetros del formulario
         String titulo = request.getParameter("titulo");
         String descripcion = request.getParameter("descripcion");
         String categoriaNombre = request.getParameter("categoria");
@@ -79,7 +89,7 @@ public class TicketServlet extends HttpServlet {
 
         // Si categoriaNombre no viene, lo buscamos usando idCategoria
         if (categoriaNombre == null || categoriaNombre.trim().isEmpty()) {
-            List<Categoria> categorias = ticketService.ListarCategorias();
+            List<Categoria> categorias = solicitanteTicketService.ListarCategorias();
             if (categorias != null) {
                 for (Categoria cat : categorias) {
                     if (cat.getId() == idCategoria) {
@@ -89,25 +99,18 @@ public class TicketServlet extends HttpServlet {
                 }
             }
         }
-       
-        // 2. Obtener el SlaService del contexto de la aplicación (configurado en el AppContextListener)
-        SlaService slaService = (SlaService) getServletContext().getAttribute("slaService");
-
-   
-        CalcularPrioridad estrategiaSla = slaService.obtenerEstrategia(String.valueOf(idCategoria));
-        String prioridadCalculada = estrategiaSla.determinarPrioridad();
-        int idPrioridad = estrategiaSla.obtenerIdPrioridad(); // ID directo de la BD
-
-        // 4. Obtener el solicitante de la sesión
-        HttpSession session = request.getSession();
-        Usuario solicitante = (Usuario) session.getAttribute("usuario");
+    HttpSession session = request.getSession();
+    SlaService slaService = (SlaService) getServletContext().getAttribute("slaService");
+    CalcularPrioridad estrategiaSla = slaService.obtenerEstrategia(String.valueOf(idCategoria));
+    String prioridadCalculada = estrategiaSla.determinarPrioridad();
+    int idPrioridad = estrategiaSla.obtenerIdPrioridad();
+    Usuario solicitante = (Usuario) session.getAttribute("usuario");
 
         if (solicitante == null) {
             response.sendRedirect(request.getContextPath() + "/iniciosesion.jsp");
             return;
         }
 
-        // 5. Crear y poblar el DTO
         TicketDTO dto = new TicketDTO();
         dto.setTitulo(titulo);
         dto.setDescripcion(descripcion);
@@ -120,7 +123,6 @@ public class TicketServlet extends HttpServlet {
         dto.setInstructor(instructor);
         dto.setJornada(jornada);
 
-        // 6. Preparar las entidades requeridas por el servicio
         Categoria categoria = new Categoria();
         categoria.setId(idCategoria);
         categoria.setNombre(categoriaNombre);
@@ -129,32 +131,24 @@ public class TicketServlet extends HttpServlet {
         prioridad.setId(idPrioridad);
         prioridad.setNombre(prioridadCalculada);
 
-        // 7. Llamar al servicio con los 4 parámetros clásicos
-        ticketService.RegistrarTicket(dto, categoria, solicitante, slaService);
+        solicitanteTicketService.RegistrarTicket(dto, categoria, solicitante, slaService);
 
-        // 8. Respuesta al usuario (SweetAlert)
         String redirectUrl = request.getContextPath() + "/SolicitudFuncionario.jsp";
-        
-        // Comprobar rol de aprendiz usando rolUsuario en sesión o los roles de solicitante
-        String rolUsuarioPost = (session != null) ? (String) session.getAttribute("rolUsuario") : "";
-        if ((rolUsuarioPost == null || rolUsuarioPost.isEmpty()) && solicitante != null) {
-            List<co.edu.sena.mesa.modelo.Rol> roles = solicitante.getRoles();
-            if (roles != null) {
-                for (co.edu.sena.mesa.modelo.Rol rol : roles) {
-                    String nombreRol = (rol != null && rol.getTiporol() != null) ? rol.getTiporol().toUpperCase() : "";
-                    if (nombreRol.contains("APRENDIZ")) {
-                        rolUsuarioPost = "APRENDIZ";
-                        break;
-                    }
+        String rolUsuarioPost = (String) session.getAttribute("rolUsuario");
+        if ((rolUsuarioPost == null || rolUsuarioPost.isEmpty()) && solicitante.getRoles() != null) {
+            for (co.edu.sena.mesa.modelo.Rol rol : solicitante.getRoles()) {
+                String nombreRol = (rol != null && rol.getTiporol() != null)
+                        ? rol.getTiporol().toUpperCase() : "";
+                if (nombreRol.contains("APRENDIZ")) {
+                    rolUsuarioPost = "APRENDIZ";
+                    break;
                 }
             }
         }
-        
         if ("APRENDIZ".equals(rolUsuarioPost)) {
             redirectUrl = request.getContextPath() + "/RegistroTicket.jsp";
         }
 
-        // 8. Respuesta de éxito con SweetAlert
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
         out.println("<!DOCTYPE html><html><head><meta charset='UTF-8'>");

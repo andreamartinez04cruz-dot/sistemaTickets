@@ -1,49 +1,10 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ page import="java.sql.*, java.util.*, co.edu.sena.mesa.config.ConexionBD, co.edu.sena.mesa.modelo.Usuario" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%
-    HttpSession sesionActual = request.getSession(false);
-    List<Map<String, Object>> ticketsUsuario = new ArrayList<>();
-
-    if (request.getMethod().equalsIgnoreCase("POST")
-            && "finalizarTicket".equals(request.getParameter("accion"))) {
-        String idTicketStr = request.getParameter("idTicket");
-        if (idTicketStr != null && !idTicketStr.trim().isEmpty()) {
-            try {
-                int idTicket = Integer.parseInt(idTicketStr);
-                Usuario usuarioActual = (sesionActual != null) ? (Usuario) sesionActual.getAttribute("usuario") : null;
-                if (usuarioActual != null) {
-                    try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement("UPDATE ticket SET estado = 'CERRADO' WHERE id = ? AND idUsuario = ? AND estado = 'RESUELTO'")) {
-                        ps.setInt(1, idTicket);
-                        ps.setInt(2, usuarioActual.getId());
-                        ps.executeUpdate();
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    if (request.getAttribute("notificacionesPreparadas") == null) {
+        response.sendRedirect(request.getContextPath() + "/notificaciones");
+        return;
     }
-
-    if (sesionActual != null && sesionActual.getAttribute("usuario") != null) {
-        Usuario usuarioActual = (Usuario) sesionActual.getAttribute("usuario");
-        String sql = "SELECT id, titulo, estado FROM ticket WHERE idUsuario = ? ORDER BY id DESC";
-        try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement(sql)) {
-            ps.setInt(1, usuarioActual.getId());
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Map<String, Object> ticket = new HashMap<>();
-                    ticket.put("id", rs.getInt("id"));
-                    ticket.put("titulo", rs.getString("titulo"));
-                    ticket.put("estado", rs.getString("estado"));
-                    ticketsUsuario.add(ticket);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    request.setAttribute("ticketsUsuario", ticketsUsuario);
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -108,7 +69,7 @@
                 <!-- Header Section -->
                 <div class="mb-6">
                     <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">Notificaciones</h1>
-                    <p class="text-sm md:text-base text-gray-600">Mantente al día con los cambios de estado de tus solicitudes.</p>
+                    <p class="text-sm md:text-base text-gray-600">Mantente al día con los cambios y asignaciones de tickets.</p>
                 </div>
 
                 <!-- Filter / Action Button -->
@@ -159,30 +120,33 @@
 
                     <c:if test="${not empty ticketsUsuario}">
                         <c:forEach var="ticket" items="${ticketsUsuario}">
-                            <c:if test="${ticket.estado ne 'NUEVO'}">
-                                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200/80 flex gap-4 items-start relative hover:shadow-md transition-all">
-                                    <div class="w-10 h-10 rounded-full bg-[#fef3c7] border border-[#fcd34d] flex items-center justify-center shrink-0">
-                                        <span class="material-symbols-outlined text-[#b45309] text-xl">sync_alt</span>
-                                    </div>
-
-                                    <div class="flex-1 pr-4">
-                                        <h3 class="text-base font-bold text-gray-900 mb-1">Cambio de estado</h3>
-                                        <p class="text-xs text-gray-600 leading-relaxed mb-3">
-                                            El ticket #${ticket.id} - ${ticket.titulo} está en estado ${ticket.estado}.
-                                        </p>
-                                        <c:if test="${ticket.estado eq 'RESUELTO'}">
-                                            <form method="post" action="${pageContext.request.contextPath}/Notificaciones.jsp">
-                                                <input type="hidden" name="accion" value="finalizarTicket"/>
-                                                <input type="hidden" name="idTicket" value="${ticket.id}"/>
-                                                <button type="submit" class="bg-[#1b5e20] hover:bg-[#154a1a] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
-                                                    Finalizar ticket
-                                                </button>
-                                            </form>
-                                        </c:if>
-                                    </div>
-                                    <span class="w-2.5 h-2.5 rounded-full bg-[#f59e0b] absolute top-5 right-5"></span>
+                            <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200/80 flex gap-4 items-start relative hover:shadow-md transition-all">
+                                <div class="w-10 h-10 rounded-full bg-[#fef3c7] border border-[#fcd34d] flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-[#b45309] text-xl">sync_alt</span>
                                 </div>
-                            </c:if>
+
+                                <div class="flex-1 pr-4">
+                                    <h3 class="text-base font-bold text-gray-900 mb-1">${ticket.tipoNotificacion}</h3>
+                                    <p class="text-xs text-gray-600 leading-relaxed mb-3">
+                                        ${ticket.mensaje}
+                                    </p>
+                                    <c:if test="${ticket.estado eq 'RESUELTO'}">
+                                        <form method="post" action="${pageContext.request.contextPath}/notificaciones">
+                                            <input type="hidden" name="accion" value="finalizarTicket"/>
+                                            <input type="hidden" name="idTicket" value="${ticket.id}"/>
+                                            <button type="submit" class="bg-[#1b5e20] hover:bg-[#154a1a] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
+                                                Finalizar ticket
+                                            </button>
+                                        </form>
+                                    </c:if>
+                                    <c:if test="${not empty sessionScope.rolUsuario and sessionScope.rolUsuario == 'AGENTE'}">
+                                        <a href="${pageContext.request.contextPath}/tickets/comentar?id=${ticket.id}" class="inline-block mt-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-lg font-bold text-xs">
+                                            Ver ticket
+                                        </a>
+                                    </c:if>
+                                </div>
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#f59e0b] absolute top-5 right-5"></span>
+                            </div>
                         </c:forEach>
                     </c:if>
 

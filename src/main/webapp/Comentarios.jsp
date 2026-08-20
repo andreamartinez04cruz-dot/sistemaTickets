@@ -104,7 +104,7 @@
                 </div>
                 <!-- BOTON VOLVER -->
                 <div>
-                    <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                    <a href="${pageContext.request.contextPath}/agente/tickets" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
                         <span class="material-symbols-outlined" style="font-size:18px;">
                             arrow_back
                         </span>
@@ -217,27 +217,37 @@
 
                 <div class="md:col-span-4">
                     <div class="bg-white rounded-xl shadow-sm border border-outline-variant p-6 sticky top-6">
-                        <h4 class="text-xl font-medium mb-4">
-                            Agregar Comentario
-                        </h4>
-                        <form action="${pageContext.request.contextPath}/tickets/comentar" method="POST" class="flex flex-col gap-4">
-                            <!-- ID DEL TICKET -->
-                            <input type="hidden" name="idTicket" value="${ticket.id}"/>
-                            <!-- TEXTO -->
-                            <div>
-                                <label class="block text-sm font-medium text-on-surface-variant mb-2" for="comment-box">
-                                    Mensaje
-                                </label>
-                                <textarea id="comment-box" name="texto" required rows="5" placeholder="Escribe tu comentario o avance aquí..." class="w-full rounded-lg border border-outline bg-white p-3 text-base focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"></textarea>
-                            </div>
-                            <!-- BOTON -->
-                            <button type="submit" class="bg-primary text-white hover:bg-primary-container font-medium px-6 py-3 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
-                                Enviar
-                                <span class="material-symbols-outlined" style="font-size:18px;">
-                                    send
-                                </span>
-                            </button>
-                        </form>
+                        <c:choose>
+                            <c:when test="${ticket.estado == 'CERRADO' || ticket.estado == 'CANCELADO' || ticket.estado == 'RESUELTO'}">
+                                <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+                                    <p class="font-semibold mb-2">Comentarios bloqueados</p>
+                                    <p class="text-sm">Este ticket ya está en estado final y no admite más comentarios.</p>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <h4 class="text-xl font-medium mb-4">
+                                    Agregar Comentario
+                                </h4>
+                                <form action="${pageContext.request.contextPath}/tickets/comentar" method="POST" class="flex flex-col gap-4">
+                                    <!-- ID DEL TICKET -->
+                                    <input type="hidden" name="idTicket" value="${ticket.id}"/>
+                                    <!-- TEXTO -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-on-surface-variant mb-2" for="comment-box">
+                                            Mensaje
+                                        </label>
+                                        <textarea id="comment-box" name="texto" required rows="5" placeholder="Escribe tu comentario o avance aquí..." class="w-full rounded-lg border border-outline bg-white p-3 text-base focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"></textarea>
+                                    </div>
+                                    <!-- BOTON -->
+                                    <button type="submit" class="bg-primary text-white hover:bg-primary-container font-medium px-6 py-3 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                                        Enviar
+                                        <span class="material-symbols-outlined" style="font-size:18px;">
+                                            send
+                                        </span>
+                                    </button>
+                                </form>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </div>
             </div>

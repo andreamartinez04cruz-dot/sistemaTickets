@@ -1,16 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ page import="co.edu.sena.mesa.servicio.TicketService" %>
 <%@ page import="co.edu.sena.mesa.modelo.Categoria" %>
 <%@ page import="java.util.List" %>
 <%
     List<Categoria> categorias = (List<Categoria>) request.getAttribute("categorias");
-    if (categorias == null) {
-        TicketService ticketService = (TicketService) getServletContext().getAttribute("ticketService");
-        if (ticketService != null) {
-            categorias = ticketService.ListarCategorias();
-        }
-    }
 %>
 
 <!DOCTYPE html>
@@ -236,7 +229,7 @@
 
                             <!-- Acciones -->
                             <div class="flex justify-end gap-4 mt-stack-md pt-stack-md border-t border-surface-container">
-                                <button class="px-6 py-2.5 rounded-lg border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-colors" type="button">
+                                <button class="px-6 py-2.5 rounded-lg border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-colors" type="button" onclick="window.location.href='${pageContext.request.contextPath}/tickets/registrar/Funcionario?action=historial'">
                                     Cancelar
                                 </button>
                                 <button class="px-6 py-2.5 rounded-lg bg-primary-container text-white font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-colors shadow-sm flex items-center gap-2" type="submit">

@@ -1,4 +1,4 @@
-package co.edu.sena.mesa.web;
+package co.edu.sena.mesa.web.admin;
 
 import co.edu.sena.mesa.dto.DashboardEstadisticasDTO;
 import co.edu.sena.mesa.repositorio.AdminTicketRepository;
@@ -25,11 +25,19 @@ public class AdminTicketServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        AdminTicketRepository repository = new AdminTicketRepositoryJdbc();
-        adminTicketService = new AdminTicketServiceImpl(repository);
+        adminTicketService = (AdminTicketService) getServletContext()
+                .getAttribute("adminTicketService");
+        if (adminTicketService == null) {
+            AdminTicketRepository repository = new AdminTicketRepositoryJdbc();
+            adminTicketService = new AdminTicketServiceImpl(repository);
+        }
 
-        DashboardRepository dashboardRepository = new DashboardRepositoryJdbc();
-        dashboardService = new DashboardServiceImpl(dashboardRepository);
+        dashboardService = (DashboardService) getServletContext()
+                .getAttribute("dashboardService");
+        if (dashboardService == null) {
+            DashboardRepository dashboardRepository = new DashboardRepositoryJdbc();
+            dashboardService = new DashboardServiceImpl(dashboardRepository);
+        }
     }
 
     @Override

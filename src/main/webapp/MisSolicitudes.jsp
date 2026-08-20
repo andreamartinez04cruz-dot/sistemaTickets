@@ -13,6 +13,7 @@
         <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
         <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <!-- Tailwind CSS -->
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -95,6 +96,35 @@
                 background-color: #f9f9f9;
                 color: #1a1c1c;
             }
+            .swal2-popup.custom-cancel-popup {
+                border-radius: 16px;
+                border: 1px solid #dfe0e0;
+                box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+            }
+            .swal2-title.custom-cancel-title {
+                font-family: 'Work Sans', sans-serif;
+                color: #1a1c1c;
+                font-size: 1.3rem;
+                font-weight: 700;
+            }
+            .swal2-html-container.custom-cancel-text {
+                color: #454747;
+                font-size: 0.98rem;
+            }
+            .swal2-confirm.custom-confirm-btn,
+            .swal2-cancel.custom-cancel-btn {
+                border-radius: 9999px !important;
+                padding: 0.6rem 1.3rem !important;
+                font-weight: 600 !important;
+                font-family: 'Work Sans', sans-serif;
+            }
+            .swal2-confirm.custom-confirm-btn {
+                background: #ba1a1a !important;
+            }
+            .swal2-cancel.custom-cancel-btn {
+                background: #e8e8e8 !important;
+                color: #1a1c1c !important;
+            }
         </style>
     </head>
 
@@ -112,12 +142,18 @@
 
                 <!-- Header Section -->
                 <div class="mb-stack-lg flex justify-between items-center">
+                    <c:set var="rolActual" value="${not empty sessionScope.rolUsuario ? sessionScope.rolUsuario : sessionScope.usuario.rol}" />
+                    <c:set var="nuevaSolicitudUrl" value="${pageContext.request.contextPath}/tickets/registrar" />
+                    <c:set var="cancelarTicketUrlBase" value="${pageContext.request.contextPath}/tickets/registrar" />
+                    <c:if test="${rolActual == 'FUNCIONARIO'}">
+                        <c:set var="nuevaSolicitudUrl" value="${pageContext.request.contextPath}/tickets/registrar/Funcionario" />
+                    </c:if>
                     <div>
                         <h1 class="font-headline-lg text-3xl md:text-4xl font-bold text-on-surface mb-stack-sm">Historial de Tickets</h1>
                         <p class="font-body-md text-on-surface-variant">Revisa el estado y el historial de todas tus solicitudes.</p>
                     </div>
                     <!-- Botón para ir al formulario de nueva solicitud -->
-                    <a href="${pageContext.request.contextPath}/tickets/registrar" 
+                    <a href="${nuevaSolicitudUrl}" 
                        class="bg-primary hover:bg-primary-fixed-dim text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
                         <span class="material-symbols-outlined text-sm">add</span> Nueva Solicitud
                     </a>
@@ -164,12 +200,22 @@
                             </div>
 
                             <!-- Pie de Tarjeta -->
-                            <div class="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center">
+                            <div class="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center gap-3 flex-wrap">
                                 <span class="text-xs text-on-surface-variant">${ticket.fechaCreacion}</span>
-                                <a href="${pageContext.request.contextPath}/tickets/comentar?id=${ticket.id}"
-                                   class="text-primary hover:text-primary-fixed-dim text-sm font-medium flex items-center gap-1 transition-colors">
-                                    Ver Detalles <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                                </a>
+                                <div class="flex items-center gap-3">
+                                    <c:set var="estadoTicket" value="${ticket.estadoNombre}" />
+                                    <c:if test="${empty estadoTicket || (estadoTicket != 'EN_PROCESO' && estadoTicket != 'CERRADO' && estadoTicket != 'RESUELTO' && estadoTicket != 'CANCELADO')}">
+                                                     <a href="${cancelarTicketUrlBase}?action=cancelar&idTicket=${ticket.id}"
+                                                         onclick="return confirmarCancelacion(event, this.href);"
+                                           class="text-error hover:text-on-error-container text-sm font-semibold transition-colors">
+                                            Cancelar
+                                        </a>
+                                    </c:if>
+                                    <a href="${pageContext.request.contextPath}/tickets/comentar?id=${ticket.id}"
+                                       class="text-primary hover:text-primary-fixed-dim text-sm font-medium flex items-center gap-1 transition-colors">
+                                        Ver Detalles <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </c:forEach>
@@ -185,6 +231,36 @@
                 </div>
             </main>
         </div>
+
+        <script>
+            function confirmarCancelacion(event, url) {
+                event.preventDefault();
+
+                Swal.fire({
+                    title: '¿Seguro que deseas cancelar este ticket?',
+                    html: 'Esta acción cambiará el estado a <b>CANCELADO</b> y no se puede deshacer fácilmente.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cancelar ticket',
+                    cancelButtonText: 'Volver',
+                    reverseButtons: true,
+                    focusCancel: true,
+                    customClass: {
+                        popup: 'custom-cancel-popup',
+                        title: 'custom-cancel-title',
+                        htmlContainer: 'custom-cancel-text',
+                        confirmButton: 'custom-confirm-btn',
+                        cancelButton: 'custom-cancel-btn'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
+                });
+
+                return false;
+            }
+        </script>
 
     </body>
 </html>

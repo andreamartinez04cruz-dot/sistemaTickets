@@ -23,4 +23,7 @@ public interface TicketRepository {
     //obtener id
     Ticket obtenerPorId(int idTicket);
 
+    // Cancelar ticket del propio solicitante solo si el estado lo permite
+    boolean cancelarTicketSolicitante(int idTicket, int idSolicitante);
+
 }

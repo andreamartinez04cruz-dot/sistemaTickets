@@ -6,6 +6,8 @@ public class DashboardEstadisticasDTO {
     private int sinAsignar;
     private int criticos;
     private int cerradosHoy;
+    private int agentesConTickets;
+    private int slaVencidos;
 
     public DashboardEstadisticasDTO() {
     }
@@ -40,5 +42,21 @@ public class DashboardEstadisticasDTO {
 
     public void setCerradosHoy(int cerradosHoy) {
         this.cerradosHoy = cerradosHoy;
+    }
+
+    public int getAgentesConTickets() {
+        return agentesConTickets;
+    }
+
+    public void setAgentesConTickets(int agentesConTickets) {
+        this.agentesConTickets = agentesConTickets;
+    }
+
+    public int getSlaVencidos() {
+        return slaVencidos;
+    }
+
+    public void setSlaVencidos(int slaVencidos) {
+        this.slaVencidos = slaVencidos;
     }
 }
