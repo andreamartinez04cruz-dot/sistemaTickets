@@ -2,6 +2,7 @@ package co.edu.sena.mesa.servicio;
 
 import co.edu.sena.mesa.dto.AdminTicketDTO;
 import co.edu.sena.mesa.repositorio.AdminTicketRepository;
+import co.edu.sena.mesa.modelo.estado.EstadoTicketFactory;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +51,14 @@ public class AdminTicketServiceImpl implements AdminTicketService {
 
     @Override
     public void cancelarTicket(int idTicket) {
-        adminTicketRepository.cancelarTicket(idTicket);
+        String estadoActual = adminTicketRepository.obtenerEstadoActual(idTicket);
+        if (estadoActual == null) {
+            return;
+        }
+        String estadoCancelado = EstadoTicketFactory.crear(estadoActual)
+                .cancelar()
+                .getNombreEstado();
+        adminTicketRepository.actualizarEstado(idTicket, estadoCancelado);
     }
 
     @Override

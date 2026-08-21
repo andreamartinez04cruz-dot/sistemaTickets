@@ -2,17 +2,25 @@ package co.edu.sena.mesa.servicio.agente;
 
 import co.edu.sena.mesa.dto.AgenteTicketDTO;
 import co.edu.sena.mesa.dto.AgenteTicketsResumenDTO;
-import co.edu.sena.mesa.modelo.estado.EstadoAsignado;
-import co.edu.sena.mesa.modelo.estado.EstadoEnProceso;
-import co.edu.sena.mesa.modelo.estado.EstadoNuevo;
-import co.edu.sena.mesa.modelo.estado.EstadoResuelto;
+import co.edu.sena.mesa.mapper.AgenteTicketsResumenMapper;
 import co.edu.sena.mesa.modelo.estado.EstadoTicket;
+import co.edu.sena.mesa.modelo.estado.EstadoTicketFactory;
 import co.edu.sena.mesa.repositorio.AgenteTicketRepository;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
 
 public class AgenteTicketServiceImpl implements AgenteTicketService {
+
+    private static final Map<String, Function<EstadoTicket, EstadoTicket>> TRANSICIONES = Map.of(
+            "EN PROCESO", EstadoTicket::iniciarAtencion,
+            "RESUELTO", EstadoTicket::resolver
+    );
+        private static final Map<String, String> ACCIONES_RESOLUCION = Map.of(
+            "resolverTicket", "RESUELTO"
+        );
 
     private final AgenteTicketRepository agenteTicketRepository;
     private final NotificacionService notificacionService;
@@ -36,9 +44,9 @@ public class AgenteTicketServiceImpl implements AgenteTicketService {
 
         String estadoActual = normalizarEstado(agenteTicketRepository
             .obtenerEstadoActual(idTicket, idAgente));
-        String estadoSolicitado = "resolverTicket".equals(accion)
-            ? "RESUELTO"
-            : normalizarEstado(nuevoEstado);
+        String estadoSolicitado = ACCIONES_RESOLUCION.getOrDefault(
+            accion,
+            normalizarEstado(nuevoEstado));
 
         if (estadoSolicitado == null) {
             return "Debe elegir un estado válido.";
@@ -51,15 +59,15 @@ public class AgenteTicketServiceImpl implements AgenteTicketService {
 
         int filasActualizadas = agenteTicketRepository.actualizarEstado(idTicket, idAgente, estado);
         if (filasActualizadas == 0) {
-            return "resolverTicket".equals(accion)
-                    ? "No se pudo resolver el ticket."
-                    : "No se pudo actualizar el estado.";
+            return ACCIONES_RESOLUCION.containsKey(accion)
+                ? "No se pudo resolver el ticket."
+                : "No se pudo actualizar el estado.";
         }
 
         notificarCambioEstado(idTicket, estado);
-        return "resolverTicket".equals(accion)
-                ? "Ticket resuelto correctamente y guardado en la base de datos."
-                : "Estado actualizado correctamente y guardado en la base de datos.";
+        return ACCIONES_RESOLUCION.containsKey(accion)
+            ? "Ticket resuelto correctamente y guardado en la base de datos."
+            : "Estado actualizado correctamente y guardado en la base de datos.";
     }
 
     @Override
@@ -77,7 +85,7 @@ public class AgenteTicketServiceImpl implements AgenteTicketService {
             }
         }
 
-        return new AgenteTicketsResumenDTO(tickets, tickets.size(), urgentes, pendientes);
+        return AgenteTicketsResumenMapper.toDTO(tickets, urgentes, pendientes);
     }
 
     private String normalizarEstado(String estado) {
@@ -97,33 +105,13 @@ public class AgenteTicketServiceImpl implements AgenteTicketService {
             return estadoSolicitado;
         }
 
-        EstadoTicket estado = crearEstado(estadoActual);
-        EstadoTicket siguiente;
-        if ("EN PROCESO".equals(estadoSolicitado)) {
-            siguiente = estado.iniciarAtencion();
-        } else if ("RESUELTO".equals(estadoSolicitado)) {
-            siguiente = estado.resolver();
-        } else {
+        Function<EstadoTicket, EstadoTicket> transicion = TRANSICIONES.get(estadoSolicitado);
+        if (transicion == null) {
             return null;
         }
 
-        return normalizarEstado(siguiente.getNombreEstado());
-    }
-
-    private EstadoTicket crearEstado(String estado) {
-        if ("NUEVO".equals(estado)) {
-            return new EstadoNuevo();
-        }
-        if ("ASIGNADO".equals(estado)) {
-            return new EstadoAsignado();
-        }
-        if ("EN PROCESO".equals(estado)) {
-            return new EstadoEnProceso();
-        }
-        if ("RESUELTO".equals(estado)) {
-            return new EstadoResuelto();
-        }
-        throw new IllegalStateException("Estado de ticket no reconocido: " + estado);
+        return normalizarEstado(transicion.apply(EstadoTicketFactory.crear(estadoActual))
+                .getNombreEstado());
     }
 
     private void notificarCambioEstado(int idTicket, String estado) {

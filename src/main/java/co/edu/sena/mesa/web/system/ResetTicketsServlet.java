@@ -1,5 +1,6 @@
 package co.edu.sena.mesa.web.system;
 
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.servicio.AdminTicketService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -28,7 +29,7 @@ public class ResetTicketsServlet extends HttpServlet {
                     + "• Ticket #2 cambiado a ASIGNADO (para que pruebes todo su ciclo de vida desde cero)";
         } catch (Exception exception) {
             message = "Hubo un error al resetear los estados: " + exception.getMessage();
-            exception.printStackTrace();
+            RegistroErrores.registrar("Error al restablecer tickets de prueba", exception);
         }
         request.setAttribute("message", message);
         request.getRequestDispatcher("/ResetTickets_view.jsp").forward(request, response);

@@ -1,5 +1,6 @@
 package co.edu.sena.mesa.repositorio;
 
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.config.ConexionBD;
 import co.edu.sena.mesa.modelo.Rol;
 import co.edu.sena.mesa.modelo.Usuario;
@@ -35,7 +36,7 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error al consultar usuario", e);
         }
 
         return null;
@@ -69,7 +70,7 @@ public class UsuarioRepositoryJdbc implements UsuarioRepository {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error al consultar roles del usuario", e);
         }
 
         return roles;

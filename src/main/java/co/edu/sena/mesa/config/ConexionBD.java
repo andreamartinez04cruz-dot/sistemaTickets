@@ -30,7 +30,7 @@ public class ConexionBD {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            RegistroErrores.registrar("Error al conectar con la base de datos", e);
 
         }
 
@@ -55,7 +55,7 @@ public class ConexionBD {
                     }
                 }
             } catch (Exception e) {
-                System.out.println("MIGRACION: Error agregando columna " + col + ": " + e.getMessage());
+                RegistroErrores.registrar("Error migrando columna " + col, e);
             }
         }
     }

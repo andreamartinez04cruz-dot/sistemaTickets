@@ -10,6 +10,8 @@ import co.edu.sena.mesa.modelo.Comentario;
 import co.edu.sena.mesa.modelo.Prioridad;
 import co.edu.sena.mesa.modelo.Ticket;
 import co.edu.sena.mesa.modelo.Usuario;
+import co.edu.sena.mesa.modelo.estado.EstadoTicket;
+import co.edu.sena.mesa.modelo.estado.EstadoTicketFactory;
 import co.edu.sena.mesa.repositorio.TicketRepository;
 import co.edu.sena.mesa.servicio.asignacion.AsignacionService;
 import co.edu.sena.mesa.servicio.sla.CalcularPrioridad;
@@ -17,9 +19,13 @@ import co.edu.sena.mesa.servicio.sla.SlaService;
 import co.edu.sena.mesa.servicio.solicitante.SolicitanteTicketService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.List;
 
 public class TicketServiceImpl implements TicketService, SolicitanteTicketService {
+
+    private static final Set<String> ESTADOS_NO_CANCELABLES_POR_SOLICITANTE = Set.of(
+            "RESUELTO", "CERRADO", "CANCELADO");
 
     // Servicio de Doris
     private final TicketRepository ticketRepository;
@@ -132,6 +138,17 @@ public class TicketServiceImpl implements TicketService, SolicitanteTicketServic
 
     @Override
     public boolean cancelarTicketSolicitante(int idTicket, int idSolicitante) {
-        return ticketRepository.cancelarTicketSolicitante(idTicket, idSolicitante);
+        String estadoActual = ticketRepository.obtenerEstadoActual(idTicket, idSolicitante);
+        if (estadoActual == null) {
+            return false;
+        }
+        if (ESTADOS_NO_CANCELABLES_POR_SOLICITANTE.contains(estadoActual.toUpperCase())) {
+            return false;
+        }
+        EstadoTicket estadoCancelado = EstadoTicketFactory.crear(estadoActual).cancelar();
+        return ticketRepository.actualizarEstado(
+                idTicket,
+                idSolicitante,
+                estadoCancelado.getNombreEstado());
     }
 }

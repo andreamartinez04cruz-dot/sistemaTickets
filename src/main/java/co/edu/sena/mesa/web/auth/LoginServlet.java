@@ -2,10 +2,7 @@ package co.edu.sena.mesa.web.auth;
 
 import co.edu.sena.mesa.modelo.Rol;
 import co.edu.sena.mesa.modelo.Usuario;
-import co.edu.sena.mesa.repositorio.UsuarioRepository;
-import co.edu.sena.mesa.repositorio.UsuarioRepositoryJdbc;
 import co.edu.sena.mesa.servicio.UsuarioService;
-import co.edu.sena.mesa.servicio.UsuarioServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -25,9 +22,12 @@ public class LoginServlet extends HttpServlet {
     private UsuarioService usuarioService;
 
     @Override
-    public void init() {
-        UsuarioRepository usuarioRepository = new UsuarioRepositoryJdbc();
-        usuarioService = new UsuarioServiceImpl(usuarioRepository);
+    public void init() throws ServletException {
+        usuarioService = (UsuarioService) getServletContext()
+                .getAttribute("usuarioService");
+        if (usuarioService == null) {
+            throw new ServletException("UsuarioService no fue inicializado en el AppContextListener");
+        }
     }
 
     @Override

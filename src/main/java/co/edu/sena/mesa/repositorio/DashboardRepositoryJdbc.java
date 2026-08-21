@@ -1,7 +1,9 @@
 package co.edu.sena.mesa.repositorio;
 
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.config.ConexionBD;
 import co.edu.sena.mesa.dto.DashboardEstadisticasDTO;
+import co.edu.sena.mesa.mapper.DashboardMapper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,7 +29,6 @@ public class DashboardRepositoryJdbc implements DashboardRepository {
 
     @Override
     public DashboardEstadisticasDTO obtenerEstadisticasAdministrador() {
-        DashboardEstadisticasDTO dto = new DashboardEstadisticasDTO();
         String sql = "SELECT "
                 + "(SELECT COUNT(*) FROM ticket WHERE MONTH(fechaCreacion) = MONTH(CURRENT_DATE()) AND YEAR(fechaCreacion) = YEAR(CURRENT_DATE())) AS total_tickets_mes, "
                 + "(SELECT COUNT(*) FROM ticket t LEFT JOIN ticketagente ta ON ta.idTicket = t.id WHERE ta.idTicket IS NULL "
@@ -54,19 +55,14 @@ public class DashboardRepositoryJdbc implements DashboardRepository {
             try (PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
                 if (rs.next()) {
-                    dto.setTotalTicketsMes(rs.getInt("total_tickets_mes"));
-                    dto.setSinAsignar(rs.getInt("sin_asignar"));
-                    dto.setCriticos(rs.getInt("criticos"));
-                    dto.setAgentesConTickets(rs.getInt("agentes_con_tickets"));
-                    dto.setSlaVencidos(rs.getInt("sla_vencidos"));
-                    dto.setCerradosHoy(rs.getInt("cerrados_hoy"));
+                    return DashboardMapper.toDTO(rs);
                 }
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error al consultar métricas del dashboard", e);
         }
 
-        return dto;
+        return DashboardMapper.empty();
     }
 }

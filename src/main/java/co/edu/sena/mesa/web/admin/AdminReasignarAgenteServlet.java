@@ -1,8 +1,6 @@
 package co.edu.sena.mesa.web.admin;
 
 import co.edu.sena.mesa.servicio.AdminTicketService;
-import co.edu.sena.mesa.servicio.AdminTicketServiceImpl;
-import co.edu.sena.mesa.repositorio.AdminTicketRepositoryJdbc;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -17,7 +15,16 @@ import java.util.Map;
 @WebServlet({"/admin/reasignar-agentes", "/admin/reasignarAgentes"})
 public class AdminReasignarAgenteServlet extends HttpServlet {
 
-    private final AdminTicketService adminTicketService = new AdminTicketServiceImpl(new AdminTicketRepositoryJdbc());
+    private AdminTicketService adminTicketService;
+
+    @Override
+    public void init() throws ServletException {
+        adminTicketService = (AdminTicketService) getServletContext()
+                .getAttribute("adminTicketService");
+        if (adminTicketService == null) {
+            throw new ServletException("AdminTicketService no fue inicializado en el AppContextListener");
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

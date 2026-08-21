@@ -26,4 +26,8 @@ public interface TicketRepository {
     // Cancelar ticket del propio solicitante solo si el estado lo permite
     boolean cancelarTicketSolicitante(int idTicket, int idSolicitante);
 
+    String obtenerEstadoActual(int idTicket, int idSolicitante);
+
+    boolean actualizarEstado(int idTicket, int idSolicitante, String estado);
+
 }

@@ -22,6 +22,10 @@ public interface AdminTicketRepository {
 
     void cancelarTicket(int idTicket);
 
+    String obtenerEstadoActual(int idTicket);
+
+    boolean actualizarEstado(int idTicket, String estado);
+
     String obtenerCorreoSolicitante(int idTicket);
 
     void restablecerEstadosTicketsPrueba();

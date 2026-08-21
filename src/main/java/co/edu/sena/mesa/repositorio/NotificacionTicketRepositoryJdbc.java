@@ -1,5 +1,6 @@
 package co.edu.sena.mesa.repositorio;
 
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.config.ConexionBD;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,7 +39,70 @@ public class NotificacionTicketRepositoryJdbc implements NotificacionTicketRepos
             }
             return statement.executeUpdate();
         } catch (Exception exception) {
-            exception.printStackTrace();
+            RegistroErrores.registrar("Error finalizando ticket", exception);
+            return 0;
+        }
+    }
+
+    @Override
+    public String obtenerEstadoActual(int idTicket, String rol, int idUsuario) {
+        String sql;
+        boolean requiereUsuario = false;
+
+        if ("ADMIN".equals(rol)) {
+            sql = "SELECT estado FROM ticket WHERE id = ?";
+        } else if ("AGENTE".equals(rol)) {
+            sql = "SELECT t.estado FROM ticket t INNER JOIN ticketagente ta ON ta.idTicket = t.id "
+                    + "WHERE t.id = ? AND ta.idUsuario = ?";
+            requiereUsuario = true;
+        } else {
+            sql = "SELECT estado FROM ticket WHERE id = ? AND idUsuario = ?";
+            requiereUsuario = true;
+        }
+
+        try (Connection conexion = ConexionBD.obtenerConexion();
+                PreparedStatement statement = conexion.prepareStatement(sql)) {
+            statement.setInt(1, idTicket);
+            if (requiereUsuario) {
+                statement.setInt(2, idUsuario);
+            }
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? resultSet.getString("estado") : null;
+            }
+        } catch (Exception exception) {
+            RegistroErrores.registrar("Error consultando estado para notificación", exception);
+            return null;
+        }
+    }
+
+    @Override
+    public int reabrirTicket(int idTicket, String rol, int idUsuario) {
+        String sql;
+        boolean requiereUsuario = false;
+
+        if ("ADMIN".equals(rol)) {
+            sql = "UPDATE ticket SET estado = 'EN PROCESO' WHERE id = ? "
+                    + "AND REPLACE(UPPER(COALESCE(estado, '')), ' ', '_') = 'RESUELTO'";
+        } else if ("AGENTE".equals(rol)) {
+            sql = "UPDATE ticket t INNER JOIN ticketagente ta ON ta.idTicket = t.id "
+                    + "SET t.estado = 'EN PROCESO' WHERE t.id = ? AND ta.idUsuario = ? "
+                    + "AND REPLACE(UPPER(COALESCE(t.estado, '')), ' ', '_') = 'RESUELTO'";
+            requiereUsuario = true;
+        } else {
+            sql = "UPDATE ticket SET estado = 'EN PROCESO' WHERE id = ? AND idUsuario = ? "
+                    + "AND REPLACE(UPPER(COALESCE(estado, '')), ' ', '_') = 'RESUELTO'";
+            requiereUsuario = true;
+        }
+
+        try (Connection conexion = ConexionBD.obtenerConexion();
+                PreparedStatement statement = conexion.prepareStatement(sql)) {
+            statement.setInt(1, idTicket);
+            if (requiereUsuario) {
+                statement.setInt(2, idUsuario);
+            }
+            return statement.executeUpdate();
+        } catch (Exception exception) {
+            RegistroErrores.registrar("Error reabriendo ticket", exception);
             return 0;
         }
     }
@@ -77,7 +141,7 @@ public class NotificacionTicketRepositoryJdbc implements NotificacionTicketRepos
                 }
             }
         } catch (Exception exception) {
-            exception.printStackTrace();
+            RegistroErrores.registrar("Error listando notificaciones de agente", exception);
         }
         return notificaciones;
     }
@@ -106,7 +170,7 @@ public class NotificacionTicketRepositoryJdbc implements NotificacionTicketRepos
                 notificaciones.add(notificacion);
             }
         } catch (Exception exception) {
-            exception.printStackTrace();
+            RegistroErrores.registrar("Error listando notificaciones de administrador", exception);
         }
         return notificaciones;
     }
@@ -134,7 +198,7 @@ public class NotificacionTicketRepositoryJdbc implements NotificacionTicketRepos
                 }
             }
         } catch (Exception exception) {
-            exception.printStackTrace();
+            RegistroErrores.registrar("Error listando notificaciones de solicitante", exception);
         }
         return notificaciones;
     }

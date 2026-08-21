@@ -1,7 +1,9 @@
 package co.edu.sena.mesa.repositorio;
 
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.config.ConexionBD;
 import co.edu.sena.mesa.dto.AgenteTicketDTO;
+import co.edu.sena.mesa.mapper.AgenteTicketMapper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,7 +25,7 @@ public class AgenteTicketRepositoryJdbc implements AgenteTicketRepository {
                 return resultSet.next();
             }
         } catch (SQLException exception) {
-            exception.printStackTrace();
+            RegistroErrores.registrar("Error validando asignación del agente", exception);
             return false;
         }
     }
@@ -42,7 +44,7 @@ public class AgenteTicketRepositoryJdbc implements AgenteTicketRepository {
                 return resultSet.next() ? resultSet.getString("estado") : null;
             }
         } catch (SQLException exception) {
-            exception.printStackTrace();
+            RegistroErrores.registrar("Error consultando estado del ticket", exception);
             return null;
         }
     }
@@ -59,7 +61,7 @@ public class AgenteTicketRepositoryJdbc implements AgenteTicketRepository {
             statement.setInt(3, idAgente);
             return statement.executeUpdate();
         } catch (SQLException exception) {
-            exception.printStackTrace();
+            RegistroErrores.registrar("Error actualizando estado del ticket", exception);
             return 0;
         }
     }
@@ -75,7 +77,7 @@ public class AgenteTicketRepositoryJdbc implements AgenteTicketRepository {
                 return resultSet.next() ? resultSet.getString("correo") : null;
             }
         } catch (SQLException exception) {
-            exception.printStackTrace();
+            RegistroErrores.registrar("Error consultando correo del solicitante", exception);
             return null;
         }
     }
@@ -99,18 +101,11 @@ public class AgenteTicketRepositoryJdbc implements AgenteTicketRepository {
             statement.setInt(1, idAgente);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    AgenteTicketDTO ticket = new AgenteTicketDTO();
-                    ticket.setId(resultSet.getInt("id"));
-                    ticket.setTitulo(resultSet.getString("titulo"));
-                    ticket.setEstado(resultSet.getString("estado"));
-                    ticket.setCategoria(resultSet.getString("categoria"));
-                    ticket.setPrioridad(resultSet.getString("prioridad"));
-                    ticket.setSolicitante(resultSet.getString("solicitante"));
-                    tickets.add(ticket);
+                    tickets.add(AgenteTicketMapper.toDTO(resultSet));
                 }
             }
         } catch (SQLException exception) {
-            exception.printStackTrace();
+            RegistroErrores.registrar("Error listando tickets asignados", exception);
         }
 
         return tickets;

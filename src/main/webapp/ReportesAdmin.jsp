@@ -22,9 +22,7 @@
     <jsp:include page="Menu.jsp" />
 
     <div class="flex-1 flex flex-col">
-        
-        <!-- Header Superior -->
-        <jsp:include page="Header.jsp" />
+  
             <div class="flex items-center justify-between mb-8 p-6 bg-gradient-to-r from-emerald-50 to-green-50/20 rounded-2xl border border-emerald-100/70 shadow-sm">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Estadísticas y Reportes</h1>

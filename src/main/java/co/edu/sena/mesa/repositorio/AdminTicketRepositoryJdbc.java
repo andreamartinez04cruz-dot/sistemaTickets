@@ -1,7 +1,9 @@
 package co.edu.sena.mesa.repositorio;
 
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.config.ConexionBD;
 import co.edu.sena.mesa.dto.AdminTicketDTO;
+import co.edu.sena.mesa.mapper.AdminTicketMapper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,28 +48,11 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
         try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                AdminTicketDTO dto = new AdminTicketDTO();
-                dto.setId(rs.getInt("id"));
-                dto.setTitulo(rs.getString("titulo"));
-                dto.setDescripcion(rs.getString("descripcion"));
-                dto.setNombreAprendiz(rs.getString("nombre_aprendiz"));
-                dto.setPrograma(rs.getString("programa"));
-                dto.setNumeroPrograma(rs.getObject("numero_programa") != null ? rs.getInt("numero_programa") : null);
-
-                String nombreInstructor = rs.getString("nombre_instructor");
-                String apellidoInstructor = rs.getString("apellido_instructor");
-                dto.setInstructorCargo((nombreInstructor != null ? nombreInstructor : "") + (apellidoInstructor != null && !apellidoInstructor.isEmpty() ? " " + apellidoInstructor : ""));
-
-                dto.setCategoria(rs.getString("categoria"));
-                dto.setPrioridad(rs.getString("prioridad"));
-                dto.setEstado(rs.getString("estado"));
-                dto.setTipoPersona(rs.getString("tipo_persona"));
-                dto.setJornada(rs.getString("jornada"));
-                ticketsAprendiz.add(dto);
+                ticketsAprendiz.add(AdminTicketMapper.toDTO(rs, true));
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error listando tickets de aprendiz", e);
         }
 
         return ticketsAprendiz;
@@ -99,22 +84,15 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
         try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                AdminTicketDTO dto = new AdminTicketDTO();
-                dto.setId(rs.getInt("id"));
-                dto.setTitulo(rs.getString("titulo"));
-                dto.setDescripcion(rs.getString("descripcion"));
-                dto.setNombreFuncionario(rs.getString("nombre_funcionario"));
-                dto.setRol(rs.getString("rol"));
-                dto.setCategoria(rs.getString("categoria"));
-                dto.setPrioridad(rs.getString("prioridad"));
-                dto.setEstado(rs.getString("estado"));
-                dto.setTipoPersona(rs.getString("tipo_persona"));
-                dto.setJornada(rs.getString("jornada") != null ? rs.getString("jornada") : "Noche");
+                AdminTicketDTO dto = AdminTicketMapper.toDTO(rs, false);
+                if (dto.getJornada() == null) {
+                    dto.setJornada("Noche");
+                }
                 ticketsFuncionario.add(dto);
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error en repositorio administrativo", e);
         }
 
         return ticketsFuncionario;
@@ -135,7 +113,7 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
         try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement(sql)) {
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error en repositorio administrativo", e);
         }
     }
 
@@ -169,7 +147,7 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error en repositorio administrativo", e);
         }
     }
 
@@ -199,7 +177,7 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
                 tickets.add(ticket);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error en repositorio administrativo", e);
         }
         return tickets;
     }
@@ -230,7 +208,7 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error en repositorio administrativo", e);
         }
         return agentes;
     }
@@ -255,7 +233,7 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
                 gestores.add(gestor);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error en repositorio administrativo", e);
         }
         return gestores;
     }
@@ -267,7 +245,36 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
             ps.setInt(1, idTicket);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error en repositorio administrativo", e);
+        }
+    }
+
+    @Override
+    public String obtenerEstadoActual(int idTicket) {
+        String sql = "SELECT estado FROM ticket WHERE id = ?";
+        try (Connection cn = ConexionBD.obtenerConexion();
+                PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, idTicket);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getString("estado") : null;
+            }
+        } catch (SQLException e) {
+            RegistroErrores.registrar("Error en repositorio administrativo", e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean actualizarEstado(int idTicket, String estado) {
+        String sql = "UPDATE ticket SET estado = ? WHERE id = ?";
+        try (Connection cn = ConexionBD.obtenerConexion();
+                PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, estado);
+            ps.setInt(2, idTicket);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            RegistroErrores.registrar("Error en repositorio administrativo", e);
+            return false;
         }
     }
 
@@ -284,7 +291,7 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error en repositorio administrativo", e);
         }
         return null;
     }
@@ -304,7 +311,7 @@ public class AdminTicketRepositoryJdbc implements AdminTicketRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error en repositorio administrativo", e);
         }
     }
 }

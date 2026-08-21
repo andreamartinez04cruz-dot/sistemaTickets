@@ -1,14 +1,8 @@
 package co.edu.sena.mesa.web.admin;
 
 import co.edu.sena.mesa.dto.DashboardEstadisticasDTO;
-import co.edu.sena.mesa.repositorio.AdminTicketRepository;
-import co.edu.sena.mesa.repositorio.AdminTicketRepositoryJdbc;
-import co.edu.sena.mesa.repositorio.DashboardRepository;
-import co.edu.sena.mesa.repositorio.DashboardRepositoryJdbc;
 import co.edu.sena.mesa.servicio.AdminTicketService;
-import co.edu.sena.mesa.servicio.AdminTicketServiceImpl;
 import co.edu.sena.mesa.servicio.DashboardService;
-import co.edu.sena.mesa.servicio.DashboardServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -28,15 +22,13 @@ public class AdminTicketServlet extends HttpServlet {
         adminTicketService = (AdminTicketService) getServletContext()
                 .getAttribute("adminTicketService");
         if (adminTicketService == null) {
-            AdminTicketRepository repository = new AdminTicketRepositoryJdbc();
-            adminTicketService = new AdminTicketServiceImpl(repository);
+            throw new ServletException("AdminTicketService no fue inicializado en el AppContextListener");
         }
 
         dashboardService = (DashboardService) getServletContext()
                 .getAttribute("dashboardService");
         if (dashboardService == null) {
-            DashboardRepository dashboardRepository = new DashboardRepositoryJdbc();
-            dashboardService = new DashboardServiceImpl(dashboardRepository);
+            throw new ServletException("DashboardService no fue inicializado en el AppContextListener");
         }
     }
 

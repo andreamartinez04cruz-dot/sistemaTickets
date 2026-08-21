@@ -138,6 +138,13 @@
                                                 Finalizar ticket
                                             </button>
                                         </form>
+                                        <form method="post" action="${pageContext.request.contextPath}/notificaciones" class="mt-2">
+                                            <input type="hidden" name="accion" value="reabrirTicket"/>
+                                            <input type="hidden" name="idTicket" value="${ticket.id}"/>
+                                            <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
+                                                Reabrir ticket
+                                            </button>
+                                        </form>
                                     </c:if>
                                     <c:if test="${not empty sessionScope.rolUsuario and sessionScope.rolUsuario == 'AGENTE'}">
                                         <a href="${pageContext.request.contextPath}/tickets/comentar?id=${ticket.id}" class="inline-block mt-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-lg font-bold text-xs">

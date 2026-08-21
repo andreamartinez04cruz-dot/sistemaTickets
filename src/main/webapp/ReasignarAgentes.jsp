@@ -24,8 +24,6 @@
             <jsp:include page="Menu.jsp" />
 
             <div class="flex-1 flex flex-col">
-                <!-- Header Superior -->
-                <jsp:include page="Header.jsp" />
                 
                 <!-- Contenido Principal -->
                 <main class="flex-1 p-8">

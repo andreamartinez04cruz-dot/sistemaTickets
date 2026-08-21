@@ -1,5 +1,6 @@
 package co.edu.sena.mesa.web.system;
 
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.modelo.Usuario;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketService;
 import jakarta.servlet.ServletException;
@@ -29,14 +30,17 @@ public class NotificacionesServlet extends HttpServlet {
         NotificacionTicketService service = (NotificacionTicketService) getServletContext()
                 .getAttribute("notificacionTicketService");
 
-        if ("POST".equalsIgnoreCase(request.getMethod())
-                && "finalizarTicket".equals(request.getParameter("accion"))
-                && service != null) {
+        if ("POST".equalsIgnoreCase(request.getMethod()) && service != null) {
             try {
                 int idTicket = Integer.parseInt(request.getParameter("idTicket"));
-                service.finalizarTicket(idTicket, rol, usuario.getId());
+                String accion = request.getParameter("accion");
+                if ("finalizarTicket".equals(accion)) {
+                    service.finalizarTicket(idTicket, rol, usuario.getId());
+                } else if ("reabrirTicket".equals(accion)) {
+                    service.reabrirTicket(idTicket, rol, usuario.getId());
+                }
             } catch (NumberFormatException exception) {
-                exception.printStackTrace();
+                RegistroErrores.registrar("ID de ticket de notificación inválido", exception);
             }
         }
 

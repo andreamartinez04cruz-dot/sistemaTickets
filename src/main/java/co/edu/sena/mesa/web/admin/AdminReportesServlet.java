@@ -1,10 +1,7 @@
 package co.edu.sena.mesa.web.admin;
 
 import co.edu.sena.mesa.dto.DashboardEstadisticasDTO;
-import co.edu.sena.mesa.repositorio.DashboardRepository;
-import co.edu.sena.mesa.repositorio.DashboardRepositoryJdbc;
 import co.edu.sena.mesa.servicio.DashboardService;
-import co.edu.sena.mesa.servicio.DashboardServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -20,8 +17,11 @@ public class AdminReportesServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        DashboardRepository dashboardRepository = new DashboardRepositoryJdbc();
-        dashboardService = new DashboardServiceImpl(dashboardRepository);
+        dashboardService = (DashboardService) getServletContext()
+                .getAttribute("dashboardService");
+        if (dashboardService == null) {
+            throw new ServletException("DashboardService no fue inicializado en el AppContextListener");
+        }
     }
 
     @Override

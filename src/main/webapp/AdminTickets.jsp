@@ -23,8 +23,6 @@
         <!-- 2. Contenedor principal que ocupa el resto del ancho -->
         <div class="flex-grow flex flex-col min-w-0">
 
-            <!-- Header superior -->
-            <jsp:include page="Header.jsp"/>
 
             <!-- Contenido del Dashboard -->
             <main class="flex-grow p-6 w-full max-w-7xl mx-auto">

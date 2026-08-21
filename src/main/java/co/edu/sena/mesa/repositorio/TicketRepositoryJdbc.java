@@ -1,6 +1,7 @@
 package co.edu.sena.mesa.repositorio;
 
 import co.edu.sena.mesa.config.ConexionBD;
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.modelo.Categoria;
 import co.edu.sena.mesa.modelo.Comentario;
 import co.edu.sena.mesa.modelo.Ticket;
@@ -18,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import co.edu.sena.mesa.modelo.estado.EstadoTicketFactory;
 import java.util.List;
 
 public class TicketRepositoryJdbc implements TicketRepository {
@@ -69,7 +71,6 @@ public class TicketRepositoryJdbc implements TicketRepository {
 
         System.out.println("ENTRO A TicketFuncionario");
 
-        // 1. Añadimos el campo de prioridad en el INSERT (Asumiendo que tu columna se llama idPrioridad)
         String sqlTicket = "INSERT INTO ticket "
             + "(titulo, descripcion, idCategoria, idPrioridad, idUsuario, estado, fechaCreacion, jornada) "
             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -85,10 +86,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
                 ps.setString(1, ticket.getTitulo());
                 ps.setString(2, ticket.getDescripcion());
                 ps.setLong(3, ticket.getCategoria().getId());
-
-                // 2. Insertamos la prioridad del ticket (Asegúrate de que tu objeto Ticket tenga un método para obtener el ID de la prioridad)
                 ps.setLong(4, ticket.getPrioridad().getId());
-
                 ps.setLong(5, idSolicitante);
                 ps.setString(6, ticket.getEstadoNombre());
                 ps.setTimestamp(7,
@@ -97,24 +95,12 @@ public class TicketRepositoryJdbc implements TicketRepository {
 
                 ps.executeUpdate();
 
-                System.out.println("TICKET INSERTADO");
-
                 try (ResultSet rs = ps.getGeneratedKeys()) {
 
                     if (rs.next()) {
-
                         long idTicket = rs.getLong(1);
-
-                        System.out.println("ID TICKET: " + idTicket);
-                        System.out.println("ID USUARIO: " + idSolicitante);
-
                         conexion.commit();
-
-                        System.out.println("COMMIT REALIZADO");
-
-                        // CORRECCIÓN: Asignamos el ID real del ticket, no el del usuario
                         ticket.setId((int) idTicket);
-
                     } else {
                         conexion.rollback();
                         throw new SQLException(
@@ -129,7 +115,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error registrando ticket", e);
             throw new RuntimeException(
                     "Error al registrar ticket",
                     e
@@ -156,7 +142,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error registrando ticket de funcionario", e);
         }
 
         return categorias;
@@ -193,24 +179,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
                     // ESTADO
                     String estadoBD = rs.getString("estado");
 
-                    if ("NUEVO".equalsIgnoreCase(estadoBD)) {
-                        ticket.setEsatdo(new EstadoNuevo());
-
-                    } else if ("ASIGNADO".equalsIgnoreCase(estadoBD)) {
-                        ticket.setEsatdo(new EstadoAsignado());
-
-                    } else if ("EN_PROCESO".equalsIgnoreCase(estadoBD)) {
-                        ticket.setEsatdo(new EstadoEnProceso());
-
-                    } else if ("RESUELTO".equalsIgnoreCase(estadoBD)) {
-                        ticket.setEsatdo(new EstadoResuelto());
-
-                    } else if ("CERRADO".equalsIgnoreCase(estadoBD)) {
-                        ticket.setEsatdo(new EstadoCerrado());
-
-                    } else if ("CANCELADO".equalsIgnoreCase(estadoBD)) {
-                        ticket.setEsatdo(new EstadoCancelado());
-                    }
+                    ticket.setEsatdo(EstadoTicketFactory.crear(estadoBD));
                     ticket.setFechaCreacion(
                             rs.getTimestamp("fechaCreacion").toLocalDateTime()
                     );
@@ -224,7 +193,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error listando categorías", e);
         }
 
         return tickets;
@@ -246,7 +215,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
             psComentario.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error consultando tickets del solicitante", e);
         }
     }
 
@@ -281,7 +250,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error guardando comentario", e);
         }
         return comentarios;
     }
@@ -356,42 +325,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
                     String estadoBD
                             = rs.getString("estado");
 
-                    if ("NUEVO".equalsIgnoreCase(estadoBD)) {
-
-                        ticket.setEsatdo(
-                                new EstadoNuevo()
-                        );
-
-                    } else if ("ASIGNADO".equalsIgnoreCase(estadoBD)) {
-
-                        ticket.setEsatdo(
-                                new EstadoAsignado()
-                        );
-
-                    } else if ("EN_PROCESO".equalsIgnoreCase(estadoBD)) {
-
-                        ticket.setEsatdo(
-                                new EstadoEnProceso()
-                        );
-
-                    } else if ("RESUELTO".equalsIgnoreCase(estadoBD)) {
-
-                        ticket.setEsatdo(
-                                new EstadoResuelto()
-                        );
-
-                    } else if ("CERRADO".equalsIgnoreCase(estadoBD)) {
-
-                        ticket.setEsatdo(
-                                new EstadoCerrado()
-                        );
-
-                    } else if ("CANCELADO".equalsIgnoreCase(estadoBD)) {
-
-                        ticket.setEsatdo(
-                                new EstadoCancelado()
-                        );
-                    }
+                    ticket.setEsatdo(EstadoTicketFactory.crear(estadoBD));
                     // =========================
                     // FECHA
                     // =========================
@@ -425,7 +359,7 @@ public class TicketRepositoryJdbc implements TicketRepository {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error consultando ticket", e);
         }
 
         return ticket;
@@ -445,9 +379,40 @@ public class TicketRepositoryJdbc implements TicketRepository {
             ps.setInt(2, idSolicitante);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            RegistroErrores.registrar("Error cancelando ticket del solicitante", e);
         }
 
         return false;
+    }
+
+    @Override
+    public String obtenerEstadoActual(int idTicket, int idSolicitante) {
+        String sql = "SELECT estado FROM ticket WHERE id = ? AND idUsuario = ?";
+        try (Connection cn = ConexionBD.obtenerConexion();
+                PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, idTicket);
+            ps.setInt(2, idSolicitante);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getString("estado") : null;
+            }
+        } catch (SQLException e) {
+            RegistroErrores.registrar("Error consultando estado del ticket", e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean actualizarEstado(int idTicket, int idSolicitante, String estado) {
+        String sql = "UPDATE ticket SET estado = ? WHERE id = ? AND idUsuario = ?";
+        try (Connection cn = ConexionBD.obtenerConexion();
+                PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setString(1, estado);
+            ps.setInt(2, idTicket);
+            ps.setInt(3, idSolicitante);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            RegistroErrores.registrar("Error actualizando estado del ticket", e);
+            return false;
+        }
     }
 }

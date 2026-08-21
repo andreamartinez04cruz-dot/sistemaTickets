@@ -37,11 +37,6 @@ public class AsignacionRepositoryJdbc implements AsignacionRepository {
 
     @Override
     public void asignarTicket(int idTicket, int idAgente, String estado) {
-        String crearTabla = "CREATE TABLE IF NOT EXISTS ticketagente ("
-                + "id INT AUTO_INCREMENT PRIMARY KEY, "
-                + "idTicket INT NOT NULL, idUsuario INT NOT NULL, "
-                + "fechaAsignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-                + "UNIQUE KEY uq_ticketagente_ticket (idTicket))";
         String insertarAsignacion = "INSERT INTO ticketagente (idTicket, idUsuario) VALUES (?, ?) "
                 + "ON DUPLICATE KEY UPDATE idUsuario = VALUES(idUsuario), "
                 + "fechaAsignacion = CURRENT_TIMESTAMP";
@@ -49,9 +44,6 @@ public class AsignacionRepositoryJdbc implements AsignacionRepository {
             + "AND REPLACE(UPPER(COALESCE(estado, '')), ' ', '_') = 'NUEVO'";
 
         try (Connection conexion = ConexionBD.obtenerConexion()) {
-            try (PreparedStatement statement = conexion.prepareStatement(crearTabla)) {
-                statement.executeUpdate();
-            }
             try (PreparedStatement statement = conexion.prepareStatement(insertarAsignacion)) {
                 statement.setInt(1, idTicket);
                 statement.setInt(2, idAgente);

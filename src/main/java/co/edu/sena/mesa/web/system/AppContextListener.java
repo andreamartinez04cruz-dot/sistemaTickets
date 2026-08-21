@@ -23,6 +23,11 @@ import co.edu.sena.mesa.servicio.asignacion.AsignacionService;
 import co.edu.sena.mesa.servicio.asignacion.AsignacionServiceImpl;
 import co.edu.sena.mesa.servicio.TicketService;
 import co.edu.sena.mesa.servicio.TicketServiceImpl;
+import co.edu.sena.mesa.servicio.UsuarioService;
+import co.edu.sena.mesa.servicio.UsuarioServiceImpl;
+import co.edu.sena.mesa.repositorio.UsuarioRepository;
+import co.edu.sena.mesa.repositorio.UsuarioRepositoryJdbc;
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionServiceImpl;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketService;
@@ -59,6 +64,10 @@ public class AppContextListener implements ServletContextListener {
         TicketService ticketService = new TicketServiceImpl(ticketRepository, asignacionService);
         event.getServletContext().setAttribute("ticketService", ticketService);
         event.getServletContext().setAttribute("solicitanteTicketService", (SolicitanteTicketService) ticketService);
+
+        UsuarioRepository usuarioRepository = new UsuarioRepositoryJdbc();
+        UsuarioService usuarioService = new UsuarioServiceImpl(usuarioRepository);
+        event.getServletContext().setAttribute("usuarioService", usuarioService);
 
         AdminTicketRepository adminTicketRepository = new AdminTicketRepositoryJdbc();
         AdminTicketService adminTicketService = new AdminTicketServiceImpl(adminTicketRepository);
@@ -120,7 +129,7 @@ public class AppContextListener implements ServletContextListener {
         try {
                 com.mysql.cj.jdbc.AbandonedConnectionCleanupThread.checkedShutdown();
             } catch (Exception e) {
-                e.printStackTrace();
+                RegistroErrores.registrar("Error cerrando recursos JDBC de Tomcat", e);
             }
             java.util.Enumeration<Driver> drivers = DriverManager.getDrivers();
             while (drivers.hasMoreElements()) {
@@ -128,7 +137,7 @@ public class AppContextListener implements ServletContextListener {
                 try {
                     DriverManager.deregisterDriver(driver);
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    RegistroErrores.registrar("Error liberando driver JDBC", e);
                 }
             }
         }

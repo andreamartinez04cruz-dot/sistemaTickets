@@ -1,5 +1,6 @@
 package co.edu.sena.mesa.web.solicitante;
 
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.dto.AgenteTicketsResumenDTO;
 import co.edu.sena.mesa.servicio.agente.AgenteTicketService;
 import co.edu.sena.mesa.modelo.Usuario;
@@ -37,7 +38,7 @@ public class AgenteTicketsServlet extends HttpServlet {
                         request.getParameter("nuevoEstado"));
             } catch (Exception exception) {
                 mensajeEstado = "Error al guardar el cambio del ticket.";
-                exception.printStackTrace();
+                RegistroErrores.registrar("Error al actualizar estado del ticket del agente", exception);
             }
         }
 

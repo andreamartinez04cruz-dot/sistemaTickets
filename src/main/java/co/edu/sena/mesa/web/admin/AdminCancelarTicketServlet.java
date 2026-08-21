@@ -1,8 +1,7 @@
 package co.edu.sena.mesa.web.admin;
 
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.servicio.AdminTicketService;
-import co.edu.sena.mesa.servicio.AdminTicketServiceImpl;
-import co.edu.sena.mesa.repositorio.AdminTicketRepositoryJdbc;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -19,15 +18,17 @@ import jakarta.servlet.http.HttpSession;
 public class AdminCancelarTicketServlet extends HttpServlet {
 
     private NotificacionService notificacionService;
-    private final AdminTicketService adminTicketService = new AdminTicketServiceImpl(new AdminTicketRepositoryJdbc());
+    private AdminTicketService adminTicketService;
 
     @Override
     public void init() throws ServletException {
         notificacionService = (NotificacionService) getServletContext().getAttribute("notificacionService");
         if (notificacionService == null) {
-            notificacionService = new co.edu.sena.mesa.servicio.notificacion.NotificacionServiceImpl(
-                    new co.edu.sena.mesa.servicio.notificacion.NotificadorEnAplicacion()
-            );
+            throw new ServletException("NotificacionService no fue inicializado en el AppContextListener");
+        }
+        adminTicketService = (AdminTicketService) getServletContext().getAttribute("adminTicketService");
+        if (adminTicketService == null) {
+            throw new ServletException("AdminTicketService no fue inicializado en el AppContextListener");
         }
     }
 
@@ -59,7 +60,7 @@ public class AdminCancelarTicketServlet extends HttpServlet {
                     session.setAttribute("notificaciones", notificaciones);
                 }
             } catch (NumberFormatException e) {
-                e.printStackTrace();
+                RegistroErrores.registrar("ID de ticket administrativo inválido", e);
             }
         }
 

@@ -1,12 +1,11 @@
 package co.edu.sena.mesa.web.solicitante;
 
+import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.dto.HistorialFuncionarioDTO;
 import co.edu.sena.mesa.dto.TicketDTO;
 import co.edu.sena.mesa.modelo.Categoria;
-import co.edu.sena.mesa.modelo.Prioridad;
 import co.edu.sena.mesa.modelo.Usuario;
 import co.edu.sena.mesa.servicio.solicitante.SolicitanteTicketService;
-import co.edu.sena.mesa.servicio.sla.CalcularPrioridad;
 import co.edu.sena.mesa.servicio.sla.SlaService;
 
 
@@ -18,7 +17,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
 @WebServlet("/tickets/registrar")
@@ -49,24 +47,13 @@ public class TicketServlet extends HttpServlet {
 
         String action = request.getParameter("action");
         if ("cancelar".equalsIgnoreCase(action)) {
-            String idTicketParam = request.getParameter("idTicket");
-            if (idTicketParam != null && !idTicketParam.isBlank()) {
-                try {
-                    int idTicket = Integer.parseInt(idTicketParam);
-                    solicitanteTicketService.cancelarTicketSolicitante(idTicket, usuario.getId());
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            response.sendRedirect(request.getContextPath() + "/tickets/registrar?action=historial");
+            TicketHistoryHelper.cancelar(request, response, solicitanteTicketService, usuario);
             return;
         }
 
         if ("historial".equalsIgnoreCase(action)) {
-            List<HistorialFuncionarioDTO> tickets = solicitanteTicketService.listarTicketsPorSolicitante(usuario.getId());
-            request.setAttribute("tickets", tickets);
-            request.getRequestDispatcher("/MisSolicitudes.jsp").forward(request, response);
+            TicketHistoryHelper.cargar(
+                    request, response, solicitanteTicketService, usuario, "/MisSolicitudes.jsp");
             return;
         }
 
@@ -77,15 +64,8 @@ public class TicketServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String titulo = request.getParameter("titulo");
-        String descripcion = request.getParameter("descripcion");
         String categoriaNombre = request.getParameter("categoria");
         int idCategoria = Integer.parseInt(request.getParameter("idCategoria"));
-
-        String programa = request.getParameter("programa");
-        String numeroPrograma = request.getParameter("numeroPrograma");
-        String instructor = request.getParameter("instructor");
-        String jornada = request.getParameter("jornada");
 
         // Si categoriaNombre no viene, lo buscamos usando idCategoria
         if (categoriaNombre == null || categoriaNombre.trim().isEmpty()) {
@@ -101,9 +81,6 @@ public class TicketServlet extends HttpServlet {
         }
     HttpSession session = request.getSession();
     SlaService slaService = (SlaService) getServletContext().getAttribute("slaService");
-    CalcularPrioridad estrategiaSla = slaService.obtenerEstrategia(String.valueOf(idCategoria));
-    String prioridadCalculada = estrategiaSla.determinarPrioridad();
-    int idPrioridad = estrategiaSla.obtenerIdPrioridad();
     Usuario solicitante = (Usuario) session.getAttribute("usuario");
 
         if (solicitante == null) {
@@ -111,27 +88,12 @@ public class TicketServlet extends HttpServlet {
             return;
         }
 
-        TicketDTO dto = new TicketDTO();
-        dto.setTitulo(titulo);
-        dto.setDescripcion(descripcion);
-        dto.setIdCategoria(idCategoria);
-        dto.setIdSolicitante(solicitante.getId());
-        dto.setIdPrioridad(idPrioridad);
-        dto.setPrioridadNombre(prioridadCalculada);
-        dto.setPrograma(programa);
-        dto.setNumeroPrograma(numeroPrograma);
-        dto.setInstructor(instructor);
-        dto.setJornada(jornada);
-
-        Categoria categoria = new Categoria();
-        categoria.setId(idCategoria);
-        categoria.setNombre(categoriaNombre);
-
-        Prioridad prioridad = new Prioridad();
-        prioridad.setId(idPrioridad);
-        prioridad.setNombre(prioridadCalculada);
-
-        solicitanteTicketService.RegistrarTicket(dto, categoria, solicitante, slaService);
+        TicketDTO ticketRegistrado = TicketRegistrationHelper.registrar(
+            request,
+            solicitante,
+            categoriaNombre,
+            slaService,
+            solicitanteTicketService);
 
         String redirectUrl = request.getContextPath() + "/SolicitudFuncionario.jsp";
         String rolUsuarioPost = (String) session.getAttribute("rolUsuario");
@@ -149,15 +111,6 @@ public class TicketServlet extends HttpServlet {
             redirectUrl = request.getContextPath() + "/RegistroTicket.jsp";
         }
 
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        out.println("<!DOCTYPE html><html><head><meta charset='UTF-8'>");
-        out.println("<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script></head><body>");
-        out.println("<script>");
-        out.println("Swal.fire({ icon: 'success', title: '¡Ticket registrado!', "
-                + "text: 'Se ha asignado prioridad: " + dto.getPrioridadNombre() + "', "
-                + "confirmButtonText: 'Aceptar' }).then(() => { "
-                + "window.location.href = '" + redirectUrl + "'; });");
-        out.println("</script></body></html>");
+        RespuestaTicket.escribirRegistroExitoso(response, ticketRegistrado, redirectUrl);
     }
 }
