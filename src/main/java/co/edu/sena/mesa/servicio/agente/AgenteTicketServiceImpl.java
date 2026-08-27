@@ -59,9 +59,7 @@ public class AgenteTicketServiceImpl implements AgenteTicketService {
 
         int filasActualizadas = agenteTicketRepository.actualizarEstado(idTicket, idAgente, estado);
         if (filasActualizadas == 0) {
-            return ACCIONES_RESOLUCION.containsKey(accion)
-                ? "No se pudo resolver el ticket."
-                : "No se pudo actualizar el estado.";
+            return "No se pudo actualizar el estado.";
         }
 
         notificarCambioEstado(idTicket, estado);

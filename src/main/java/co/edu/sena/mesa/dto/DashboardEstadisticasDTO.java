@@ -1,5 +1,8 @@
 package co.edu.sena.mesa.dto;
 
+import java.util.Collections;
+import java.util.List;
+
 public class DashboardEstadisticasDTO {
 
     private int totalTicketsMes;
@@ -8,6 +11,8 @@ public class DashboardEstadisticasDTO {
     private int cerradosHoy;
     private int agentesConTickets;
     private int slaVencidos;
+    private List<EstadoConteoDTO> ticketsPorEstado = Collections.emptyList();
+    private List<AgenteConteoDTO> ticketsPorAgente = Collections.emptyList();
 
     public DashboardEstadisticasDTO() {
     }
@@ -58,5 +63,21 @@ public class DashboardEstadisticasDTO {
 
     public void setSlaVencidos(int slaVencidos) {
         this.slaVencidos = slaVencidos;
+    }
+
+    public List<EstadoConteoDTO> getTicketsPorEstado() {
+        return ticketsPorEstado;
+    }
+
+    public void setTicketsPorEstado(List<EstadoConteoDTO> ticketsPorEstado) {
+        this.ticketsPorEstado = ticketsPorEstado;
+    }
+
+    public List<AgenteConteoDTO> getTicketsPorAgente() {
+        return ticketsPorAgente;
+    }
+
+    public void setTicketsPorAgente(List<AgenteConteoDTO> ticketsPorAgente) {
+        this.ticketsPorAgente = ticketsPorAgente;
     }
 }

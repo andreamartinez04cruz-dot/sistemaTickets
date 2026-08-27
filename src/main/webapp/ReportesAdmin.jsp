@@ -79,6 +79,71 @@
                 </div>
             </div>
 
+            <!-- Tickets por Estado y por Agente -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Tickets por Estado</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-500">
+                            <thead class="text-xs uppercase bg-emerald-50 text-emerald-900 border-b border-emerald-100">
+                                <tr>
+                                    <th class="px-4 py-3 font-semibold">Estado</th>
+                                    <th class="px-4 py-3 font-semibold text-center">Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <c:choose>
+                                    <c:when test="${not empty estadisticasAdmin.ticketsPorEstado}">
+                                        <c:forEach var="fila" items="${estadisticasAdmin.ticketsPorEstado}">
+                                            <tr class="hover:bg-emerald-50/30 transition-colors">
+                                                <td class="px-4 py-3 font-medium text-gray-900">${fila.estado}</td>
+                                                <td class="px-4 py-3 text-center font-bold text-emerald-700">${fila.cantidad}</td>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <tr>
+                                            <td colspan="2" class="px-4 py-4 text-center text-gray-400">Sin datos disponibles.</td>
+                                        </tr>
+                                    </c:otherwise>
+                                </c:choose>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Tickets por Agente</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-500">
+                            <thead class="text-xs uppercase bg-emerald-50 text-emerald-900 border-b border-emerald-100">
+                                <tr>
+                                    <th class="px-4 py-3 font-semibold">Agente</th>
+                                    <th class="px-4 py-3 font-semibold text-center">Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <c:choose>
+                                    <c:when test="${not empty estadisticasAdmin.ticketsPorAgente}">
+                                        <c:forEach var="fila" items="${estadisticasAdmin.ticketsPorAgente}">
+                                            <tr class="hover:bg-emerald-50/30 transition-colors">
+                                                <td class="px-4 py-3 font-medium text-gray-900">${fila.nombreAgente}</td>
+                                                <td class="px-4 py-3 text-center font-bold text-emerald-700">${fila.cantidad}</td>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <tr>
+                                            <td colspan="2" class="px-4 py-4 text-center text-gray-400">Sin datos disponibles.</td>
+                                        </tr>
+                                    </c:otherwise>
+                                </c:choose>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tabla de Resumen Metrológico -->
             <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Resumen General de Datos Reales</h3>

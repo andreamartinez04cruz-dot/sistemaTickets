@@ -2,12 +2,16 @@ package co.edu.sena.mesa.repositorio;
 
 import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.config.ConexionBD;
+import co.edu.sena.mesa.dto.AgenteConteoDTO;
 import co.edu.sena.mesa.dto.DashboardEstadisticasDTO;
+import co.edu.sena.mesa.dto.EstadoConteoDTO;
 import co.edu.sena.mesa.mapper.DashboardMapper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DashboardRepositoryJdbc implements DashboardRepository {
 
@@ -52,17 +56,52 @@ public class DashboardRepositoryJdbc implements DashboardRepository {
 
             asegurarTablaAsignacion(cn);
 
+            DashboardEstadisticasDTO dto = DashboardMapper.empty();
+
             try (PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
                 if (rs.next()) {
-                    return DashboardMapper.toDTO(rs);
+                    dto = DashboardMapper.toDTO(rs);
                 }
             }
+
+            dto.setTicketsPorEstado(obtenerTicketsPorEstado(cn));
+            dto.setTicketsPorAgente(obtenerTicketsPorAgente(cn));
+
+            return dto;
 
         } catch (SQLException e) {
             RegistroErrores.registrar("Error al consultar métricas del dashboard", e);
         }
 
         return DashboardMapper.empty();
+    }
+
+    private List<EstadoConteoDTO> obtenerTicketsPorEstado(Connection cn) throws SQLException {
+        List<EstadoConteoDTO> resultado = new ArrayList<>();
+        String sql = "SELECT UPPER(COALESCE(estado, 'SIN_ESTADO')) AS estado, COUNT(*) AS cantidad "
+                + "FROM ticket GROUP BY UPPER(COALESCE(estado, 'SIN_ESTADO')) ORDER BY cantidad DESC";
+
+        try (PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                resultado.add(new EstadoConteoDTO(rs.getString("estado"), rs.getInt("cantidad")));
+            }
+        }
+        return resultado;
+    }
+
+    private List<AgenteConteoDTO> obtenerTicketsPorAgente(Connection cn) throws SQLException {
+        List<AgenteConteoDTO> resultado = new ArrayList<>();
+        String sql = "SELECT u.nombre AS nombre_agente, COUNT(*) AS cantidad "
+                + "FROM ticketagente ta "
+                + "INNER JOIN usuario u ON u.id = ta.idUsuario "
+                + "GROUP BY u.id, u.nombre ORDER BY cantidad DESC";
+
+        try (PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                resultado.add(new AgenteConteoDTO(rs.getString("nombre_agente"), rs.getInt("cantidad")));
+            }
+        }
+        return resultado;
     }
 }

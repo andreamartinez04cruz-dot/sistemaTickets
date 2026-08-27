@@ -34,6 +34,8 @@ import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketService;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketServiceImpl;
 import co.edu.sena.mesa.servicio.notificacion.Notificador;
 import co.edu.sena.mesa.servicio.notificacion.NotificadorEnAplicacion;
+import co.edu.sena.mesa.servicio.notificacion.NotificadorEmail;
+import co.edu.sena.mesa.servicio.notificacion.NotificadorCompuesto;
 import co.edu.sena.mesa.servicio.sla.CalcularPrioridad;
 import co.edu.sena.mesa.servicio.sla.SlaAltaStrategy;
 import co.edu.sena.mesa.servicio.sla.SlaBajaStrategy;
@@ -77,7 +79,10 @@ public class AppContextListener implements ServletContextListener {
         DashboardService dashboardService = new DashboardServiceImpl(dashboardRepository);
         event.getServletContext().setAttribute("dashboardService", dashboardService);
 
-        Notificador notificador = new NotificadorEnAplicacion();
+        Notificador notificadorEnAplicacion = new NotificadorEnAplicacion();
+        Notificador notificadorEmail = new NotificadorEmail();
+        Notificador notificador = new NotificadorCompuesto(
+            java.util.List.of(notificadorEnAplicacion, notificadorEmail));
         NotificacionService notificacionService = new NotificacionServiceImpl(notificador);
         event.getServletContext().setAttribute("notificacionService", notificacionService);
 

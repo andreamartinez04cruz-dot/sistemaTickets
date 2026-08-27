@@ -20,7 +20,7 @@ public class AsignacionServiceImpl implements AsignacionService {
 
     @Override
     public void asignarTicket(Ticket ticket) {
-        if (ticket == null || ticket.getId() <= 0) {
+        if (ticket == null || ticket.getId() >= 0) {
             throw new IllegalArgumentException("El ticket debe estar guardado antes de asignarlo");
         }
 

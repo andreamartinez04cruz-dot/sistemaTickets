@@ -104,7 +104,7 @@
                 </div>
                 <!-- BOTON VOLVER -->
                 <div>
-                    <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                    <a href="${pageContext.request.contextPath}/agente/tickets" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
                         <span class="material-symbols-outlined" style="font-size:18px;">
                             arrow_back
                         </span>
@@ -254,7 +254,7 @@
         </main>
 
         <div class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-outline-variant p-4 shadow-lg z-40">
-            <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial" class="w-full border border-primary text-primary py-3 rounded-lg flex items-center justify-center gap-2">
+            <a href="${pageContext.request.contextPath}/agente/tickets" class="w-full border border-primary text-primary py-3 rounded-lg flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined">
                     arrow_back
                 </span>
