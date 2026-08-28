@@ -131,13 +131,44 @@
                                         ${ticket.mensaje}
                                     </p>
                                     <c:if test="${ticket.estado eq 'RESUELTO'}">
-                                        <form method="post" action="${pageContext.request.contextPath}/notificaciones">
-                                            <input type="hidden" name="accion" value="finalizarTicket"/>
-                                            <input type="hidden" name="idTicket" value="${ticket.id}"/>
-                                            <button type="submit" class="bg-[#1b5e20] hover:bg-[#154a1a] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
-                                                Finalizar ticket
-                                            </button>
-                                        </form>
+                                        <c:if test="${ticketConMensaje eq ticket.id}">
+                                            <c:if test="${not empty errorCodigo}">
+                                                <p class="text-xs text-red-600 font-semibold mb-2">${errorCodigo}</p>
+                                            </c:if>
+                                            <c:if test="${not empty avisoCodigo}">
+                                                <p class="text-xs text-emerald-700 font-semibold mb-2">${avisoCodigo}</p>
+                                            </c:if>
+                                        </c:if>
+                                        <c:choose>
+                                            <c:when test="${sessionScope.rolUsuario eq 'AGENTE' or sessionScope.rolUsuario eq 'ADMIN'}">
+                                                <p class="text-[11px] text-gray-500 italic mb-2">
+                                                    Esperando que el solicitante confirme el cierre con su codigo.
+                                                </p>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <form method="post" action="${pageContext.request.contextPath}/notificaciones" class="mb-2">
+                                                    <input type="hidden" name="accion" value="reenviarCodigo"/>
+                                                    <input type="hidden" name="idTicket" value="${ticket.id}"/>
+                                                    <button type="submit" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold px-3 py-2 rounded-lg transition-colors">
+                                                        Enviar codigo a mi correo
+                                                    </button>
+                                                </form>
+                                                <form method="post" action="${pageContext.request.contextPath}/notificaciones">
+                                                    <input type="hidden" name="accion" value="finalizarTicket"/>
+                                                    <input type="hidden" name="idTicket" value="${ticket.id}"/>
+                                                    <label class="block text-[11px] font-semibold text-gray-500 mb-1">
+                                                        Codigo enviado a tu correo
+                                                    </label>
+                                                    <input type="text" name="codigo" inputmode="numeric" maxlength="6"
+                                                           autocomplete="one-time-code" required
+                                                           placeholder="000000"
+                                                           class="w-28 mb-2 px-2 py-1.5 border border-gray-300 rounded-lg text-sm tracking-widest text-center"/>
+                                                    <button type="submit" class="bg-[#1b5e20] hover:bg-[#154a1a] text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors block">
+                                                        Finalizar ticket
+                                                    </button>
+                                                </form>
+                                            </c:otherwise>
+                                        </c:choose>
                                         <form method="post" action="${pageContext.request.contextPath}/notificaciones" class="mt-2">
                                             <input type="hidden" name="accion" value="reabrirTicket"/>
                                             <input type="hidden" name="idTicket" value="${ticket.id}"/>

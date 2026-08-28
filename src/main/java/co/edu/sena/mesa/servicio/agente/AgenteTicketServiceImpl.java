@@ -8,6 +8,7 @@ import co.edu.sena.mesa.modelo.estado.EstadoTicket;
 import co.edu.sena.mesa.modelo.estado.EstadoTicketFactory;
 import co.edu.sena.mesa.repositorio.AgenteTicketRepository;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
+import co.edu.sena.mesa.servicio.notificacion.OtpCierreService;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -25,12 +26,21 @@ public class AgenteTicketServiceImpl implements AgenteTicketService {
 
     private final AgenteTicketRepository agenteTicketRepository;
     private final NotificacionService notificacionService;
+    private final OtpCierreService otpCierreService;
 
     public AgenteTicketServiceImpl(
             AgenteTicketRepository agenteTicketRepository,
             NotificacionService notificacionService) {
+        this(agenteTicketRepository, notificacionService, null);
+    }
+
+    public AgenteTicketServiceImpl(
+            AgenteTicketRepository agenteTicketRepository,
+            NotificacionService notificacionService,
+            OtpCierreService otpCierreService) {
         this.agenteTicketRepository = agenteTicketRepository;
         this.notificacionService = notificacionService;
+        this.otpCierreService = otpCierreService;
     }
 
     @Override
@@ -66,6 +76,9 @@ public class AgenteTicketServiceImpl implements AgenteTicketService {
         }
 
         notificarCambioEstado(idTicket, estado);
+        if ("RESUELTO".equals(estado) && otpCierreService != null) {
+            otpCierreService.generarYEnviar(idTicket);
+        }
         return ACCIONES_RESOLUCION.containsKey(accion)
             ? "Ticket resuelto correctamente y guardado en la base de datos."
             : "Estado actualizado correctamente y guardado en la base de datos.";

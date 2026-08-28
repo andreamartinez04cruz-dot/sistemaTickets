@@ -12,6 +12,8 @@ import co.edu.sena.mesa.repositorio.AsignacionRepository;
 import co.edu.sena.mesa.repositorio.AsignacionRepositoryJdbc;
 import co.edu.sena.mesa.repositorio.NotificacionTicketRepository;
 import co.edu.sena.mesa.repositorio.NotificacionTicketRepositoryJdbc;
+import co.edu.sena.mesa.repositorio.OtpCierreRepository;
+import co.edu.sena.mesa.repositorio.OtpCierreRepositoryJdbc;
 import co.edu.sena.mesa.servicio.AdminTicketService;
 import co.edu.sena.mesa.servicio.AdminTicketServiceImpl;
 import co.edu.sena.mesa.servicio.DashboardService;
@@ -32,6 +34,8 @@ import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionServiceImpl;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketService;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketServiceImpl;
+import co.edu.sena.mesa.servicio.notificacion.OtpCierreService;
+import co.edu.sena.mesa.servicio.notificacion.OtpCierreServiceImpl;
 import co.edu.sena.mesa.servicio.notificacion.ConfiguracionCorreo;
 import co.edu.sena.mesa.servicio.notificacion.Notificador;
 import co.edu.sena.mesa.servicio.notificacion.NotificadorCompuesto;
@@ -93,14 +97,24 @@ public class AppContextListener implements ServletContextListener {
         event.getServletContext().setAttribute("dashboardService", dashboardService);
 
         NotificacionTicketRepository notificacionTicketRepository = new NotificacionTicketRepositoryJdbc();
+        OtpCierreRepository otpCierreRepository = new OtpCierreRepositoryJdbc();
+        otpCierreRepository.asegurarTabla();
+        OtpCierreService otpCierreService = new OtpCierreServiceImpl(
+            otpCierreRepository,
+            agenteTicketRepository,
+            notificador);
+        event.getServletContext().setAttribute("otpCierreService", otpCierreService);
+
         NotificacionTicketService notificacionTicketService = new NotificacionTicketServiceImpl(
             notificacionTicketRepository,
-            notificacionService);
+            notificacionService,
+            otpCierreService);
         event.getServletContext().setAttribute("notificacionTicketService", notificacionTicketService);
 
         AgenteTicketService agenteTicketService = new AgenteTicketServiceImpl(
             agenteTicketRepository,
-            notificacionService);
+            notificacionService,
+            otpCierreService);
         event.getServletContext().setAttribute("agenteTicketService", agenteTicketService);
 
         //PRIORIDAD
