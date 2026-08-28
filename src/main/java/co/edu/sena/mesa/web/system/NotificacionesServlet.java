@@ -55,7 +55,7 @@ public class NotificacionesServlet extends HttpServlet {
                         otpCierreService.generarYEnviar(idTicket);
                         request.setAttribute("ticketConMensaje", idTicket);
                         request.setAttribute("avisoCodigo",
-                            "Enviamos un codigo nuevo a tu correo. Vence en 1 minuto.");
+                            "Enviamos un codigo nuevo a tu correo. Vence en 10 minutos.");
                     }
                 } else if ("reabrirTicket".equals(accion)) {
                     service.reabrirTicket(idTicket, rol, usuario.getId());

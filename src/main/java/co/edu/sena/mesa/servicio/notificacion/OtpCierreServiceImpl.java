@@ -8,7 +8,7 @@ import java.security.SecureRandom;
 
 public class OtpCierreServiceImpl implements OtpCierreService {
 
-    private static final int MINUTOS_VIGENCIA = 1;
+    private static final int MINUTOS_VIGENCIA = 10;
 
     private final OtpCierreRepository otpCierreRepository;
     private final AgenteTicketRepository agenteTicketRepository;
@@ -39,7 +39,7 @@ public class OtpCierreServiceImpl implements OtpCierreService {
             String mensaje = "Tu ticket #" + idTicket + " fue marcado como RESUELTO.\n\n"
                 + "Para confirmar el cierre ingresa este codigo en la seccion Notificaciones:\n\n"
                 + "    " + codigo + "\n\n"
-                + "El codigo vence en " + MINUTOS_VIGENCIA + " minuto y solo puede usarse una vez.\n"
+                + "El codigo vence en " + MINUTOS_VIGENCIA + " minutos y solo puede usarse una vez.\n"
                 + "Si vence, pide uno nuevo con el boton Enviar codigo.\n"
                 + "Si el problema no quedo resuelto, usa la opcion Reabrir ticket.";
 
