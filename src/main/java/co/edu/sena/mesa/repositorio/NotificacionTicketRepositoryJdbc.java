@@ -1,6 +1,6 @@
 package co.edu.sena.mesa.repositorio;
 
-import co.edu.sena.mesa.config.RegistroErrores;
+import co.edu.sena.mesa.util.RegistroErrores;
 import co.edu.sena.mesa.config.ConexionBD;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -1,7 +1,11 @@
 package co.edu.sena.mesa.servicio;
 
 import co.edu.sena.mesa.dto.AdminTicketDTO;
+import co.edu.sena.mesa.dto.DestinatarioNotificacionDTO;
 import co.edu.sena.mesa.repositorio.AdminTicketRepository;
+import co.edu.sena.mesa.repositorio.AgenteTicketRepository;
+import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
+import co.edu.sena.mesa.util.RegistroErrores;
 import co.edu.sena.mesa.modelo.estado.EstadoTicketFactory;
 import java.util.List;
 import java.util.Map;
@@ -9,9 +13,20 @@ import java.util.Map;
 public class AdminTicketServiceImpl implements AdminTicketService {
 
     private final AdminTicketRepository adminTicketRepository;
+    private final NotificacionService notificacionService;
+    private final AgenteTicketRepository agenteTicketRepository;
 
     public AdminTicketServiceImpl(AdminTicketRepository adminTicketRepository) {
+        this(adminTicketRepository, null, null);
+    }
+
+    public AdminTicketServiceImpl(
+            AdminTicketRepository adminTicketRepository,
+            NotificacionService notificacionService,
+            AgenteTicketRepository agenteTicketRepository) {
         this.adminTicketRepository = adminTicketRepository;
+        this.notificacionService = notificacionService;
+        this.agenteTicketRepository = agenteTicketRepository;
     }
 
     @Override
@@ -32,6 +47,14 @@ public class AdminTicketServiceImpl implements AdminTicketService {
     @Override
     public void reasignarTicket(int idTicket, int idAgente) {
         adminTicketRepository.reasignarTicket(idTicket, idAgente);
+        notificarReasignacion(idTicket);
+    }
+
+    private void notificarReasignacion(int idTicket) {
+        if (notificacionService == null) {
+            return;
+        }
+        notificacionService.notificarATodosLosRoles(idTicket, "ASIGNADO");
     }
 
     @Override

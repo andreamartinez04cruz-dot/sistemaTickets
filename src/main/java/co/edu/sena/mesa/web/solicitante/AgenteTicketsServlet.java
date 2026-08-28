@@ -1,6 +1,6 @@
 package co.edu.sena.mesa.web.solicitante;
 
-import co.edu.sena.mesa.config.RegistroErrores;
+import co.edu.sena.mesa.util.RegistroErrores;
 import co.edu.sena.mesa.dto.AgenteTicketsResumenDTO;
 import co.edu.sena.mesa.servicio.agente.AgenteTicketService;
 import co.edu.sena.mesa.modelo.Usuario;

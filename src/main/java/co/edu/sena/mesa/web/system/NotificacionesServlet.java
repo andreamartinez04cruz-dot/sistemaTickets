@@ -1,8 +1,9 @@
 package co.edu.sena.mesa.web.system;
 
-import co.edu.sena.mesa.config.RegistroErrores;
+import co.edu.sena.mesa.util.RegistroErrores;
 import co.edu.sena.mesa.modelo.Usuario;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketService;
+import co.edu.sena.mesa.servicio.notificacion.OtpCierreService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -35,7 +36,27 @@ public class NotificacionesServlet extends HttpServlet {
                 int idTicket = Integer.parseInt(request.getParameter("idTicket"));
                 String accion = request.getParameter("accion");
                 if ("finalizarTicket".equals(accion)) {
-                    service.finalizarTicket(idTicket, rol, usuario.getId());
+                    int resultado = service.finalizarTicket(idTicket, rol, usuario.getId(),
+                        request.getParameter("codigo"));
+                    request.setAttribute("ticketConMensaje", idTicket);
+                    if (resultado == -2) {
+                        request.setAttribute("errorCodigo",
+                            "Solo el solicitante puede cerrar el ticket.");
+                    } else if (resultado == -1) {
+                        request.setAttribute("errorCodigo",
+                            "El codigo es incorrecto o ya vencio. Pide uno nuevo.");
+                    } else {
+                        request.removeAttribute("ticketConMensaje");
+                    }
+                } else if ("reenviarCodigo".equals(accion)) {
+                    OtpCierreService otpCierreService = (OtpCierreService) getServletContext()
+                            .getAttribute("otpCierreService");
+                    if (otpCierreService != null) {
+                        otpCierreService.generarYEnviar(idTicket);
+                        request.setAttribute("ticketConMensaje", idTicket);
+                        request.setAttribute("avisoCodigo",
+                            "Enviamos un codigo nuevo a tu correo. Vence en 10 minutos.");
+                    }
                 } else if ("reabrirTicket".equals(accion)) {
                     service.reabrirTicket(idTicket, rol, usuario.getId());
                 }

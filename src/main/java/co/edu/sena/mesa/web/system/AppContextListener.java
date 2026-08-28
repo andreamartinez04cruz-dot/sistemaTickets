@@ -12,6 +12,13 @@ import co.edu.sena.mesa.repositorio.AsignacionRepository;
 import co.edu.sena.mesa.repositorio.AsignacionRepositoryJdbc;
 import co.edu.sena.mesa.repositorio.NotificacionTicketRepository;
 import co.edu.sena.mesa.repositorio.NotificacionTicketRepositoryJdbc;
+import co.edu.sena.mesa.repositorio.OtpCierreRepository;
+import co.edu.sena.mesa.repositorio.OtpCierreRepositoryJdbc;
+import co.edu.sena.mesa.repositorio.UsuarioRepository;
+import co.edu.sena.mesa.repositorio.UsuarioRepositoryJdbc;
+import co.edu.sena.mesa.repositorio.MensajeChatRepository;
+import co.edu.sena.mesa.repositorio.MensajeChatRepositoryJdbc;
+
 import co.edu.sena.mesa.servicio.AdminTicketService;
 import co.edu.sena.mesa.servicio.AdminTicketServiceImpl;
 import co.edu.sena.mesa.servicio.DashboardService;
@@ -25,28 +32,30 @@ import co.edu.sena.mesa.servicio.TicketService;
 import co.edu.sena.mesa.servicio.TicketServiceImpl;
 import co.edu.sena.mesa.servicio.UsuarioService;
 import co.edu.sena.mesa.servicio.UsuarioServiceImpl;
-import co.edu.sena.mesa.repositorio.UsuarioRepository;
-import co.edu.sena.mesa.repositorio.UsuarioRepositoryJdbc;
-import co.edu.sena.mesa.config.RegistroErrores;
-import co.edu.sena.mesa.repositorio.MensajeChatRepository;
-import co.edu.sena.mesa.repositorio.MensajeChatRepositoryJdbc;
 import co.edu.sena.mesa.servicio.MensajeChatService;
 import co.edu.sena.mesa.servicio.MensajeChatServiceImpl;
+
 import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionServiceImpl;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketService;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketServiceImpl;
+import co.edu.sena.mesa.servicio.notificacion.OtpCierreService;
+import co.edu.sena.mesa.servicio.notificacion.OtpCierreServiceImpl;
+import co.edu.sena.mesa.servicio.notificacion.ConfiguracionCorreo;
 import co.edu.sena.mesa.servicio.notificacion.Notificador;
-import co.edu.sena.mesa.servicio.notificacion.NotificadorEnAplicacion;
-import co.edu.sena.mesa.servicio.notificacion.NotificadorEmail;
 import co.edu.sena.mesa.servicio.notificacion.NotificadorCompuesto;
+import co.edu.sena.mesa.servicio.notificacion.NotificadorCorreo;
+import co.edu.sena.mesa.servicio.notificacion.NotificadorEnAplicacion;
+
 import co.edu.sena.mesa.servicio.sla.CalcularPrioridad;
 import co.edu.sena.mesa.servicio.sla.SlaAltaStrategy;
 import co.edu.sena.mesa.servicio.sla.SlaBajaStrategy;
 import co.edu.sena.mesa.servicio.sla.SlaCriticaStrategy;
 import co.edu.sena.mesa.servicio.sla.SlaMediaStrategy;
 import co.edu.sena.mesa.servicio.sla.SlaService;
+
 import co.edu.sena.mesa.servicio.solicitante.SolicitanteTicketService;
+import co.edu.sena.mesa.util.RegistroErrores;
 
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -62,70 +71,157 @@ public class AppContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent event) {
 
-        TicketRepository ticketRepository = new TicketRepositoryJdbc();
-        AsignacionRepository asignacionRepository = new AsignacionRepositoryJdbc();
-        AsignacionService asignacionService = new AsignacionServiceImpl(
-                asignacionRepository,
-                new AsignacionRoundRobinStrategy());
-        TicketService ticketService = new TicketServiceImpl(ticketRepository, asignacionService);
-        event.getServletContext().setAttribute("ticketService", ticketService);
-        event.getServletContext().setAttribute("solicitanteTicketService", (SolicitanteTicketService) ticketService);
+        // NOTIFICACIONES
+        Notificador notificador = crearNotificador();
 
-        UsuarioRepository usuarioRepository = new UsuarioRepositoryJdbc();
-        UsuarioService usuarioService = new UsuarioServiceImpl(usuarioRepository);
-        event.getServletContext().setAttribute("usuarioService", usuarioService);
+        AgenteTicketRepository agenteTicketRepository
+                = new AgenteTicketRepositoryJdbc();
 
-        AdminTicketRepository adminTicketRepository = new AdminTicketRepositoryJdbc();
-        AdminTicketService adminTicketService = new AdminTicketServiceImpl(adminTicketRepository);
-        event.getServletContext().setAttribute("adminTicketService", adminTicketService);
+        NotificacionService notificacionService
+                = new NotificacionServiceImpl(
+                        notificador,
+                        agenteTicketRepository);
 
-        MensajeChatRepository mesajeChatRepository = new MensajeChatRepositoryJdbc();
-        MensajeChatService mensajeService = new MensajeChatServiceImpl(mesajeChatRepository);
-        event.getServletContext().setAttribute("mensajeService", mensajeService);
-
-        DashboardRepository dashboardRepository = new DashboardRepositoryJdbc();
-        DashboardService dashboardService = new DashboardServiceImpl(dashboardRepository);
-        event.getServletContext().setAttribute("dashboardService", dashboardService);
-
-        Notificador notificadorEnAplicacion = new NotificadorEnAplicacion();
-        Notificador notificador;
-        try {
-            Notificador notificadorEmail = new NotificadorEmail();
-            notificador = new NotificadorCompuesto(
-                    java.util.List.of(notificadorEnAplicacion, notificadorEmail));
-        } catch (Exception e) {
-            // Si el correo real falla al iniciar, la app sigue funcionando solo con notificación en aplicación
-            RegistroErrores.registrar("No se pudo inicializar el notificador de correo, se usará solo notificación en aplicación", e);
-            notificador = notificadorEnAplicacion;
-        }
-        NotificacionService notificacionService = new NotificacionServiceImpl(notificador);
-        event.getServletContext().setAttribute("notificacionService", notificacionService);
-
-        NotificacionTicketRepository notificacionTicketRepository = new NotificacionTicketRepositoryJdbc();
-        NotificacionTicketService notificacionTicketService = new NotificacionTicketServiceImpl(
-                notificacionTicketRepository);
-        event.getServletContext().setAttribute("notificacionTicketService", notificacionTicketService);
-
-        AgenteTicketRepository agenteTicketRepository = new AgenteTicketRepositoryJdbc();
-        AgenteTicketService agenteTicketService = new AgenteTicketServiceImpl(
-                agenteTicketRepository,
+        event.getServletContext().setAttribute(
+                "notificacionService",
                 notificacionService);
-        event.getServletContext().setAttribute("agenteTicketService", agenteTicketService);
 
-        //PRIORIDAD
-        // Deja las estrategias de SLA
+        // TICKETS
+        TicketRepository ticketRepository
+                = new TicketRepositoryJdbc();
+
+        AsignacionRepository asignacionRepository
+                = new AsignacionRepositoryJdbc();
+
+        AsignacionService asignacionService
+                = new AsignacionServiceImpl(
+                        asignacionRepository,
+                        new AsignacionRoundRobinStrategy(),
+                        notificacionService,
+                        agenteTicketRepository);
+
+        TicketService ticketService
+                = new TicketServiceImpl(
+                        ticketRepository,
+                        asignacionService);
+
+        event.getServletContext().setAttribute(
+                "ticketService",
+                ticketService);
+
+        event.getServletContext().setAttribute(
+                "solicitanteTicketService",
+                (SolicitanteTicketService) ticketService);
+
+        // USUARIOS
+        UsuarioRepository usuarioRepository
+                = new UsuarioRepositoryJdbc();
+
+        UsuarioService usuarioService
+                = new UsuarioServiceImpl(usuarioRepository);
+
+        event.getServletContext().setAttribute(
+                "usuarioService",
+                usuarioService);
+
+        // ADMINISTRADOR
+        AdminTicketRepository adminTicketRepository
+                = new AdminTicketRepositoryJdbc();
+
+        AdminTicketService adminTicketService
+                = new AdminTicketServiceImpl(
+                        adminTicketRepository,
+                        notificacionService,
+                        agenteTicketRepository);
+
+        event.getServletContext().setAttribute(
+                "adminTicketService",
+                adminTicketService);
+
+        // CHAT
+        MensajeChatRepository mensajeChatRepository
+                = new MensajeChatRepositoryJdbc();
+
+        MensajeChatService mensajeService
+                = new MensajeChatServiceImpl(
+                        mensajeChatRepository);
+
+        event.getServletContext().setAttribute(
+                "mensajeService",
+                mensajeService);
+
+        // DASHBOARD
+        DashboardRepository dashboardRepository
+                = new DashboardRepositoryJdbc();
+
+        DashboardService dashboardService
+                = new DashboardServiceImpl(
+                        dashboardRepository);
+
+        event.getServletContext().setAttribute(
+                "dashboardService",
+                dashboardService);
+
+        // OTP PARA CIERRE DE TICKETS
+        NotificacionTicketRepository notificacionTicketRepository
+                = new NotificacionTicketRepositoryJdbc();
+
+        OtpCierreRepository otpCierreRepository
+                = new OtpCierreRepositoryJdbc();
+
+        otpCierreRepository.asegurarTabla();
+
+        OtpCierreService otpCierreService
+                = new OtpCierreServiceImpl(
+                        otpCierreRepository,
+                        agenteTicketRepository,
+                        notificador);
+
+        event.getServletContext().setAttribute(
+                "otpCierreService",
+                otpCierreService);
+
+        // NOTIFICACIONES DE TICKETS
+        NotificacionTicketService notificacionTicketService
+                = new NotificacionTicketServiceImpl(
+                        notificacionTicketRepository,
+                        notificacionService,
+                        otpCierreService);
+
+        event.getServletContext().setAttribute(
+                "notificacionTicketService",
+                notificacionTicketService);
+
+        // SERVICIO DEL AGENTE
+        AgenteTicketService agenteTicketService
+                = new AgenteTicketServiceImpl(
+                        agenteTicketRepository,
+                        notificacionService,
+                        otpCierreService);
+
+        event.getServletContext().setAttribute(
+                "agenteTicketService",
+                agenteTicketService);
+
+        // PRIORIDAD / SLA
         SlaService slaService = new SlaService();
 
-// Instancias de tus estrategias
-        CalcularPrioridad critica = new SlaCriticaStrategy();
-        CalcularPrioridad alta = new SlaAltaStrategy();
-        CalcularPrioridad media = new SlaMediaStrategy();
-        CalcularPrioridad baja = new SlaBajaStrategy();
+        CalcularPrioridad critica
+                = new SlaCriticaStrategy();
 
-// Mapeas los IDs de tus categorías (ejemplo agrupando por criticidad)
+        CalcularPrioridad alta
+                = new SlaAltaStrategy();
+
+        CalcularPrioridad media
+                = new SlaMediaStrategy();
+
+        CalcularPrioridad baja
+                = new SlaBajaStrategy();
+
+        // Mapeo de categorías a estrategias de prioridad
         slaService.registrarEstrategia("1", baja);
         slaService.registrarEstrategia("2", baja);
-        slaService.registrarEstrategia("8", baja); // Aquí registras el ID 8 que te dio el error
+        slaService.registrarEstrategia("8", baja);
 
         slaService.registrarEstrategia("3", media);
         slaService.registrarEstrategia("4", media);
@@ -137,25 +233,74 @@ public class AppContextListener implements ServletContextListener {
         slaService.registrarEstrategia("9", critica);
         slaService.registrarEstrategia("10", critica);
 
-        event.getServletContext().setAttribute("slaService", slaService);
+        event.getServletContext().setAttribute(
+                "slaService",
+                slaService);
+    }
+
+    /**
+     * Crea el sistema de notificaciones. Siempre se utiliza la notificación
+     * dentro de la aplicación y, si existe configuración SMTP, también se envía
+     * por correo.
+     */
+    private Notificador crearNotificador() {
+
+        Notificador enAplicacion
+                = new NotificadorEnAplicacion();
+
+        ConfiguracionCorreo configuracion
+                = ConfiguracionCorreo.desdeVariablesDeEntorno();
+
+        if (configuracion.estaCompleta()) {
+
+            System.out.println(
+                    "[Notificacion] Activado: aplicacion + correo real desde "
+                    + configuracion.getRemitente());
+
+            return new NotificadorCompuesto(
+                    enAplicacion,
+                    new NotificadorCorreo(configuracion));
+        }
+
+        System.out.println(
+                "[Notificacion] Activado: solo aplicacion "
+                + "(falta configurar correo.properties)");
+
+        return enAplicacion;
     }
 
     @Override
-    public void contextDestroyed(ServletContextEvent event
-    ) {
+    public void contextDestroyed(ServletContextEvent event) {
+
         // Limpieza explícita del driver JDBC para evitar bloqueos en Tomcat
         try {
-            com.mysql.cj.jdbc.AbandonedConnectionCleanupThread.checkedShutdown();
+
+            com.mysql.cj.jdbc.AbandonedConnectionCleanupThread
+                    .checkedShutdown();
+
         } catch (Exception e) {
-            RegistroErrores.registrar("Error cerrando recursos JDBC de Tomcat", e);
+
+            RegistroErrores.registrar(
+                    "Error cerrando recursos JDBC de Tomcat",
+                    e);
         }
-        java.util.Enumeration<Driver> drivers = DriverManager.getDrivers();
+
+        java.util.Enumeration<Driver> drivers
+                = DriverManager.getDrivers();
+
         while (drivers.hasMoreElements()) {
+
             Driver driver = drivers.nextElement();
+
             try {
+
                 DriverManager.deregisterDriver(driver);
+
             } catch (SQLException e) {
-                RegistroErrores.registrar("Error liberando driver JDBC", e);
+
+                RegistroErrores.registrar(
+                        "Error liberando driver JDBC",
+                        e);
             }
         }
     }

@@ -1,6 +1,19 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+
+<c:set var="rolActual" value="${not empty sessionScope.rolUsuario ? sessionScope.rolUsuario : sessionScope.usuario.rol}" />
+<c:choose>
+    <c:when test="${rolActual == 'AGENTE'}">
+        <c:set var="urlVolver" value="${pageContext.request.contextPath}/agente/tickets" />
+    </c:when>
+    <c:when test="${rolActual == 'ADMIN'}">
+        <c:set var="urlVolver" value="${pageContext.request.contextPath}/admin/tickets" />
+    </c:when>
+    <c:otherwise>
+        <c:set var="urlVolver" value="${pageContext.request.contextPath}/tickets/registrar/Funcionario?action=historial" />
+    </c:otherwise>
+</c:choose>
 <!DOCTYPE html>
 <html class="light" lang="es">
     <head>
@@ -108,6 +121,9 @@
                 <div class="flex items-center gap-3">
                     <!-- BOTÓN NUEVO: REDIRECCIÓN AL CHAT EN VIVO -->
                     <a href="${pageContext.request.contextPath}/chat?idTicket=${ticket.id}" class="bg-primary hover:bg-primary-container text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                <!-- BOTON VOLVER -->
+                <div>
+                    <a href="${urlVolver}" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
                         <span class="material-symbols-outlined" style="font-size:18px;">
                             forum
                         </span>
@@ -287,5 +303,14 @@
                 </div>
             </div>
         </main>
+
+        <div class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-outline-variant p-4 shadow-lg z-40">
+            <a href="${urlVolver}" class="w-full border border-primary text-primary py-3 rounded-lg flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">
+                    arrow_back
+                </span>
+                Volver
+            </a>
+        </div>
     </body>
 </html>

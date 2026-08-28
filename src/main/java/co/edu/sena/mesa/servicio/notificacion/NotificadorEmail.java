@@ -1,6 +1,6 @@
 package co.edu.sena.mesa.servicio.notificacion;
 
-import co.edu.sena.mesa.config.RegistroErrores;
+import co.edu.sena.mesa.util.RegistroErrores;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
