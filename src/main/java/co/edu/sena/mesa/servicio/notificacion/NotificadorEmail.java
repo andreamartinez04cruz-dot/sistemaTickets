@@ -17,8 +17,8 @@ public class NotificadorEmail implements Notificador {
     // TODO: reemplazar por las credenciales reales del correo remitente
     private static final String SMTP_HOST = "smtp.gmail.com";
     private static final String SMTP_PORT = "587";
-    private static final String CORREO_REMITENTE = "mesadeayuda.sena@gmail.com";
-    private static final String CLAVE_APLICACION = "clave_de_aplicacion_aqui";
+    private static final String CORREO_REMITENTE = "dorisita201911b@gmail.com";
+    private static final String CLAVE_APLICACION = "vprkdvlruhdorqge";
 
     @Override
     public void enviar(String destinatario, String asunto, String mensaje) {

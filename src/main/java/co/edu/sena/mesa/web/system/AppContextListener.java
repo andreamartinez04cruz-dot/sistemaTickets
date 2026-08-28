@@ -80,9 +80,16 @@ public class AppContextListener implements ServletContextListener {
         event.getServletContext().setAttribute("dashboardService", dashboardService);
 
         Notificador notificadorEnAplicacion = new NotificadorEnAplicacion();
-        Notificador notificadorEmail = new NotificadorEmail();
-        Notificador notificador = new NotificadorCompuesto(
-            java.util.List.of(notificadorEnAplicacion, notificadorEmail));
+        Notificador notificador;
+        try {
+            Notificador notificadorEmail = new NotificadorEmail();
+            notificador = new NotificadorCompuesto(
+                java.util.List.of(notificadorEnAplicacion, notificadorEmail));
+        } catch (Exception e) {
+            // Si el correo real falla al iniciar, la app sigue funcionando solo con notificación en aplicación
+            RegistroErrores.registrar("No se pudo inicializar el notificador de correo, se usará solo notificación en aplicación", e);
+            notificador = notificadorEnAplicacion;
+        }
         NotificacionService notificacionService = new NotificacionServiceImpl(notificador);
         event.getServletContext().setAttribute("notificacionService", notificacionService);
 
