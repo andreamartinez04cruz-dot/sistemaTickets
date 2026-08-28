@@ -119,14 +119,14 @@
         </style>
     </head>
     <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%
-    if (request.getAttribute("agenteTicketsPreparados") == null) {
-        response.sendRedirect(request.getContextPath() + "/agente/tickets");
-        return;
-    }
-%>
+    <%
+        if (request.getAttribute("agenteTicketsPreparados") == null) {
+            response.sendRedirect(request.getContextPath() + "/agente/tickets");
+            return;
+        }
+    %>
 
-<body class="bg-background text-on-background min-h-screen flex flex-col">
+    <body class="bg-background text-on-background min-h-screen flex flex-col">
         <header class="bg-gradient-to-r from-emerald-50 to-green-50/20 border-b border-emerald-100 shadow-sm fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16">
             <div class="flex items-center gap-4">
                 <button class="p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant dark:text-on-surface-variant active:scale-95 transition-transform">
@@ -186,6 +186,7 @@
                                             <th class="py-4 px-6">Solicitante</th>
                                             <th class="py-4 px-6">Categoría</th>
                                             <th class="py-4 px-6">Prioridad</th>
+                                            <th class="py-4 px-6">Tiempo de atención</th>
                                             <th class="py-4 px-6">Estado</th>
                                             <th class="py-4 px-6 text-right">Acciones</th>
                                         </tr>
@@ -253,6 +254,16 @@
                                                         ${ticket.prioridad != null ? ticket.prioridad : 'Sin prioridad'}
                                                     </span>
                                                 </td>
+                                                <!-- Tiempo de atención -->
+                                                <td class="py-4 px-6">
+                                                    <span class="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700">
+                                                        <span class="material-symbols-outlined text-[18px]">schedule</span>
+                                                        <c:choose>
+                                                            <c:when test="${ticket.horasAtencion > 0}">${ticket.horasAtencion} horas</c:when>
+                                                            <c:otherwise>Sin definir</c:otherwise>
+                                                        </c:choose>
+                                                    </span>
+                                                </td>
                                                 <!-- Estado -->
                                                 <td class="py-4 px-6">
                                                     <span class="px-2.5 py-1 rounded-full font-semibold text-xs border ${stateBg} shadow-sm">
@@ -295,7 +306,7 @@
                                                                 </form>
                                                             </c:otherwise>
                                                         </c:choose>
-                                                        
+
                                                         <a href="${pageContext.request.contextPath}/tickets/comentar?id=${ticket.id}" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 transition-all">
                                                             <c:choose>
                                                                 <c:when test="${ticket.estado == 'CERRADO' || ticket.estado == 'CANCELADO' || ticket.estado == 'RESUELTO'}">
@@ -336,7 +347,7 @@
         </footer>
         <!-- Script de Filtrado por Menú Lateral -->
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
+            document.addEventListener("DOMContentLoaded", function () {
                 const menuVerTickets = document.getElementById('menu-ver-tickets');
                 const menuAtenderTicket = document.getElementById('menu-atender-ticket');
                 const menuVerHistorial = document.getElementById('menu-ver-historial');
@@ -395,7 +406,7 @@
 
                 // Eventos del menú lateral
                 if (menuVerTickets) {
-                    menuVerTickets.addEventListener('click', function(e) {
+                    menuVerTickets.addEventListener('click', function (e) {
                         e.preventDefault();
                         currentView = 'todos';
                         window.history.pushState({}, '', window.location.pathname);
@@ -404,7 +415,7 @@
                 }
 
                 if (menuAtenderTicket) {
-                    menuAtenderTicket.addEventListener('click', function(e) {
+                    menuAtenderTicket.addEventListener('click', function (e) {
                         e.preventDefault();
                         currentView = 'atender';
                         window.history.pushState({}, '', `${window.location.pathname}?filter=atender`);
@@ -413,7 +424,7 @@
                 }
 
                 if (menuVerHistorial) {
-                    menuVerHistorial.addEventListener('click', function(e) {
+                    menuVerHistorial.addEventListener('click', function (e) {
                         e.preventDefault();
                         currentView = 'historial';
                         window.history.pushState({}, '', `${window.location.pathname}?filter=historial`);

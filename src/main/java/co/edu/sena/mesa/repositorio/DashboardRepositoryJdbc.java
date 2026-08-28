@@ -2,18 +2,63 @@ package co.edu.sena.mesa.repositorio;
 
 import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.config.ConexionBD;
-import co.edu.sena.mesa.dto.AgenteConteoDTO;
 import co.edu.sena.mesa.dto.DashboardEstadisticasDTO;
-import co.edu.sena.mesa.dto.EstadoConteoDTO;
 import co.edu.sena.mesa.mapper.DashboardMapper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DashboardRepositoryJdbc implements DashboardRepository {
+
+    @Override
+    public List<Map<String, Object>> listarTicketsPorEstado() {
+        List<Map<String, Object>> resultado = new ArrayList<>();
+        String sql = "SELECT COALESCE(NULLIF(TRIM(estado), ''), 'SIN ESTADO') AS estado, "
+                + "COUNT(*) AS cantidad FROM ticket GROUP BY estado ORDER BY cantidad DESC";
+
+        try (Connection cn = ConexionBD.obtenerConexion(); PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> fila = new HashMap<>();
+                fila.put("estado", rs.getString("estado"));
+                fila.put("cantidad", rs.getInt("cantidad"));
+                resultado.add(fila);
+            }
+        } catch (SQLException e) {
+            RegistroErrores.registrar("Error listando tickets por estado", e);
+        }
+        return resultado;
+    }
+
+    @Override
+    public List<Map<String, Object>> listarTicketsPorAgente() {
+        List<Map<String, Object>> resultado = new ArrayList<>();
+        String sql = "SELECT u.nombre AS agente, COUNT(ta.idTicket) AS cantidad "
+                + "FROM ticketagente ta INNER JOIN usuario u ON u.id = ta.idUsuario "
+                + "INNER JOIN ticket t ON t.id = ta.idTicket "
+                + "WHERE REPLACE(UPPER(COALESCE(t.estado, '')), ' ', '_') "
+                + "NOT IN ('CERRADO', 'CANCELADO', 'RESUELTO') "
+                + "GROUP BY u.id, u.nombre ORDER BY cantidad DESC, u.nombre ASC";
+
+        try (Connection cn = ConexionBD.obtenerConexion()) {
+            asegurarTablaAsignacion(cn);
+            try (PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> fila = new HashMap<>();
+                    fila.put("agente", rs.getString("agente"));
+                    fila.put("cantidad", rs.getInt("cantidad"));
+                    resultado.add(fila);
+                }
+            }
+        } catch (SQLException e) {
+            RegistroErrores.registrar("Error listando tickets por agente", e);
+        }
+        return resultado;
+    }
 
     private void asegurarTablaAsignacion(Connection cn) throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS ticketagente ("
@@ -56,52 +101,17 @@ public class DashboardRepositoryJdbc implements DashboardRepository {
 
             asegurarTablaAsignacion(cn);
 
-            DashboardEstadisticasDTO dto = DashboardMapper.empty();
-
             try (PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
                 if (rs.next()) {
-                    dto = DashboardMapper.toDTO(rs);
+                    return DashboardMapper.toDTO(rs);
                 }
             }
-
-            dto.setTicketsPorEstado(obtenerTicketsPorEstado(cn));
-            dto.setTicketsPorAgente(obtenerTicketsPorAgente(cn));
-
-            return dto;
 
         } catch (SQLException e) {
             RegistroErrores.registrar("Error al consultar métricas del dashboard", e);
         }
 
         return DashboardMapper.empty();
-    }
-
-    private List<EstadoConteoDTO> obtenerTicketsPorEstado(Connection cn) throws SQLException {
-        List<EstadoConteoDTO> resultado = new ArrayList<>();
-        String sql = "SELECT UPPER(COALESCE(estado, 'SIN_ESTADO')) AS estado, COUNT(*) AS cantidad "
-                + "FROM ticket GROUP BY UPPER(COALESCE(estado, 'SIN_ESTADO')) ORDER BY cantidad DESC";
-
-        try (PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                resultado.add(new EstadoConteoDTO(rs.getString("estado"), rs.getInt("cantidad")));
-            }
-        }
-        return resultado;
-    }
-
-    private List<AgenteConteoDTO> obtenerTicketsPorAgente(Connection cn) throws SQLException {
-        List<AgenteConteoDTO> resultado = new ArrayList<>();
-        String sql = "SELECT u.nombre AS nombre_agente, COUNT(*) AS cantidad "
-                + "FROM ticketagente ta "
-                + "INNER JOIN usuario u ON u.id = ta.idUsuario "
-                + "GROUP BY u.id, u.nombre ORDER BY cantidad DESC";
-
-        try (PreparedStatement ps = cn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                resultado.add(new AgenteConteoDTO(rs.getString("nombre_agente"), rs.getInt("cantidad")));
-            }
-        }
-        return resultado;
     }
 }

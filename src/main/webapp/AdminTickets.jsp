@@ -154,6 +154,15 @@
                                                     <span class="text-gray-500">Prioridad</span>
                                                     <span class="font-semibold text-gray-800"><c:out value="${ticket.prioridad != null ? ticket.prioridad : 'Sin datos'}" /></span>
                                                 </div>
+                                                <div class="flex justify-between border-b pb-2">
+                                                    <span class="text-gray-500">Tiempo de atención</span>
+                                                    <span class="font-semibold text-emerald-700">
+                                                        <c:choose>
+                                                            <c:when test="${ticket.horasAtencion > 0}">${ticket.horasAtencion} horas</c:when>
+                                                            <c:otherwise>Sin definir</c:otherwise>
+                                                        </c:choose>
+                                                    </span>
+                                                </div>
                                                 <div class="flex justify-between">
                                                     <span class="text-gray-500">Estado</span>
                                                     <span class="font-semibold text-gray-800"><c:out value="${ticket.estado != null ? ticket.estado : 'Sin datos'}" /></span>
@@ -211,6 +220,7 @@
                                                 <div class="flex justify-between border-b pb-2"><span class="text-gray-500">Jornada</span><span class="font-semibold text-gray-800"><c:out value="${ticket.jornada != null ? ticket.jornada : 'Sin datos'}" /></span></div>
                                                 <div class="flex justify-between border-b pb-2"><span class="text-gray-500">Categoría</span><span class="font-semibold text-gray-800"><c:out value="${ticket.categoria != null ? ticket.categoria : 'Sin datos'}" /></span></div>
                                                 <div class="flex justify-between border-b pb-2"><span class="text-gray-500">Prioridad</span><span class="font-semibold text-gray-800"><c:out value="${ticket.prioridad != null ? ticket.prioridad : 'Sin datos'}" /></span></div>
+                                                <div class="flex justify-between border-b pb-2"><span class="text-gray-500">Tiempo de atención</span><span class="font-semibold text-emerald-700"><c:choose><c:when test="${ticket.horasAtencion > 0}">${ticket.horasAtencion} horas</c:when><c:otherwise>Sin definir</c:otherwise></c:choose></span></div>
                                                 <div class="flex justify-between"><span class="text-gray-500">Estado</span><span class="font-semibold text-gray-800"><c:out value="${ticket.estado != null ? ticket.estado : 'Sin datos'}" /></span></div>
                                             </div>
                                         </article>

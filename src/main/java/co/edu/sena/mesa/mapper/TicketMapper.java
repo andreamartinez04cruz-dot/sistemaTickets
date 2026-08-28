@@ -96,6 +96,7 @@ public class TicketMapper {
                 ? ticket.getPrioridad().getNombre()
                 : "Sin Prioridad"
         );
+        dto.setHorasAtencion(calcularHorasAtencion(ticket.getPrioridad()));
 
         // -------------------------
         // ESTADO
@@ -117,6 +118,27 @@ public class TicketMapper {
 
         return dto;
     }
+
+        private static int calcularHorasAtencion(Prioridad prioridad) {
+                if (prioridad == null || prioridad.getNombre() == null) {
+                        return 0;
+                }
+
+                String nombre = prioridad.getNombre().toUpperCase(Locale.ROOT);
+                if (nombre.contains("CRIT")) {
+                        return 4;
+                }
+                if (nombre.contains("ALTA")) {
+                        return 8;
+                }
+                if (nombre.contains("MEDIA")) {
+                        return 24;
+                }
+                if (nombre.contains("BAJA")) {
+                        return 72;
+        }
+                return 0;
+        }
 
     // =========================================================
     // TICKET -> TICKET DTO

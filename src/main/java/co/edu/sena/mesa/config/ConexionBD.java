@@ -7,7 +7,7 @@ public class ConexionBD {
 
     private static final String URL = "jdbc:mysql://localhost:3306/mesaayuda";
     private static final String USER = "root";
-    private static final String PASSWORD = "Sena2026*";
+    private static final String PASSWORD = "root";
 
     private static boolean migrado = false;
 
@@ -30,7 +30,7 @@ public class ConexionBD {
 
         } catch (Exception e) {
 
-            RegistroErrores.registrar("Error al conectar con la base de datos", e);
+            e.printStackTrace();
 
         }
 
@@ -55,7 +55,7 @@ public class ConexionBD {
                     }
                 }
             } catch (Exception e) {
-                RegistroErrores.registrar("Error migrando columna " + col, e);
+                System.out.println("MIGRACION: Error agregando columna " + col + ": " + e.getMessage());
             }
         }
     }

@@ -199,14 +199,24 @@
                                 <span class="text-sm text-tertiary">${ticket.categoriaNombre}</span>
                             </div>
 
+                            <div class="flex items-center gap-2 mb-4 text-sm text-emerald-700 font-semibold">
+                                <span class="material-symbols-outlined text-[16px]">schedule</span>
+                                <span>Tiempo de atención: 
+                                    <c:choose>
+                                        <c:when test="${ticket.horasAtencion > 0}">${ticket.horasAtencion} horas</c:when>
+                                        <c:otherwise>Sin definir</c:otherwise>
+                                    </c:choose>
+                                </span>
+                            </div>
+
                             <!-- Pie de Tarjeta -->
                             <div class="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center gap-3 flex-wrap">
                                 <span class="text-xs text-on-surface-variant">${ticket.fechaCreacion}</span>
                                 <div class="flex items-center gap-3">
                                     <c:set var="estadoTicket" value="${ticket.estadoNombre}" />
                                     <c:if test="${empty estadoTicket || (estadoTicket != 'EN_PROCESO' && estadoTicket != 'CERRADO' && estadoTicket != 'RESUELTO' && estadoTicket != 'CANCELADO')}">
-                                                     <a href="${cancelarTicketUrlBase}?action=cancelar&idTicket=${ticket.id}"
-                                                         onclick="return confirmarCancelacion(event, this.href);"
+                                        <a href="${cancelarTicketUrlBase}?action=cancelar&idTicket=${ticket.id}"
+                                           onclick="return confirmarCancelacion(event, this.href);"
                                            class="text-error hover:text-on-error-container text-sm font-semibold transition-colors">
                                             Cancelar
                                         </a>

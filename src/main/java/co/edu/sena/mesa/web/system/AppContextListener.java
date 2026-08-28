@@ -28,6 +28,10 @@ import co.edu.sena.mesa.servicio.UsuarioServiceImpl;
 import co.edu.sena.mesa.repositorio.UsuarioRepository;
 import co.edu.sena.mesa.repositorio.UsuarioRepositoryJdbc;
 import co.edu.sena.mesa.config.RegistroErrores;
+import co.edu.sena.mesa.repositorio.MensajeChatRepository;
+import co.edu.sena.mesa.repositorio.MensajeChatRepositoryJdbc;
+import co.edu.sena.mesa.servicio.MensajeChatService;
+import co.edu.sena.mesa.servicio.MensajeChatServiceImpl;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionServiceImpl;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketService;
@@ -61,8 +65,8 @@ public class AppContextListener implements ServletContextListener {
         TicketRepository ticketRepository = new TicketRepositoryJdbc();
         AsignacionRepository asignacionRepository = new AsignacionRepositoryJdbc();
         AsignacionService asignacionService = new AsignacionServiceImpl(
-            asignacionRepository,
-            new AsignacionRoundRobinStrategy());
+                asignacionRepository,
+                new AsignacionRoundRobinStrategy());
         TicketService ticketService = new TicketServiceImpl(ticketRepository, asignacionService);
         event.getServletContext().setAttribute("ticketService", ticketService);
         event.getServletContext().setAttribute("solicitanteTicketService", (SolicitanteTicketService) ticketService);
@@ -75,6 +79,10 @@ public class AppContextListener implements ServletContextListener {
         AdminTicketService adminTicketService = new AdminTicketServiceImpl(adminTicketRepository);
         event.getServletContext().setAttribute("adminTicketService", adminTicketService);
 
+        MensajeChatRepository mesajeChatRepository = new MensajeChatRepositoryJdbc();
+        MensajeChatService mensajeService = new MensajeChatServiceImpl(mesajeChatRepository);
+        event.getServletContext().setAttribute("mensajeService", mensajeService);
+
         DashboardRepository dashboardRepository = new DashboardRepositoryJdbc();
         DashboardService dashboardService = new DashboardServiceImpl(dashboardRepository);
         event.getServletContext().setAttribute("dashboardService", dashboardService);
@@ -84,7 +92,7 @@ public class AppContextListener implements ServletContextListener {
         try {
             Notificador notificadorEmail = new NotificadorEmail();
             notificador = new NotificadorCompuesto(
-                java.util.List.of(notificadorEnAplicacion, notificadorEmail));
+                    java.util.List.of(notificadorEnAplicacion, notificadorEmail));
         } catch (Exception e) {
             // Si el correo real falla al iniciar, la app sigue funcionando solo con notificación en aplicación
             RegistroErrores.registrar("No se pudo inicializar el notificador de correo, se usará solo notificación en aplicación", e);
@@ -95,13 +103,13 @@ public class AppContextListener implements ServletContextListener {
 
         NotificacionTicketRepository notificacionTicketRepository = new NotificacionTicketRepositoryJdbc();
         NotificacionTicketService notificacionTicketService = new NotificacionTicketServiceImpl(
-            notificacionTicketRepository);
+                notificacionTicketRepository);
         event.getServletContext().setAttribute("notificacionTicketService", notificacionTicketService);
 
         AgenteTicketRepository agenteTicketRepository = new AgenteTicketRepositoryJdbc();
         AgenteTicketService agenteTicketService = new AgenteTicketServiceImpl(
-            agenteTicketRepository,
-            notificacionService);
+                agenteTicketRepository,
+                notificacionService);
         event.getServletContext().setAttribute("agenteTicketService", agenteTicketService);
 
         //PRIORIDAD
@@ -132,25 +140,23 @@ public class AppContextListener implements ServletContextListener {
         event.getServletContext().setAttribute("slaService", slaService);
     }
 
-        @Override
-        public void contextDestroyed
-        (ServletContextEvent event
-        
-            ) {
+    @Override
+    public void contextDestroyed(ServletContextEvent event
+    ) {
         // Limpieza explícita del driver JDBC para evitar bloqueos en Tomcat
         try {
-                com.mysql.cj.jdbc.AbandonedConnectionCleanupThread.checkedShutdown();
-            } catch (Exception e) {
-                RegistroErrores.registrar("Error cerrando recursos JDBC de Tomcat", e);
-            }
-            java.util.Enumeration<Driver> drivers = DriverManager.getDrivers();
-            while (drivers.hasMoreElements()) {
-                Driver driver = drivers.nextElement();
-                try {
-                    DriverManager.deregisterDriver(driver);
-                } catch (SQLException e) {
-                    RegistroErrores.registrar("Error liberando driver JDBC", e);
-                }
+            com.mysql.cj.jdbc.AbandonedConnectionCleanupThread.checkedShutdown();
+        } catch (Exception e) {
+            RegistroErrores.registrar("Error cerrando recursos JDBC de Tomcat", e);
+        }
+        java.util.Enumeration<Driver> drivers = DriverManager.getDrivers();
+        while (drivers.hasMoreElements()) {
+            Driver driver = drivers.nextElement();
+            try {
+                DriverManager.deregisterDriver(driver);
+            } catch (SQLException e) {
+                RegistroErrores.registrar("Error liberando driver JDBC", e);
             }
         }
     }
+}

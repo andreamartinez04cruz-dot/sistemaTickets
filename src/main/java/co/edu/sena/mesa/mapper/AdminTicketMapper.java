@@ -16,6 +16,7 @@ public final class AdminTicketMapper {
         dto.setDescripcion(resultSet.getString("descripcion"));
         dto.setCategoria(resultSet.getString("categoria"));
         dto.setPrioridad(resultSet.getString("prioridad"));
+        dto.setHorasAtencion(resultSet.getInt("horas_atencion"));
         dto.setEstado(resultSet.getString("estado"));
         dto.setTipoPersona(resultSet.getString("tipo_persona"));
         dto.setJornada(resultSet.getString("jornada"));

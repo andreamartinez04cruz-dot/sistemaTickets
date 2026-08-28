@@ -1,7 +1,8 @@
 package co.edu.sena.mesa.dto;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DashboardEstadisticasDTO {
 
@@ -11,8 +12,8 @@ public class DashboardEstadisticasDTO {
     private int cerradosHoy;
     private int agentesConTickets;
     private int slaVencidos;
-    private List<EstadoConteoDTO> ticketsPorEstado = Collections.emptyList();
-    private List<AgenteConteoDTO> ticketsPorAgente = Collections.emptyList();
+    private List<Map<String, Object>> ticketsPorEstado = new ArrayList<>();
+    private List<Map<String, Object>> ticketsPorAgente = new ArrayList<>();
 
     public DashboardEstadisticasDTO() {
     }
@@ -65,19 +66,19 @@ public class DashboardEstadisticasDTO {
         this.slaVencidos = slaVencidos;
     }
 
-    public List<EstadoConteoDTO> getTicketsPorEstado() {
+    public List<Map<String, Object>> getTicketsPorEstado() {
         return ticketsPorEstado;
     }
 
-    public void setTicketsPorEstado(List<EstadoConteoDTO> ticketsPorEstado) {
+    public void setTicketsPorEstado(List<Map<String, Object>> ticketsPorEstado) {
         this.ticketsPorEstado = ticketsPorEstado;
     }
 
-    public List<AgenteConteoDTO> getTicketsPorAgente() {
+    public List<Map<String, Object>> getTicketsPorAgente() {
         return ticketsPorAgente;
     }
 
-    public void setTicketsPorAgente(List<AgenteConteoDTO> ticketsPorAgente) {
+    public void setTicketsPorAgente(List<Map<String, Object>> ticketsPorAgente) {
         this.ticketsPorAgente = ticketsPorAgente;
     }
 }

@@ -16,6 +16,7 @@ public class AdminTicketDTO {
     private String rol;
     private String estado;
     private String tipoPersona;
+    private int horasAtencion;
 
     public AdminTicketDTO() {
     }
@@ -130,5 +131,13 @@ public class AdminTicketDTO {
 
     public void setTipoPersona(String tipoPersona) {
         this.tipoPersona = tipoPersona;
+    }
+
+    public int getHorasAtencion() {
+        return horasAtencion;
+    }
+
+    public void setHorasAtencion(int horasAtencion) {
+        this.horasAtencion = horasAtencion;
     }
 }

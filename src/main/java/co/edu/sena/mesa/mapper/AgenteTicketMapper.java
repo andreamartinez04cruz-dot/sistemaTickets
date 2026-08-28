@@ -16,6 +16,7 @@ public final class AgenteTicketMapper {
         dto.setEstado(resultSet.getString("estado"));
         dto.setCategoria(resultSet.getString("categoria"));
         dto.setPrioridad(resultSet.getString("prioridad"));
+        dto.setHorasAtencion(resultSet.getInt("horas_atencion"));
         dto.setSolicitante(resultSet.getString("solicitante"));
         return dto;
     }

@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html class="light" lang="es">
     <head>
@@ -102,18 +103,45 @@
                         ${ticket.titulo}
                     </h3>
                 </div>
-                <!-- BOTON VOLVER -->
-                <div>
-                    <a href="${pageContext.request.contextPath}/agente/tickets" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+
+                <!-- BOTONES DE ACCIÓN SUPERIOR -->
+                <div class="flex items-center gap-3">
+                    <!-- BOTÓN NUEVO: REDIRECCIÓN AL CHAT EN VIVO -->
+                    <a href="${pageContext.request.contextPath}/chat?idTicket=${ticket.id}" class="bg-primary hover:bg-primary-container text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
                         <span class="material-symbols-outlined" style="font-size:18px;">
-                            arrow_back
+                            forum
                         </span>
+                        Abrir Chat en Vivo
+                    </a>
+
+                    <!-- BOTON VOLVER -->
+                    <!-- BOTON VOLVER -->
+                    <%-- Determinamos a qué ruta debe volver el usuario evaluando su lista de roles --%>
+                    <c:set var="urlVolver" value="${pageContext.request.contextPath}/tickets" />
+
+                    <c:forEach var="rol" items="${usuario.roles}">
+                        <%-- Ajusta 'rol.nombre' o el método que tenga tu clase Rol para obtener el nombre del rol --%>
+                        <c:if test="${rol.tiporol == 'AGENTE' || rol.tiporol == 'Agente'}">
+                            <c:set var="urlVolver" value="${pageContext.request.contextPath}/agente/tickets" />
+                        </c:if>
+                        <c:if test="${rol.tiporol == 'APRENDIZ' || rol.tiporol == 'Aprendiz'}">
+                            <c:set var="urlVolver" value="${pageContext.request.contextPath}/tickets/registrar/Funcionario?action=historial" />
+                        </c:if>
+                        <c:if test="${rol.tiporol == 'FUNCIONARIO' || rol.tiporol == 'Funcionario'}">
+                            <c:set var="urlVolver" value="${pageContext.request.contextPath}/tickets/registrar?action=historial" />
+                        </c:if>
+                    </c:forEach>
+
+                    <%-- Renderizamos el botón de manera limpia con la URL obtenida --%>
+                    <a href="${urlVolver}" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
                         Volver
                     </a>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <!-- COLUMNA IZQUIERDA: DETALLES Y COMENTARIOS CLÁSICOS -->
                 <div class="md:col-span-8 flex flex-col gap-8">
                     <div class="bg-white rounded-xl shadow-sm border border-outline-variant overflow-hidden relative">
                         <!-- BARRA LATERAL -->
@@ -163,84 +191,91 @@
                         </div>
                     </div>
 
-                    <div>
-                        <h4 class="text-xl font-medium mb-4 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary">
-                                forum
+                    <!-- SECCIÓN DE COMENTARIOS TRADICIONALES (MANTENIDA) -->
+                    <div class="bg-white rounded-xl shadow-sm border border-outline-variant p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h4 class="text-xl font-medium flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">
+                                    comment
+                                </span>
+                                Historial de Comentarios / Notas
+                            </h4>
+                            <span class="text-xs bg-surface-container px-3 py-1 rounded-full text-on-surface-variant">
+                                Modo Estándar
                             </span>
-                            Historial de Actividad
-                        </h4>
-                        <div class="flex flex-col gap-4">
+                        </div>
+
+                        <!-- LISTADO DE COMENTARIOS -->
+                        <div class="flex flex-col gap-4 mb-6">
                             <c:choose>
                                 <c:when test="${not empty comentarios}">
                                     <c:forEach var="comentario" items="${comentarios}">
-                                        <div class="flex gap-4">
-                                            <!-- AVATAR -->
-                                            <div class="flex-shrink-0">
-                                                <div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center font-bold">
-                                                    ${not empty comentario.nombreUsuario ? comentario.nombreUsuario.substring(0,1) : 'U'}
-                                                </div>
+                                        <div class="bg-surface-container-low rounded-lg p-4 border border-outline-variant">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <span class="font-semibold text-primary">
+                                                    ${not empty comentario.nombreUsuario ? comentario.nombreUsuario : 'Usuario'}
+                                                </span>
+                                                <span class="text-xs text-on-surface-variant">
+                                                    ${comentario.fechaFormateada}
+                                                </span>
                                             </div>
-                                            <!-- COMENTARIO -->
-                                            <div class="bg-white rounded-lg p-4 flex-grow border border-outline-variant shadow-sm">
-                                                <!-- AUTOR Y FECHA -->
-                                                <div class="flex justify-between items-start mb-2 gap-3">
-                                                    <span class="font-semibold">
-                                                        ${not empty comentario.nombreUsuario ? comentario.nombreUsuario : 'Usuario'}
-                                                    </span>
-                                                    <span class="text-xs text-on-surface-variant">
-                                                        ${comentario.fechaFormateada}
-                                                    </span>
-                                                </div>
-                                                <!-- TEXTO -->
-                                                <p class="text-on-surface-variant whitespace-pre-line">
-                                                    ${comentario.texto}
-                                                </p>
-                                            </div>
+                                            <p class="text-on-surface-variant whitespace-pre-line">
+                                                ${comentario.texto}
+                                            </p>
                                         </div>
                                     </c:forEach>
                                 </c:when>
                                 <c:otherwise>
-                                    <div class="bg-surface-container-low rounded-lg p-6 border border-outline-variant text-center">
-                                        <span class="material-symbols-outlined text-4xl text-tertiary">
-                                            forum
-                                        </span>
-                                        <p class="text-on-surface-variant mt-2">
-                                            Aún no hay comentarios en este ticket.
-                                        </p>
-                                    </div>
+                                    <p class="text-on-surface-variant text-center py-4">
+                                        No hay comentarios registrados en este ticket todavía.
+                                    </p>
                                 </c:otherwise>
                             </c:choose>
                         </div>
                     </div>
                 </div>
 
+                <!-- COLUMNA DERECHA: FORMULARIO PARA AGREGAR COMENTARIO CLÁSICO (MANTENIDO) -->
                 <div class="md:col-span-4">
                     <div class="bg-white rounded-xl shadow-sm border border-outline-variant p-6 sticky top-6">
+
+                        <!-- ACCESO RÁPIDO ADICIONAL A CHAT EN VIVO -->
+                        <div class="mb-6 p-4 bg-green-50 rounded-xl border border-primary/30 text-center">
+                            <span class="material-symbols-outlined text-primary text-3xl mb-1">
+                                support_agent
+                            </span>
+                            <h5 class="font-semibold text-primary mb-1">¿Necesitas resolverlo rápido?</h5>
+                            <p class="text-xs text-on-surface-variant mb-3">Habla en tiempo real con el usuario mediante nuestra sala de chat interactiva.</p>
+                            <a href="${pageContext.request.contextPath}/chat?idTicket=${ticket.id}" class="w-full inline-block bg-primary text-white hover:bg-primary-container text-sm font-medium py-2 px-4 rounded-lg transition-colors">
+                                Ir al Chat en Vivo
+                            </a>
+                        </div>
+
+                        <hr class="border-surface-variant mb-6"/>
+
                         <c:choose>
                             <c:when test="${ticket.estado == 'CERRADO' || ticket.estado == 'CANCELADO' || ticket.estado == 'RESUELTO'}">
                                 <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-                                    <p class="font-semibold mb-2">Comentarios bloqueados</p>
-                                    <p class="text-sm">Este ticket ya está en estado final y no admite más comentarios.</p>
+                                    <p class="font-semibold mb-2">Ticket Cerrado</p>
+                                    <p class="text-sm">Este ticket ya no acepta nuevos comentarios.</p>
                                 </div>
                             </c:when>
                             <c:otherwise>
                                 <h4 class="text-xl font-medium mb-4">
                                     Agregar Comentario
                                 </h4>
+                                <!-- Formulario Tradicional POST -->
                                 <form action="${pageContext.request.contextPath}/tickets/comentar" method="POST" class="flex flex-col gap-4">
-                                    <!-- ID DEL TICKET -->
                                     <input type="hidden" name="idTicket" value="${ticket.id}"/>
-                                    <!-- TEXTO -->
                                     <div>
                                         <label class="block text-sm font-medium text-on-surface-variant mb-2" for="comment-box">
-                                            Mensaje
+                                            Escribe una nota o respuesta
                                         </label>
-                                        <textarea id="comment-box" name="texto" required rows="5" placeholder="Escribe tu comentario o avance aquí..." class="w-full rounded-lg border border-outline bg-white p-3 text-base focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"></textarea>
+                                        <textarea id="comment-box" name="textoComentario" required rows="4" placeholder="Escribe tu comentario..." class="w-full rounded-lg border border-outline bg-white p-3 text-base focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"></textarea>
                                     </div>
                                     <!-- BOTON -->
                                     <button type="submit" class="bg-primary text-white hover:bg-primary-container font-medium px-6 py-3 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
-                                        Enviar
+                                        Enviar Comentario
                                         <span class="material-symbols-outlined" style="font-size:18px;">
                                             send
                                         </span>
@@ -252,14 +287,5 @@
                 </div>
             </div>
         </main>
-
-        <div class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-outline-variant p-4 shadow-lg z-40">
-            <a href="${pageContext.request.contextPath}/agente/tickets" class="w-full border border-primary text-primary py-3 rounded-lg flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined">
-                    arrow_back
-                </span>
-                Volver
-            </a>
-        </div>
     </body>
 </html>

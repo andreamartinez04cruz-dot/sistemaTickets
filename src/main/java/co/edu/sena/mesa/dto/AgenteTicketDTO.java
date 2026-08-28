@@ -8,6 +8,7 @@ public class AgenteTicketDTO {
     private String categoria;
     private String prioridad;
     private String solicitante;
+    private int horasAtencion;
 
     public int getId() {
         return id;
@@ -55,5 +56,13 @@ public class AgenteTicketDTO {
 
     public void setSolicitante(String solicitante) {
         this.solicitante = solicitante;
+    }
+
+    public int getHorasAtencion() {
+        return horasAtencion;
+    }
+
+    public void setHorasAtencion(int horasAtencion) {
+        this.horasAtencion = horasAtencion;
     }
 }

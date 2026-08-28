@@ -4,6 +4,7 @@ import co.edu.sena.mesa.config.ConexionBD;
 import co.edu.sena.mesa.config.RegistroErrores;
 import co.edu.sena.mesa.modelo.Categoria;
 import co.edu.sena.mesa.modelo.Comentario;
+import co.edu.sena.mesa.modelo.Prioridad;
 import co.edu.sena.mesa.modelo.Ticket;
 import co.edu.sena.mesa.modelo.Usuario;
 import co.edu.sena.mesa.modelo.estado.EstadoAsignado;
@@ -155,9 +156,10 @@ public class TicketRepositoryJdbc implements TicketRepository {
         List<Ticket> tickets = new ArrayList<>();
 
         String sql = "SELECT t.id, t.titulo, t.descripcion, t.estado, t.fechaCreacion, "
-                + "c.nombre AS categoria "
+            + "c.nombre AS categoria, p.id AS prioridad_id, p.tipoPrioridad AS prioridad "
                 + "FROM ticket t "
                 + "INNER JOIN categoria c ON t.idCategoria = c.id "
+            + "LEFT JOIN prioridad p ON t.idPrioridad = p.id "
                 + "WHERE t.idUsuario = ?";
 
         try (Connection conn = ConexionBD.obtenerConexion(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -187,6 +189,11 @@ public class TicketRepositoryJdbc implements TicketRepository {
                     Categoria categoria = new Categoria();
                     categoria.setNombre(rs.getString("categoria"));
                     ticket.setCategoria(categoria);
+
+                    Prioridad prioridad = new Prioridad();
+                    prioridad.setId(rs.getInt("prioridad_id"));
+                    prioridad.setNombre(rs.getString("prioridad"));
+                    ticket.setPrioridad(prioridad);
 
                     tickets.add(ticket);
                 }

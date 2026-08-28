@@ -3,26 +3,26 @@
 
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8"/>
-    <title>Reportes y Estadísticas - Administrador</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <link href="${pageContext.request.contextPath}/css/styles-global.css" rel="stylesheet"/>
-    <style>
-        body {
-            font-family: 'Work Sans', sans-serif;
-            background-color: #f4fbf7;
-            color: #073a1e;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex">
-    <jsp:include page="Menu.jsp" />
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Reportes y Estadísticas - Administrador</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <link href="${pageContext.request.contextPath}/css/styles-global.css" rel="stylesheet"/>
+        <style>
+            body {
+                font-family: 'Work Sans', sans-serif;
+                background-color: #f4fbf7;
+                color: #073a1e;
+            }
+        </style>
+    </head>
+    <body class="min-h-screen flex">
+        <jsp:include page="Menu.jsp" />
 
-    <div class="flex-1 flex flex-col">
-  
+        <div class="flex-1 flex flex-col">
+
             <div class="flex items-center justify-between mb-8 p-6 bg-gradient-to-r from-emerald-50 to-green-50/20 rounded-2xl border border-emerald-100/70 shadow-sm">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Estadísticas y Reportes</h1>
@@ -79,158 +79,84 @@
                 </div>
             </div>
 
-            <!-- Tickets por Estado y por Agente -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Tickets por Estado</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-500">
-                            <thead class="text-xs uppercase bg-emerald-50 text-emerald-900 border-b border-emerald-100">
-                                <tr>
-                                    <th class="px-4 py-3 font-semibold">Estado</th>
-                                    <th class="px-4 py-3 font-semibold text-center">Cantidad</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                <c:choose>
-                                    <c:when test="${not empty estadisticasAdmin.ticketsPorEstado}">
-                                        <c:forEach var="fila" items="${estadisticasAdmin.ticketsPorEstado}">
-                                            <tr class="hover:bg-emerald-50/30 transition-colors">
-                                                <td class="px-4 py-3 font-medium text-gray-900">${fila.estado}</td>
-                                                <td class="px-4 py-3 text-center font-bold text-emerald-700">${fila.cantidad}</td>
-                                            </tr>
-                                        </c:forEach>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <tr>
-                                            <td colspan="2" class="px-4 py-4 text-center text-gray-400">Sin datos disponibles.</td>
-                                        </tr>
-                                    </c:otherwise>
-                                </c:choose>
-                            </tbody>
-                        </table>
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="text-lg font-bold text-gray-900">Tickets por estado</h3>
+                        <span class="material-symbols-outlined text-emerald-600">bar_chart</span>
+                    </div>
+                    <div class="space-y-4 bar-chart" data-chart="estado">
+                        <c:forEach var="fila" items="${estadisticasAdmin.ticketsPorEstado}">
+                            <div class="bar-row" data-value="${fila.cantidad}">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-medium text-gray-700"><c:out value="${fila.estado}" /></span>
+                                    <span class="font-bold text-emerald-700"><c:out value="${fila.cantidad}" /></span>
+                                </div>
+                                <div class="h-3 bg-emerald-50 rounded-full overflow-hidden">
+                                    <div class="bar-fill h-full bg-emerald-500 rounded-full"></div>
+                                </div>
+                            </div>
+                        </c:forEach>
+                        <c:if test="${empty estadisticasAdmin.ticketsPorEstado}">
+                            <p class="text-sm text-gray-500">No hay datos disponibles.</p>
+                        </c:if>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Tickets por Agente</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-500">
-                            <thead class="text-xs uppercase bg-emerald-50 text-emerald-900 border-b border-emerald-100">
-                                <tr>
-                                    <th class="px-4 py-3 font-semibold">Agente</th>
-                                    <th class="px-4 py-3 font-semibold text-center">Cantidad</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                <c:choose>
-                                    <c:when test="${not empty estadisticasAdmin.ticketsPorAgente}">
-                                        <c:forEach var="fila" items="${estadisticasAdmin.ticketsPorAgente}">
-                                            <tr class="hover:bg-emerald-50/30 transition-colors">
-                                                <td class="px-4 py-3 font-medium text-gray-900">${fila.nombreAgente}</td>
-                                                <td class="px-4 py-3 text-center font-bold text-emerald-700">${fila.cantidad}</td>
-                                            </tr>
-                                        </c:forEach>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <tr>
-                                            <td colspan="2" class="px-4 py-4 text-center text-gray-400">Sin datos disponibles.</td>
-                                        </tr>
-                                    </c:otherwise>
-                                </c:choose>
-                            </tbody>
-                        </table>
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="text-lg font-bold text-gray-900">Tickets por agente</h3>
+                        <span class="material-symbols-outlined text-blue-600">bar_chart</span>
+                    </div>
+                    <div class="space-y-4 bar-chart" data-chart="agente">
+                        <c:forEach var="fila" items="${estadisticasAdmin.ticketsPorAgente}">
+                            <div class="bar-row" data-value="${fila.cantidad}">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="font-medium text-gray-700"><c:out value="${fila.agente}" /></span>
+                                    <span class="font-bold text-blue-700"><c:out value="${fila.cantidad}" /></span>
+                                </div>
+                                <div class="h-3 bg-blue-50 rounded-full overflow-hidden">
+                                    <div class="bar-fill h-full bg-blue-500 rounded-full"></div>
+                                </div>
+                            </div>
+                        </c:forEach>
+                        <c:if test="${empty estadisticasAdmin.ticketsPorAgente}">
+                            <p class="text-sm text-gray-500">No hay agentes con tickets activos.</p>
+                        </c:if>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="text-lg font-bold text-gray-900">SLA vencidos</h3>
+                        <span class="material-symbols-outlined text-red-600">warning</span>
+                    </div>
+                    <div class="space-y-4 bar-chart" data-chart="sla" data-max="${estadisticasAdmin.totalTicketsMes}">
+                        <div class="bar-row" data-value="${estadisticasAdmin.slaVencidos}">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="font-medium text-gray-700">Tickets fuera de tiempo</span>
+                                <span class="font-bold text-red-700"><c:out value="${estadisticasAdmin.slaVencidos}" /></span>
+                            </div>
+                            <div class="h-3 bg-red-50 rounded-full overflow-hidden">
+                                <div class="bar-fill h-full bg-red-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500">Tickets activos que superaron el tiempo permitido.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Tabla de Resumen Metrológico -->
-            <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Resumen General de Datos Reales</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-gray-500">
-                        <thead class="text-xs uppercase bg-emerald-50 text-emerald-900 border-b border-emerald-100">
-                            <tr>
-                                <th class="px-6 py-4 font-semibold">Métrica de Gestión</th>
-                                <th class="px-6 py-4 font-semibold text-center">Cantidad</th>
-                                <th class="px-6 py-4 font-semibold text-center">Porcentaje (%)</th>
-                                <th class="px-6 py-4 font-semibold">Interpretación</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <tr class="hover:bg-emerald-50/30 transition-colors">
-                                <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-cyan-500"></span> Agentes con tickets activos
-                                </td>
-                                <td class="px-6 py-4 text-center font-bold text-cyan-600">${estadisticasAdmin.agentesConTickets}</td>
-                                <td class="px-6 py-4 text-center">-</td>
-                                <td class="px-6 py-4 text-gray-500">Agentes con al menos un ticket activo asignado.</td>
-                            </tr>
-                            <tr class="hover:bg-emerald-50/30 transition-colors">
-                                <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-red-600"></span> SLA vencidos
-                                </td>
-                                <td class="px-6 py-4 text-center font-bold text-red-600">${estadisticasAdmin.slaVencidos}</td>
-                                <td class="px-6 py-4 text-center">-</td>
-                                <td class="px-6 py-4 text-gray-500">Tickets activos que superaron el tiempo máximo de su prioridad.</td>
-                            </tr>
-                            <tr class="hover:bg-emerald-50/30 transition-colors">
-                                <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-blue-500"></span> Total de Casos (Mes)
-                                </td>
-                                <td class="px-6 py-4 text-center font-bold text-gray-900">${estadisticasAdmin.totalTicketsMes}</td>
-                                <td class="px-6 py-4 text-center">100%</td>
-                                <td class="px-6 py-4 text-gray-500">Total acumulado de solicitudes registradas.</td>
-                            </tr>
-                            <tr class="hover:bg-emerald-50/30 transition-colors">
-                                <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-rose-500"></span> Casos de Alta Prioridad / Críticos
-                                </td>
-                                <td class="px-6 py-4 text-center font-bold text-rose-600">${estadisticasAdmin.criticos}</td>
-                                <td class="px-6 py-4 text-center font-semibold text-rose-600">
-                                    <c:choose>
-                                        <c:when test="${estadisticasAdmin.totalTicketsMes > 0}">
-                                            <c:out value="${Math.round((estadisticasAdmin.criticos * 100.0) / estadisticasAdmin.totalTicketsMes)}%" />
-                                        </c:when>
-                                        <c:otherwise>0%</c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td class="px-6 py-4 text-gray-500">Casos urgentes que requieren atención de primer nivel.</td>
-                            </tr>
-                            <tr class="hover:bg-emerald-50/30 transition-colors">
-                                <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-amber-500"></span> Casos sin Agente Asignado
-                                </td>
-                                <td class="px-6 py-4 text-center font-bold text-amber-600">${estadisticasAdmin.sinAsignar}</td>
-                                <td class="px-6 py-4 text-center font-semibold text-amber-600">
-                                    <c:choose>
-                                        <c:when test="${estadisticasAdmin.totalTicketsMes > 0}">
-                                            <c:out value="${Math.round((estadisticasAdmin.sinAsignar * 100.0) / estadisticasAdmin.totalTicketsMes)}%" />
-                                        </c:when>
-                                        <c:otherwise>0%</c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td class="px-6 py-4 text-gray-500">Solicitudes pendientes por reasignar a un técnico.</td>
-                            </tr>
-                            <tr class="hover:bg-emerald-50/30 transition-colors">
-                                <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span> Casos Cerrados Hoy
-                                </td>
-                                <td class="px-6 py-4 text-center font-bold text-emerald-600">${estadisticasAdmin.cerradosHoy}</td>
-                                <td class="px-6 py-4 text-center font-semibold text-emerald-600">
-                                    <c:choose>
-                                        <c:when test="${estadisticasAdmin.totalTicketsMes > 0}">
-                                            <c:out value="${Math.round((estadisticasAdmin.cerradosHoy * 100.0) / estadisticasAdmin.totalTicketsMes)}%" />
-                                        </c:when>
-                                        <c:otherwise>0%</c:otherwise>
-                                    </c:choose>
-                                </td>
-                                <td class="px-6 py-4 text-gray-500">Tickets finalizados con resolución exitosa el día de hoy.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <script>
+                document.querySelectorAll('.bar-chart').forEach(function (chart) {
+                    const rows = chart.querySelectorAll('.bar-row');
+                    const configuredMax = Number(chart.dataset.max);
+                    const max = Math.max(configuredMax || 0,
+                            ...Array.from(rows).map(row => Number(row.dataset.value)), 1);
+                    rows.forEach(function (row) {
+                        row.querySelector('.bar-fill').style.width = (Number(row.dataset.value) / max * 100) + '%';
+                    });
+                });
+            </script>
 
         </div>
     </div>

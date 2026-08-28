@@ -85,6 +85,11 @@ public class AgenteTicketRepositoryJdbc implements AgenteTicketRepository {
     @Override
     public List<AgenteTicketDTO> listarTicketsAsignados(int idAgente) {
         String sql = "SELECT t.id, t.titulo, t.estado, c.nombre AS categoria, pr.tipoPrioridad AS prioridad, "
+            + "CASE "
+            + "WHEN UPPER(COALESCE(pr.tipoPrioridad, '')) LIKE '%CRIT%' THEN 4 "
+            + "WHEN UPPER(COALESCE(pr.tipoPrioridad, '')) LIKE '%ALTA%' THEN 8 "
+            + "WHEN UPPER(COALESCE(pr.tipoPrioridad, '')) LIKE '%MEDIA%' THEN 24 "
+            + "WHEN UPPER(COALESCE(pr.tipoPrioridad, '')) LIKE '%BAJA%' THEN 72 ELSE 0 END AS horas_atencion, "
                 + "u.nombre AS solicitante "
                 + "FROM ticketagente ta "
                 + "JOIN ticket t ON t.id = ta.idTicket "

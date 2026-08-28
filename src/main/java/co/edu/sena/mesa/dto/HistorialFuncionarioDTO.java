@@ -9,6 +9,7 @@ public class HistorialFuncionarioDTO {
     private String prioridadNombre;
     private String estadoNombre;
     private String fechaCreacion;
+    private int horasAtencion;
 
     // Getters y Setters
     public int getId() {
@@ -65,5 +66,13 @@ public class HistorialFuncionarioDTO {
 
     public void setFechaCreacion(String fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
+    }
+
+    public int getHorasAtencion() {
+        return horasAtencion;
+    }
+
+    public void setHorasAtencion(int horasAtencion) {
+        this.horasAtencion = horasAtencion;
     }
 }

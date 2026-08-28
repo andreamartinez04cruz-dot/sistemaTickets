@@ -13,6 +13,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public DashboardEstadisticasDTO obtenerEstadisticasAdministrador() {
-        return dashboardRepository.obtenerEstadisticasAdministrador();
+        DashboardEstadisticasDTO estadisticas = dashboardRepository.obtenerEstadisticasAdministrador();
+        estadisticas.setTicketsPorEstado(dashboardRepository.listarTicketsPorEstado());
+        estadisticas.setTicketsPorAgente(dashboardRepository.listarTicketsPorAgente());
+        return estadisticas;
     }
 }
