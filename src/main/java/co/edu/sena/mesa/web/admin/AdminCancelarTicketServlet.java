@@ -1,6 +1,6 @@
 package co.edu.sena.mesa.web.admin;
 
-import co.edu.sena.mesa.config.RegistroErrores;
+import co.edu.sena.mesa.util.RegistroErrores;
 import co.edu.sena.mesa.servicio.AdminTicketService;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
 import java.io.IOException;

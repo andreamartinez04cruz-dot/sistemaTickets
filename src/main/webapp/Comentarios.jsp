@@ -104,7 +104,7 @@
                 </div>
                 <!-- BOTON VOLVER -->
                 <div>
-                    <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                    <a href="${pageContext.request.contextPath}/agente/tickets" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
                         <span class="material-symbols-outlined" style="font-size:18px;">
                             arrow_back
                         </span>

@@ -1,5 +1,6 @@
 package co.edu.sena.mesa.config;
 
+import co.edu.sena.mesa.util.RegistroErrores;
 import java.sql.Connection;
 import java.sql.DriverManager;
 

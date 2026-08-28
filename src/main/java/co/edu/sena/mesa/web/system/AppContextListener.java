@@ -27,7 +27,7 @@ import co.edu.sena.mesa.servicio.UsuarioService;
 import co.edu.sena.mesa.servicio.UsuarioServiceImpl;
 import co.edu.sena.mesa.repositorio.UsuarioRepository;
 import co.edu.sena.mesa.repositorio.UsuarioRepositoryJdbc;
-import co.edu.sena.mesa.config.RegistroErrores;
+import co.edu.sena.mesa.util.RegistroErrores;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionServiceImpl;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketService;

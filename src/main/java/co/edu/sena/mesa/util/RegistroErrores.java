@@ -1,4 +1,4 @@
-package co.edu.sena.mesa.config;
+package co.edu.sena.mesa.util;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

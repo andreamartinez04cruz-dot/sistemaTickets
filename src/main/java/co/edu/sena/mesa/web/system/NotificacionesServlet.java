@@ -1,6 +1,6 @@
 package co.edu.sena.mesa.web.system;
 
-import co.edu.sena.mesa.config.RegistroErrores;
+import co.edu.sena.mesa.util.RegistroErrores;
 import co.edu.sena.mesa.modelo.Usuario;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketService;
 import jakarta.servlet.ServletException;
