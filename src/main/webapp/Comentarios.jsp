@@ -119,36 +119,15 @@
 
                 <!-- BOTONES DE ACCIÓN SUPERIOR -->
                 <div class="flex items-center gap-3">
-                    <!-- BOTÓN NUEVO: REDIRECCIÓN AL CHAT EN VIVO -->
+                    <!-- BOTÓN: REDIRECCIÓN AL CHAT EN VIVO -->
                     <a href="${pageContext.request.contextPath}/chat?idTicket=${ticket.id}" class="bg-primary hover:bg-primary-container text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
-                <!-- BOTON VOLVER -->
-                <div>
-                    <a href="${urlVolver}" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
                         <span class="material-symbols-outlined" style="font-size:18px;">
                             forum
                         </span>
                         Abrir Chat en Vivo
                     </a>
 
-                    <!-- BOTON VOLVER -->
-                    <!-- BOTON VOLVER -->
-                    <%-- Determinamos a qué ruta debe volver el usuario evaluando su lista de roles --%>
-                    <c:set var="urlVolver" value="${pageContext.request.contextPath}/tickets" />
-
-                    <c:forEach var="rol" items="${usuario.roles}">
-                        <%-- Ajusta 'rol.nombre' o el método que tenga tu clase Rol para obtener el nombre del rol --%>
-                        <c:if test="${rol.tiporol == 'AGENTE' || rol.tiporol == 'Agente'}">
-                            <c:set var="urlVolver" value="${pageContext.request.contextPath}/agente/tickets" />
-                        </c:if>
-                        <c:if test="${rol.tiporol == 'APRENDIZ' || rol.tiporol == 'Aprendiz'}">
-                            <c:set var="urlVolver" value="${pageContext.request.contextPath}/tickets/registrar/Funcionario?action=historial" />
-                        </c:if>
-                        <c:if test="${rol.tiporol == 'FUNCIONARIO' || rol.tiporol == 'Funcionario'}">
-                            <c:set var="urlVolver" value="${pageContext.request.contextPath}/tickets/registrar?action=historial" />
-                        </c:if>
-                    </c:forEach>
-
-                    <%-- Renderizamos el botón de manera limpia con la URL obtenida --%>
+                    <%-- Renderizamos el botón de manera limpia con la URL obtenida arriba --%>
                     <a href="${urlVolver}" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
                         <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
                         Volver
@@ -164,7 +143,7 @@
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
                         <div class="p-6 ml-1">
                             <!-- INFORMACION -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-6 border-b border-surface-variant pb-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6 border-b border-surface-variant pb-6">
                                 <div>
                                     <p class="text-xs font-semibold text-on-surface-variant mb-1">
                                         Categoría
@@ -207,7 +186,7 @@
                         </div>
                     </div>
 
-                    <!-- SECCIÓN DE COMENTARIOS TRADICIONALES (MANTENIDA) -->
+                    <!-- SECCIÓN DE COMENTARIOS TRADICIONALES -->
                     <div class="bg-white rounded-xl shadow-sm border border-outline-variant p-6">
                         <div class="flex justify-between items-center mb-6">
                             <h4 class="text-xl font-medium flex items-center gap-2">
@@ -251,7 +230,7 @@
                     </div>
                 </div>
 
-                <!-- COLUMNA DERECHA: FORMULARIO PARA AGREGAR COMENTARIO CLÁSICO (MANTENIDO) -->
+                <!-- COLUMNA DERECHA: FORMULARIO PARA AGREGAR COMENTARIO -->
                 <div class="md:col-span-4">
                     <div class="bg-white rounded-xl shadow-sm border border-outline-variant p-6 sticky top-6">
 
@@ -271,7 +250,7 @@
 
                         <c:choose>
                             <c:when test="${ticket.estado == 'CERRADO' || ticket.estado == 'CANCELADO' || ticket.estado == 'RESUELTO'}">
-                                <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+                                <div class="rounded-lg border border-red-205 bg-red-50 p-4 text-red-700">
                                     <p class="font-semibold mb-2">Ticket Cerrado</p>
                                     <p class="text-sm">Este ticket ya no acepta nuevos comentarios.</p>
                                 </div>
