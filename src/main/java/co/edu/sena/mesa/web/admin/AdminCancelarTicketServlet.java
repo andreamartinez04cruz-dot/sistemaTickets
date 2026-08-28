@@ -49,9 +49,10 @@ public class AdminCancelarTicketServlet extends HttpServlet {
                 adminTicketService.cancelarTicket(idTicket);
 
                 String destinatario = adminTicketService.obtenerCorreoSolicitante(idTicket);
-                if (notificacionService != null && destinatario != null && !destinatario.isBlank()) {
-                    notificacionService.notificarCambioEstado(destinatario, idTicket, "CANCELADO");
-
+                if (notificacionService != null) {
+                    notificacionService.notificarATodosLosRoles(idTicket, "CANCELADO");
+                }
+                if (destinatario != null && !destinatario.isBlank()) {
                     List<String> notificaciones = (List<String>) session.getAttribute("notificaciones");
                     if (notificaciones == null) {
                         notificaciones = new ArrayList<>();

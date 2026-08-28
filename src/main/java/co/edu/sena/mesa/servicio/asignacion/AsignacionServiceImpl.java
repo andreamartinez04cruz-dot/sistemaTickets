@@ -1,21 +1,37 @@
 package co.edu.sena.mesa.servicio.asignacion;
 
+import co.edu.sena.mesa.dto.DestinatarioNotificacionDTO;
 import co.edu.sena.mesa.modelo.Ticket;
 import co.edu.sena.mesa.modelo.Usuario;
 import co.edu.sena.mesa.modelo.estado.EstadoTicket;
+import co.edu.sena.mesa.repositorio.AgenteTicketRepository;
 import co.edu.sena.mesa.repositorio.AsignacionRepository;
+import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
+import co.edu.sena.mesa.util.RegistroErrores;
 import java.util.List;
 
 public class AsignacionServiceImpl implements AsignacionService {
 
     private final AsignacionRepository asignacionRepository;
     private final AsignacionStrategy asignacionStrategy;
+    private final NotificacionService notificacionService;
+    private final AgenteTicketRepository agenteTicketRepository;
 
     public AsignacionServiceImpl(
             AsignacionRepository asignacionRepository,
             AsignacionStrategy asignacionStrategy) {
+        this(asignacionRepository, asignacionStrategy, null, null);
+    }
+
+    public AsignacionServiceImpl(
+            AsignacionRepository asignacionRepository,
+            AsignacionStrategy asignacionStrategy,
+            NotificacionService notificacionService,
+            AgenteTicketRepository agenteTicketRepository) {
         this.asignacionRepository = asignacionRepository;
         this.asignacionStrategy = asignacionStrategy;
+        this.notificacionService = notificacionService;
+        this.agenteTicketRepository = agenteTicketRepository;
     }
 
     @Override
@@ -36,5 +52,14 @@ public class AsignacionServiceImpl implements AsignacionService {
             ticket.getId(),
             agente.getId(),
             estadoAsignado.getNombreEstado());
+
+        notificarAsignacion(ticket.getId(), estadoAsignado.getNombreEstado());
+    }
+
+    private void notificarAsignacion(int idTicket, String estado) {
+        if (notificacionService == null) {
+            return;
+        }
+        notificacionService.notificarATodosLosRoles(idTicket, estado);
     }
 }

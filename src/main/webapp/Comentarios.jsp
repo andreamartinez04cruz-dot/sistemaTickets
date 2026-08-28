@@ -1,5 +1,17 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<c:set var="rolActual" value="${not empty sessionScope.rolUsuario ? sessionScope.rolUsuario : sessionScope.usuario.rol}" />
+<c:choose>
+    <c:when test="${rolActual == 'AGENTE'}">
+        <c:set var="urlVolver" value="${pageContext.request.contextPath}/agente/tickets" />
+    </c:when>
+    <c:when test="${rolActual == 'ADMIN'}">
+        <c:set var="urlVolver" value="${pageContext.request.contextPath}/admin/tickets" />
+    </c:when>
+    <c:otherwise>
+        <c:set var="urlVolver" value="${pageContext.request.contextPath}/tickets/registrar/Funcionario?action=historial" />
+    </c:otherwise>
+</c:choose>
 <!DOCTYPE html>
 <html class="light" lang="es">
     <head>
@@ -104,7 +116,7 @@
                 </div>
                 <!-- BOTON VOLVER -->
                 <div>
-                    <a href="${pageContext.request.contextPath}/agente/tickets" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                    <a href="${urlVolver}" class="border border-primary text-primary hover:bg-green-50 font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
                         <span class="material-symbols-outlined" style="font-size:18px;">
                             arrow_back
                         </span>
@@ -254,7 +266,7 @@
         </main>
 
         <div class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-outline-variant p-4 shadow-lg z-40">
-            <a href="${pageContext.request.contextPath}/tickets/registrar?action=historial" class="w-full border border-primary text-primary py-3 rounded-lg flex items-center justify-center gap-2">
+            <a href="${urlVolver}" class="w-full border border-primary text-primary py-3 rounded-lg flex items-center justify-center gap-2">
                 <span class="material-symbols-outlined">
                     arrow_back
                 </span>

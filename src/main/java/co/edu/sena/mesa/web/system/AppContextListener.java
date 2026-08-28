@@ -32,7 +32,10 @@ import co.edu.sena.mesa.servicio.notificacion.NotificacionService;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionServiceImpl;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketService;
 import co.edu.sena.mesa.servicio.notificacion.NotificacionTicketServiceImpl;
+import co.edu.sena.mesa.servicio.notificacion.ConfiguracionCorreo;
 import co.edu.sena.mesa.servicio.notificacion.Notificador;
+import co.edu.sena.mesa.servicio.notificacion.NotificadorCompuesto;
+import co.edu.sena.mesa.servicio.notificacion.NotificadorCorreo;
 import co.edu.sena.mesa.servicio.notificacion.NotificadorEnAplicacion;
 import co.edu.sena.mesa.servicio.sla.CalcularPrioridad;
 import co.edu.sena.mesa.servicio.sla.SlaAltaStrategy;
@@ -56,11 +59,20 @@ public class AppContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent event) {
 
+        Notificador notificador = crearNotificador();
+        AgenteTicketRepository agenteTicketRepository = new AgenteTicketRepositoryJdbc();
+        NotificacionService notificacionService = new NotificacionServiceImpl(
+            notificador,
+            agenteTicketRepository);
+        event.getServletContext().setAttribute("notificacionService", notificacionService);
+
         TicketRepository ticketRepository = new TicketRepositoryJdbc();
         AsignacionRepository asignacionRepository = new AsignacionRepositoryJdbc();
         AsignacionService asignacionService = new AsignacionServiceImpl(
             asignacionRepository,
-            new AsignacionRoundRobinStrategy());
+            new AsignacionRoundRobinStrategy(),
+            notificacionService,
+            agenteTicketRepository);
         TicketService ticketService = new TicketServiceImpl(ticketRepository, asignacionService);
         event.getServletContext().setAttribute("ticketService", ticketService);
         event.getServletContext().setAttribute("solicitanteTicketService", (SolicitanteTicketService) ticketService);
@@ -70,23 +82,22 @@ public class AppContextListener implements ServletContextListener {
         event.getServletContext().setAttribute("usuarioService", usuarioService);
 
         AdminTicketRepository adminTicketRepository = new AdminTicketRepositoryJdbc();
-        AdminTicketService adminTicketService = new AdminTicketServiceImpl(adminTicketRepository);
+        AdminTicketService adminTicketService = new AdminTicketServiceImpl(
+            adminTicketRepository,
+            notificacionService,
+            agenteTicketRepository);
         event.getServletContext().setAttribute("adminTicketService", adminTicketService);
 
         DashboardRepository dashboardRepository = new DashboardRepositoryJdbc();
         DashboardService dashboardService = new DashboardServiceImpl(dashboardRepository);
         event.getServletContext().setAttribute("dashboardService", dashboardService);
 
-        Notificador notificador = new NotificadorEnAplicacion();
-        NotificacionService notificacionService = new NotificacionServiceImpl(notificador);
-        event.getServletContext().setAttribute("notificacionService", notificacionService);
-
         NotificacionTicketRepository notificacionTicketRepository = new NotificacionTicketRepositoryJdbc();
         NotificacionTicketService notificacionTicketService = new NotificacionTicketServiceImpl(
-            notificacionTicketRepository);
+            notificacionTicketRepository,
+            notificacionService);
         event.getServletContext().setAttribute("notificacionTicketService", notificacionTicketService);
 
-        AgenteTicketRepository agenteTicketRepository = new AgenteTicketRepositoryJdbc();
         AgenteTicketService agenteTicketService = new AgenteTicketServiceImpl(
             agenteTicketRepository,
             notificacionService);
@@ -118,6 +129,23 @@ public class AppContextListener implements ServletContextListener {
         slaService.registrarEstrategia("10", critica);
 
         event.getServletContext().setAttribute("slaService", slaService);
+    }
+
+    /**
+     * Notifica siempre en aplicacion y ademas por correo real cuando estan
+     * definidas las variables de entorno SMTP.
+     */
+    private Notificador crearNotificador() {
+        Notificador enAplicacion = new NotificadorEnAplicacion();
+        ConfiguracionCorreo configuracion = ConfiguracionCorreo.desdeVariablesDeEntorno();
+        if (configuracion.estaCompleta()) {
+            System.out.println("[Notificacion] Activado: aplicacion + correo real desde "
+                + configuracion.getRemitente());
+            return new NotificadorCompuesto(enAplicacion, new NotificadorCorreo(configuracion));
+        }
+        System.out.println("[Notificacion] Activado: solo aplicacion "
+            + "(falta configurar correo.properties)");
+        return enAplicacion;
     }
 
         @Override

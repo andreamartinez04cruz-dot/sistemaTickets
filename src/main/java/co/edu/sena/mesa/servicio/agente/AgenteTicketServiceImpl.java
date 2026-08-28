@@ -2,6 +2,7 @@ package co.edu.sena.mesa.servicio.agente;
 
 import co.edu.sena.mesa.dto.AgenteTicketDTO;
 import co.edu.sena.mesa.dto.AgenteTicketsResumenDTO;
+import co.edu.sena.mesa.dto.DestinatarioNotificacionDTO;
 import co.edu.sena.mesa.mapper.AgenteTicketsResumenMapper;
 import co.edu.sena.mesa.modelo.estado.EstadoTicket;
 import co.edu.sena.mesa.modelo.estado.EstadoTicketFactory;
@@ -115,15 +116,24 @@ public class AgenteTicketServiceImpl implements AgenteTicketService {
     }
 
     private void notificarCambioEstado(int idTicket, String estado) {
-        String correoSolicitante = agenteTicketRepository.obtenerCorreoSolicitante(idTicket);
-        if (correoSolicitante == null || correoSolicitante.trim().isEmpty()) {
+        List<DestinatarioNotificacionDTO> destinatarios =
+            agenteTicketRepository.obtenerDestinatariosNotificacion(idTicket);
+
+        if (destinatarios.isEmpty()) {
+            String correoSolicitante = agenteTicketRepository.obtenerCorreoSolicitante(idTicket);
+            if (correoSolicitante == null || correoSolicitante.trim().isEmpty()) {
+                return;
+            }
+            if ("RESUELTO".equals(estado)) {
+                notificacionService.notificarTicketResuelto(correoSolicitante.trim(), idTicket);
+            } else {
+                notificacionService.notificarCambioEstado(correoSolicitante.trim(), idTicket, estado);
+            }
             return;
         }
 
-        if ("RESUELTO".equals(estado)) {
-            notificacionService.notificarTicketResuelto(correoSolicitante, idTicket);
-        } else {
-            notificacionService.notificarCambioEstado(correoSolicitante, idTicket, estado);
+        for (DestinatarioNotificacionDTO destinatario : destinatarios) {
+            notificacionService.notificarSegunRol(destinatario, idTicket, estado);
         }
     }
 

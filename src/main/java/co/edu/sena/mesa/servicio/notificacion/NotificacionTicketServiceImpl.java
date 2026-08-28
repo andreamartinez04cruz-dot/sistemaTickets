@@ -8,9 +8,17 @@ import java.util.Map;
 public class NotificacionTicketServiceImpl implements NotificacionTicketService {
 
     private final NotificacionTicketRepository notificacionTicketRepository;
+    private final NotificacionService notificacionService;
 
     public NotificacionTicketServiceImpl(NotificacionTicketRepository notificacionTicketRepository) {
+        this(notificacionTicketRepository, null);
+    }
+
+    public NotificacionTicketServiceImpl(
+            NotificacionTicketRepository notificacionTicketRepository,
+            NotificacionService notificacionService) {
         this.notificacionTicketRepository = notificacionTicketRepository;
+        this.notificacionService = notificacionService;
     }
 
     @Override
@@ -21,7 +29,11 @@ public class NotificacionTicketServiceImpl implements NotificacionTicketService 
             return 0;
         }
         EstadoTicketFactory.crear(estadoActual).confirmar();
-        return notificacionTicketRepository.finalizarTicket(idTicket, rol, idUsuario);
+        int filas = notificacionTicketRepository.finalizarTicket(idTicket, rol, idUsuario);
+        if (filas > 0 && notificacionService != null) {
+            notificacionService.notificarATodosLosRoles(idTicket, "CERRADO");
+        }
+        return filas;
     }
 
     @Override
@@ -32,7 +44,11 @@ public class NotificacionTicketServiceImpl implements NotificacionTicketService 
             return 0;
         }
         EstadoTicketFactory.crear(estadoActual).reabrir();
-        return notificacionTicketRepository.reabrirTicket(idTicket, rol, idUsuario);
+        int filas = notificacionTicketRepository.reabrirTicket(idTicket, rol, idUsuario);
+        if (filas > 0 && notificacionService != null) {
+            notificacionService.notificarATodosLosRoles(idTicket, "EN PROCESO");
+        }
+        return filas;
     }
 
     @Override

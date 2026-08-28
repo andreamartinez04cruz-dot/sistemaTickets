@@ -3,6 +3,7 @@ package co.edu.sena.mesa.repositorio;
 import co.edu.sena.mesa.util.RegistroErrores;
 import co.edu.sena.mesa.config.ConexionBD;
 import co.edu.sena.mesa.dto.AgenteTicketDTO;
+import co.edu.sena.mesa.dto.DestinatarioNotificacionDTO;
 import co.edu.sena.mesa.mapper.AgenteTicketMapper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -79,6 +80,61 @@ public class AgenteTicketRepositoryJdbc implements AgenteTicketRepository {
         } catch (SQLException exception) {
             RegistroErrores.registrar("Error consultando correo del solicitante", exception);
             return null;
+        }
+    }
+
+    @Override
+    public List<DestinatarioNotificacionDTO> obtenerDestinatariosNotificacion(int idTicket) {
+        List<DestinatarioNotificacionDTO> destinatarios = new ArrayList<>();
+
+        String sqlSolicitante = "SELECT u.correo, t.titulo, t.estado "
+                + "FROM ticket t JOIN usuario u ON u.id = t.idUsuario WHERE t.id = ?";
+
+        String sqlAgentes = "SELECT u.correo, t.titulo, t.estado "
+                + "FROM ticketagente ta JOIN ticket t ON t.id = ta.idTicket "
+                + "JOIN usuario u ON u.id = ta.idUsuario WHERE ta.idTicket = ?";
+
+        String sqlAdmins = "SELECT DISTINCT u.correo, t.titulo, t.estado, "
+                + "COALESCE(c.nombre, 'Sin categoria') AS categoria, "
+                + "COALESCE(ag.nombre, 'sin agente') AS agente "
+                + "FROM ticket t "
+                + "LEFT JOIN categoria c ON c.id = t.idCategoria "
+                + "LEFT JOIN ticketagente ta ON ta.idTicket = t.id "
+                + "LEFT JOIN usuario ag ON ag.id = ta.idUsuario "
+                + "JOIN rolusuario ru ON ru.idRol = "
+                + "(SELECT r.id FROM rol r WHERE UPPER(r.tipoRol) = 'ADMINISTRADOR' LIMIT 1) "
+                + "JOIN usuario u ON u.id = ru.idUsuario "
+                + "WHERE t.id = ?";
+
+        agregar(destinatarios, sqlSolicitante, idTicket, "SOLICITANTE", false);
+        agregar(destinatarios, sqlAgentes, idTicket, "AGENTE", false);
+        agregar(destinatarios, sqlAdmins, idTicket, "ADMIN", true);
+
+        return destinatarios;
+    }
+
+    private void agregar(List<DestinatarioNotificacionDTO> destino, String sql, int idTicket,
+            String rol, boolean conDetalleAdmin) {
+        try (Connection conexion = ConexionBD.obtenerConexion();
+                PreparedStatement statement = conexion.prepareStatement(sql)) {
+            statement.setInt(1, idTicket);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String correo = resultSet.getString("correo");
+                    if (correo == null || correo.trim().isEmpty()) {
+                        continue;
+                    }
+                    destino.add(new DestinatarioNotificacionDTO(
+                        correo.trim(),
+                        rol,
+                        resultSet.getString("titulo"),
+                        resultSet.getString("estado"),
+                        conDetalleAdmin ? resultSet.getString("categoria") : null,
+                        conDetalleAdmin ? resultSet.getString("agente") : null));
+                }
+            }
+        } catch (SQLException exception) {
+            RegistroErrores.registrar("Error consultando destinatarios (" + rol + ")", exception);
         }
     }
 
